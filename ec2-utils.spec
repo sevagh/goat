@@ -1,6 +1,7 @@
-%define _buildid .19
+%define _buildid .20
 
 %bcond_without upstart
+%bcond_with systemd
 
 Name:      ec2-utils
 Summary:   A set of tools for running in EC2
@@ -26,6 +27,11 @@ Source14:  ec2ifscan.8
 
 Source20:  ixgbevf.conf
 Source21:  acpiphp.modules
+
+# fedora stuff
+Source30:  elastic-network-interfaces.service
+Source31:  60-net-hotplug.rules
+Source32:  net.hotplug
 
 URL:       http://developer.amazonwebservices.com/connect/entry.jspa?externalID=1825
 BuildArch: noarch
@@ -87,6 +93,16 @@ install -m644 %{SOURCE11} $RPM_BUILD_ROOT%{_mandir}/man8/ec2ifup.8
 ln -s ./ec2ifup.8.gz $RPM_BUILD_ROOT%{_mandir}/man8/ec2ifdown.8.gz
 install -m644 %{SOURCE14} $RPM_BUILD_ROOT%{_mandir}/man8/ec2ifscan.8
 
+%if 0%{?fedora}
+install -m644 %{SOURCE31} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
+install -m755 %{SOURCE32} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/network-scripts/
+%endif
+
+%if %{with systemd}
+%{__install} -d -m 0775 ${RPM_BUILD_ROOT}%{_unitdir}
+%{__install} -m 0644 %{SOURCE30} ${RPM_BUILD_ROOT}%{_unitdir}
+%endif
+
 # add module configs
 install -m644 -D %{SOURCE20} $RPM_BUILD_ROOT/etc/modprobe.d/ixgbevf.conf
 install -m755 -D %{SOURCE21} $RPM_BUILD_ROOT/etc/sysconfig/modules/acpiphp.modules
@@ -117,6 +133,30 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/ec2ifup.8.gz
 %{_mandir}/man8/ec2ifdown.8.gz
 %{_mandir}/man8/ec2ifscan.8.gz
+
+%if 0%{?fedora}
+%{_sysconfdir}/udev/rules.d/60-net-hotplug.rules
+%{_sysconfdir}/sysconfig/network-scripts/net.hotplug
+%endif
+
+%if %{with systemd}
+%{_unitdir}/elastic-network-interfaces.service
+%endif
+
+%post -n ec2-net-utils
+%if %{with systemd}
+%systemd_post elastic-network-interfaces.service
+%endif
+
+%preun -n ec2-net-utils
+%if %{with systemd}
+%systemd_preun elastic-network-interfaces.service
+%endif
+
+%postun -n ec2-net-utils
+%if %{with systemd}
+%systemd_postun_with_restart elastic-network-interfaces.service
+%endif
 
 %changelog
 * Tue Sep 24 2013 Andrew Jorgensen <ajorgens@amazon.com>
