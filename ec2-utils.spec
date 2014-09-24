@@ -53,6 +53,9 @@ Requires:  iproute
 %if %{with upstart}
 Requires:  upstart
 %endif
+%if %{with systemd}
+BuildRequires: systemd-units
+%endif
 
 %description -n ec2-net-utils
 ec2-net-utils contains a set of utilities for managing elastic network
