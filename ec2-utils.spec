@@ -6,7 +6,7 @@
 Name:      ec2-utils
 Summary:   A set of tools for running in EC2
 Version:   0.4
-Release: 2%{?_buildid}%{?dist}
+Release: 3%{?_buildid}%{?dist}
 License:   Apache License 2.0
 Group:     System Tools
 Source0:   ec2-metadata

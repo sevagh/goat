@@ -2,7 +2,7 @@
 # left in an unconfigured state.
 [Unit]
 Description=Elastic Network Interfaces
-After=network.target syslog.target
+After=network-online.target syslog.target
 
 [Service]
 Type=oneshot
