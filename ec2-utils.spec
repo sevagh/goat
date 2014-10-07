@@ -6,7 +6,7 @@
 Name:      ec2-utils
 Summary:   A set of tools for running in EC2
 Version:   0.4
-Release: 1%{?_buildid}%{?dist}
+Release: 2%{?_buildid}%{?dist}
 License:   Apache License 2.0
 Group:     System Tools
 Source0:   ec2-metadata
@@ -85,7 +85,9 @@ install -m755 %{SOURCE12} $RPM_BUILD_ROOT/sbin/
 install -m644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
 install -m644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
 install -m644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
+%if %{with upstart}
 install -m644 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
+%endif
 install -m644 %{SOURCE6} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/network-scripts/
 install -m755 %{SOURCE7} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/network-scripts/
 install -m755 %{SOURCE10} $RPM_BUILD_ROOT%{_sysconfdir}/dhcp/dhclient.d/
@@ -124,7 +126,9 @@ rm -rf $RPM_BUILD_ROOT
 /sbin/ec2ifdown
 /sbin/ec2ifscan
 %{_sysconfdir}/udev/rules.d/53-ec2-network-interfaces.rules
+%if %{with upstart}
 %{_sysconfdir}/udev/rules.d/75-persistent-net-generator.rules
+%endif
 %{_sysconfdir}/modprobe.d/ixgbevf.conf
 %{_sysconfdir}/sysconfig/modules/acpiphp.modules
 %{_sysconfdir}/sysconfig/network-scripts/ec2net-functions
