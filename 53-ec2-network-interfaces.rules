@@ -24,12 +24,12 @@ SUBSYSTEM=="net", RUN+="/etc/sysconfig/network-scripts/ec2net.hotplug"
 # run by elastic-network-interfaces.service).  The following rule has to use
 # 'systemctl start' rather than ENV{SYSTEMD_WANTS} because systemd doesn't
 # keep trying to start the service in the WANTS case.
-ACTION=="add", SUBSYSTEM=="net", KERNEL=="eth*",
+ACTION=="add", SUBSYSTEM=="net", KERNEL=="eth*", \
   RUN+="/usr/bin/systemctl start ec2-ifup@$env{INTERFACE}"
 
 # A remove event may be for an interface which was started by network.service
 # (if config existed at boot) or by ec2-ifup@.service.  In the latter case,
 # systemd should kill dhclient when the device disappears.  Still have to run
 # ifdown to kill dhclient in the former case.
-ACTION=="remove", SUBSYSTEM=="net", KERNEL=="eth*",
+ACTION=="remove", SUBSYSTEM=="net", KERNEL=="eth*", \
   RUN+="/sbin/ifdown $env{INTERFACE}"
