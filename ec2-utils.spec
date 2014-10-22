@@ -30,8 +30,7 @@ Source21:  acpiphp.modules
 
 # fedora stuff
 Source30:  elastic-network-interfaces.service
-Source31:  60-net-hotplug.rules
-Source32:  net.hotplug
+Source31:  ec2-ifup@.service
 
 URL:       http://developer.amazonwebservices.com/connect/entry.jspa?externalID=1825
 BuildArch: noarch
@@ -98,14 +97,10 @@ install -m644 %{SOURCE11} $RPM_BUILD_ROOT%{_mandir}/man8/ec2ifup.8
 ln -s ./ec2ifup.8.gz $RPM_BUILD_ROOT%{_mandir}/man8/ec2ifdown.8.gz
 install -m644 %{SOURCE14} $RPM_BUILD_ROOT%{_mandir}/man8/ec2ifscan.8
 
-%if 0%{?fedora}
-install -m644 %{SOURCE31} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
-install -m755 %{SOURCE32} $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/network-scripts/
-%endif
-
 %if %{with systemd}
 %{__install} -d -m 0775 ${RPM_BUILD_ROOT}%{_unitdir}
 %{__install} -m 0644 %{SOURCE30} ${RPM_BUILD_ROOT}%{_unitdir}
+%{__install} -m 0644 %{SOURCE31} ${RPM_BUILD_ROOT}%{_unitdir}
 %endif
 
 # add module configs
@@ -141,28 +136,23 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man8/ec2ifdown.8.gz
 %{_mandir}/man8/ec2ifscan.8.gz
 
-%if 0%{?fedora}
-%{_sysconfdir}/udev/rules.d/60-net-hotplug.rules
-%{_sysconfdir}/sysconfig/network-scripts/net.hotplug
-%endif
-
 %if %{with systemd}
 %{_unitdir}/elastic-network-interfaces.service
+%{_unitdir}/ec2-ifup@.service
 %endif
 
-%post -n ec2-net-utils
 %if %{with systemd}
+%post -n ec2-net-utils
 %systemd_post elastic-network-interfaces.service
-%endif
+%systemd_post ec2-ifup@.service
 
 %preun -n ec2-net-utils
-%if %{with systemd}
 %systemd_preun elastic-network-interfaces.service
-%endif
+%systemd_preun ec2-ifup@.service
 
 %postun -n ec2-net-utils
-%if %{with systemd}
-%systemd_postun_with_restart elastic-network-interfaces.service
+%systemd_postun elastic-network-interfaces.service
+%systemd_postun ec2-ifup@.service
 %endif
 
 %changelog
