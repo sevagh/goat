@@ -1,7 +1,11 @@
 %define _buildid .20
 
 %bcond_without upstart
-%bcond_with systemd
+
+%if 0%{?fedora} >= 17
+%define with_systemd 1
+%undefine with_upstart
+%endif
 
 Name:      ec2-utils
 Summary:   A set of tools for running in EC2
