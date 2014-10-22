@@ -77,12 +77,16 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/init/
 mkdir -p $RPM_BUILD_ROOT%{_mandir}/man8/
 
 install -m755 %{SOURCE0} $RPM_BUILD_ROOT/opt/aws/bin/
+%if ! %{?fedora}
 install -m755 %{SOURCE1} $RPM_BUILD_ROOT/sbin/
+%endif
 install -m755 %{SOURCE8} $RPM_BUILD_ROOT/sbin/
 install -m755 %{SOURCE9} $RPM_BUILD_ROOT/sbin/
 install -m755 %{SOURCE12} $RPM_BUILD_ROOT/sbin/
+%if ! %{?fedora}
 install -m644 %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
 install -m644 %{SOURCE3} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
+%endif
 install -m644 %{SOURCE4} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
 %if %{with upstart}
 install -m644 %{SOURCE5} $RPM_BUILD_ROOT%{_sysconfdir}/udev/rules.d/
@@ -112,9 +116,11 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 /opt/aws/bin/ec2-metadata
+%if ! %{?fedora}
 /sbin/ec2udev
 %{_sysconfdir}/udev/rules.d/51-ec2-hvm-devices.rules
 %{_sysconfdir}/udev/rules.d/52-ec2-vcpu.rules
+%endif
 
 %files -n ec2-net-utils
 /sbin/ec2ifup
