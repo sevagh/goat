@@ -1,10 +1,10 @@
 package main
 
 import (
-	"strconv"
-	"time"
 	"fmt"
 	"log"
+	"strconv"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -15,10 +15,10 @@ import (
 )
 
 type attachData struct {
-	instanceId string
-	prefix     string
-	nodeId     string
-	volumes    map[int]string
+	instanceId    string
+	prefix        string
+	nodeId        string
+	volumes       map[int]string
 	attachedNames []string
 }
 
@@ -134,7 +134,7 @@ func findEbsVolumes(svc *ec2.EC2, ad *attachData, logger *log.Logger) error {
 
 	ad.attachedNames = []string{}
 
-	OUTER:
+OUTER:
 	for _, volume := range result.Volumes {
 		if len(volume.Attachments) > 0 {
 			log.Printf("Active attachments on volume %s, investigating...", *volume.VolumeId)
@@ -177,7 +177,7 @@ func attachVolumes(svc *ec2.EC2, ad *attachData, logger *log.Logger) ([]string, 
 		}
 		volAttachments, err := svc.AttachVolume(attachVolIn)
 		if err != nil {
-		    return deviceNames, err
+			return deviceNames, err
 		}
 		logger.Println(volAttachments)
 		deviceNames = append(deviceNames, deviceName)
