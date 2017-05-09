@@ -1,6 +1,8 @@
 # kraken
 ### Attach & mount EBS volumes from inside EC2 instances
 
+![kraken-logo](./.github/kraken-logo.png)
+
 ## What is it
 
 Kraken runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access). 
