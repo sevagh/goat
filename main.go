@@ -32,20 +32,31 @@ Options:
 		os.Exit(-1)
 	}
 
-	deviceNames, err := AttachEbsVolumes(logger)
+	ec2Instance, err := GetEc2InstanceData(logger)
 	if err != nil {
-		logger.Println(err)
+		logger.Fatalf("%v", err)
 		os.Exit(-1)
 	}
-	logger.Printf("Attached: %s\n", deviceNames)
-	logger.Printf("Now mounting")
-	if len(deviceNames) == 1 {
-		if err := MountSingleDrive(deviceNames[0], mountPath, logger); err != nil {
-			os.Exit(-1)
-		}
-	} else {
-		if err := MountRaidDrives(deviceNames, mountPath, raidLevel, logger); err != nil {
-			os.Exit(-1)
+	ebsVolumes, err := FindEbsVolumes(&ec2Instance, logger)
+	if err != nil {
+		logger.Fatalf("%v", err)
+		os.Exit(-1)
+	}
+	attachedVolumes, err := AttachEbsVolumes(ec2Instance, ebsVolumes, logger)
+	if err != nil {
+		logger.Fatalf("%v", err)
+		os.Exit(-1)
+	}
+	for volId, deviceNames := range attachedVolumes {
+		logger.Printf("Now mounting for volume %d", volId)
+		if len(deviceNames) == 1 {
+			if err := MountSingleDrive(deviceNames[0], mountPath, logger); err != nil {
+				os.Exit(-1)
+			}
+		} else {
+			if err := MountRaidDrives(deviceNames, mountPath, raidLevel, logger); err != nil {
+				os.Exit(-1)
+			}
 		}
 	}
 }
