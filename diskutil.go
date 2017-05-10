@@ -6,7 +6,6 @@ import (
 	"log"
 	"os/exec"
 	"strconv"
-	"strings"
 	"syscall"
 )
 
@@ -20,7 +19,6 @@ func MountRaidDrives(driveNames []string, mountPath string, raidLevel int, logge
 	if raidLevel != 0 && raidLevel != 1 {
 		return fmt.Errorf("Valid raid levels are 0 and 1")
 	}
-	driveString := strings.Join(driveNames, " ")
 	cmd := "mdadm"
 	args := []string{
 		"--create",
@@ -28,8 +26,8 @@ func MountRaidDrives(driveNames []string, mountPath string, raidLevel int, logge
 		"--level=" + strconv.Itoa(raidLevel),
 		"--name=KRAKEN",
 		"--raid-devices=" + strconv.Itoa(len(driveNames)),
-		driveString,
 	}
+	args = append(args, driveNames...)
 	logger.Printf("Executing: %s %s\n", cmd, args)
 	if err := executeCommand(cmd, args, logger); err != nil {
 		logger.Fatalf("%v", err)
@@ -50,6 +48,8 @@ func executeCommand(commandString string, args []string, logger *log.Logger) err
 	var cmdErr bytes.Buffer
 	cmd.Stdout = &cmdOut
 	cmd.Stderr = &cmdErr
+
+	logger.Printf("Cmd args: %s", cmd.Args)
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("cmd.Start: %v", err)
