@@ -17,6 +17,13 @@ func MountSingleDrive(driveName string, mountPath string, logger *log.Logger) er
 	return nil
 }
 
+func DoesDriveExist(driveName string, logger *log.Logger) bool {
+	if err := executeCommand("stat", []string{driveName}, logger); err != nil {
+		return false
+	}
+	return true
+}
+
 func MountRaidDrives(driveNames []string, mountPath string, raidLevel int, logger *log.Logger) error {
 	logger.Printf("Mounting raid drives: %s", driveNames)
 	if raidLevel != 0 && raidLevel != 1 {
@@ -25,7 +32,7 @@ func MountRaidDrives(driveNames []string, mountPath string, raidLevel int, logge
 	logger.Printf("Checking if drives exist")
 	for _, driveName := range driveNames {
 		var attempts int
-		for err := fmt.Errorf("dummy_error"); err != nil; err = executeCommand("stat", []string{driveName}, logger) {
+		for driveExists := false; driveExists == true; driveExists = DoesDriveExist(driveName, logger) {
 			time.Sleep(time.Duration(1 * time.Second))
 			attempts++
 			if attempts >= statAttempts {
