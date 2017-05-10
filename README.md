@@ -1,7 +1,7 @@
 # kraken
 ### Attach & mount EBS volumes from inside EC2 instances
 
-<img src="./.github/kraken-logo.png" width="200">
+<img src="./.github/kraken-logo.png" width="300">
 
 ## What is it
 
