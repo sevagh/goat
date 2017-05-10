@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os/exec"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -23,13 +25,13 @@ func MountRaidDrives(driveNames []string, mountPath string, raidLevel int, logge
 	args := []string{
 		"--create",
 		"/dev/md0",
-		"--level=" + string(raidLevel),
+		"--level=" + strconv.Itoa(raidLevel),
 		"--name=KRAKEN",
-		"--raid-devices=" + string(len(driveNames)),
+		"--raid-devices=" + strconv.Itoa(len(driveNames)),
 		driveString,
 	}
 	logger.Printf("Executing: %s %s\n", cmd, args)
-	if err := executeCommand(cmd, args); err != nil {
+	if err := executeCommand(cmd, args, logger); err != nil {
 		logger.Fatalf("%v", err)
 		return err
 	}
@@ -41,8 +43,13 @@ func mountSingleDrive(driveName string, mountPath string) error {
 	return nil
 }
 
-func executeCommand(commandString string, args []string) error {
+func executeCommand(commandString string, args []string, logger *log.Logger) error {
 	cmd := exec.Command(commandString, args...)
+
+	var cmdOut bytes.Buffer
+	var cmdErr bytes.Buffer
+	cmd.Stdout = &cmdOut
+	cmd.Stderr = &cmdErr
 
 	if err := cmd.Start(); err != nil {
 		return fmt.Errorf("cmd.Start: %v", err)
@@ -51,11 +58,14 @@ func executeCommand(commandString string, args []string) error {
 	if err := cmd.Wait(); err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
+				logger.Fatalf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
 				return fmt.Errorf("Exit Status: %d", status.ExitStatus())
 			}
 		} else {
+			logger.Fatalf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
 			return fmt.Errorf("cmd.Wait: %v", err)
 		}
 	}
+	logger.Printf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
 	return nil
 }
