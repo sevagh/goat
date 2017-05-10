@@ -7,8 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol, logger *log.Logger) (map[int][]string, error) {
-	ret := map[int][]string{}
+func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol, logger *log.Logger) (map[int][]EbsVol, error) {
 	drivesToMount := map[int][]EbsVol{}
 	ctr := 0
 
@@ -34,7 +33,7 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol, logger *log.Log
 			}
 			volAttachments, err := ec2Instance.Ec2Client.AttachVolume(attachVolIn)
 			if err != nil {
-				return ret, err
+				return drivesToMount, err
 			}
 			logger.Println(volAttachments)
 			volume.AttachedName = deviceName
@@ -43,27 +42,25 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol, logger *log.Log
 		}
 	}
 
-	for volId, volumes := range drivesToMount {
+	for _, volumes := range drivesToMount {
 		//check for volume mismatch
-		ret[volId] = []string{}
 		volSize := volumes[0].VolumeSize
+		mountPath := volumes[0].MountPath
 		if len(volumes) == 1 && volSize == 1 {
-			ret[volId] = append(ret[volId], volumes[0].AttachedName)
 			continue
 		} else {
 			for _, vol := range volumes[1:] {
 				if volSize != vol.VolumeSize {
-					return ret, fmt.Errorf("Mismatched VolumeSize tags among disks of same volume")
+					return drivesToMount, fmt.Errorf("Mismatched VolumeSize tags among disks of same volume")
 				}
-				ret[volId] = append(ret[volId], vol.AttachedName)
+				if mountPath != vol.MountPath {
+					return drivesToMount, fmt.Errorf("Mismatched MountPath tags among disks of same volume")
+				}
 			}
 			if len(volumes) != volSize {
-				return ret, fmt.Errorf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
+				return drivesToMount, fmt.Errorf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
 			}
 		}
 	}
-	for _, attachedDrives := range ret {
-		logger.Printf("Attached drives: %s\n", attachedDrives)
-	}
-	return ret, nil
+	return drivesToMount, nil
 }

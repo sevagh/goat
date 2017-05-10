@@ -1,36 +1,15 @@
 package main
 
 import (
-	"github.com/docopt/docopt-go"
 	"log"
 	"os"
-	"strconv"
 	"time"
 )
 
 func main() {
-	usage := `kraken - EC2/EBS utility
-
-Usage:
-  kraken <mountpath> [--raid-level=<level>]
-  kraken -h | --help
-  kraken --version
-
-Options:
-  --raid-level=<level>  0 or 1
-  -h --help             Show this screen.
-  --version             Show version.`
-	arguments, _ := docopt.Parse(usage, nil, true, "Kraken 0.1", false)
-
 	currTime := time.Now().UTC()
 	logger := log.New(os.Stderr, "kraken: ", log.Lshortfile)
 	logger.Printf("RUNNING KRAKEN: %s", currTime.Format(time.RFC850))
-	mountPath := arguments["<mountpath>"].(string)
-	raidLevel, err := strconv.Atoi(arguments["--raid-level"].(string))
-	if err != nil {
-		logger.Fatalf("Couldn't parse --raid-level as int")
-		os.Exit(-1)
-	}
 
 	ec2Instance, err := GetEc2InstanceData(logger)
 	if err != nil {
@@ -47,14 +26,15 @@ Options:
 		logger.Fatalf("%v", err)
 		os.Exit(-1)
 	}
-	for volId, deviceNames := range attachedVolumes {
+
+	for volId, vols := range attachedVolumes {
 		logger.Printf("Now mounting for volume %d", volId)
-		if len(deviceNames) == 1 {
-			if err := MountSingleDrive(deviceNames[0], mountPath, logger); err != nil {
+		if len(vols) == 1 {
+			if err := MountSingleDrive(vols[0], vols[0].MountPath, logger); err != nil {
 				os.Exit(-1)
 			}
 		} else {
-			if err := MountRaidDrives(deviceNames, mountPath, raidLevel, logger); err != nil {
+			if err := MountRaidDrives(vols, volId, vols[0].MountPath, vols[0].RaidLevel, logger); err != nil {
 				os.Exit(-1)
 			}
 		}

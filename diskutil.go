@@ -12,9 +12,9 @@ import (
 
 const statAttempts = 5
 
-func MountSingleDrive(driveName string, mountPath string, logger *log.Logger) error {
-	logger.Printf("Mounting single drive: %s", driveName)
-	return nil
+func MountSingleDrive(drive EbsVol, mountPath string, logger *log.Logger) error {
+	logger.Printf("Mounting single drive: %s", drive.AttachedName)
+	return mountSingleDrive(drive.AttachedName, mountPath, logger)
 }
 
 func DoesDriveExist(driveName string, logger *log.Logger) bool {
@@ -24,28 +24,33 @@ func DoesDriveExist(driveName string, logger *log.Logger) bool {
 	return true
 }
 
-func MountRaidDrives(driveNames []string, mountPath string, raidLevel int, logger *log.Logger) error {
-	logger.Printf("Mounting raid drives: %s", driveNames)
+func MountRaidDrives(drives []EbsVol, volId int, mountPath string, raidLevel int, logger *log.Logger) error {
+	logger.Printf("Mounting raid drives")
 	if raidLevel != 0 && raidLevel != 1 {
 		return fmt.Errorf("Valid raid levels are 0 and 1")
 	}
 	logger.Printf("Checking if drives exist")
-	for _, driveName := range driveNames {
+
+	driveNames := []string{}
+	for _, drive := range drives {
 		var attempts int
-		for driveExists := false; driveExists == true; driveExists = DoesDriveExist(driveName, logger) {
+		for driveExists := false; driveExists == true; driveExists = DoesDriveExist(drive.AttachedName, logger) {
 			time.Sleep(time.Duration(1 * time.Second))
 			attempts++
 			if attempts >= statAttempts {
-				logger.Fatalf("Exceeded max (%d) stat attempts waiting for drive %s to exist", statAttempts, driveName)
+				logger.Fatalf("Exceeded max (%d) stat attempts waiting for drive %s to exist", statAttempts, drive.AttachedName)
 				return fmt.Errorf("Stat failed")
 			}
 		}
+		driveNames = append(driveNames, drive.AttachedName)
 	}
+
+	raidDriveName := "/dev/md" + strconv.Itoa(volId)
 
 	cmd := "mdadm"
 	args := []string{
 		"--create",
-		"/dev/md0",
+		raidDriveName,
 		"--level=" + strconv.Itoa(raidLevel),
 		"--name=KRAKEN",
 		"--raid-devices=" + strconv.Itoa(len(driveNames)),
@@ -57,10 +62,21 @@ func MountRaidDrives(driveNames []string, mountPath string, raidLevel int, logge
 		return err
 	}
 
-	return nil
+	return mountSingleDrive(raidDriveName, mountPath, logger)
 }
 
-func mountSingleDrive(driveName string, mountPath string) error {
+func mountSingleDrive(driveName string, mountPath string, logger *log.Logger) error {
+	cmd := "mount"
+	args := []string{
+		driveName,
+		mountPath,
+	}
+	logger.Printf("Executing: %s %s\n", cmd, args)
+	if err := executeCommand(cmd, args, logger); err != nil {
+		logger.Fatalf("%v", err)
+		return err
+	}
+
 	return nil
 }
 

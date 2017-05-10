@@ -15,6 +15,7 @@ type EbsVol struct {
 	RaidLevel    int
 	VolumeSize   int
 	AttachedName string
+	MountPath    string
 }
 
 func FindEbsVolumes(ec2Instance *Ec2Instance, logger *log.Logger) ([]EbsVol, error) {
@@ -75,6 +76,8 @@ func FindEbsVolumes(ec2Instance *Ec2Instance, logger *log.Logger) ([]EbsVol, err
 					logger.Printf("Couldn't parse tag VolumeSize for vol %s as int", *volume.VolumeId)
 					return volumes, err
 				}
+			case "MountPath":
+				ebsVolume.MountPath = *tag.Value
 			default:
 				logger.Printf("Unrecognized tag %s for vol %s, ignoring...", tag, *volume.VolumeId)
 			}
