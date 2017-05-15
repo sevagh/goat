@@ -8,6 +8,12 @@ import (
 	"syscall"
 )
 
+type CommandOut struct {
+	Stdout    string
+	Stderr    string
+	Status int
+}
+
 const statAttempts = 5
 
 func DoesDriveExist(driveName string, logger *log.Logger) bool {
@@ -20,7 +26,8 @@ func DoesDriveExist(driveName string, logger *log.Logger) bool {
 	return true
 }
 
-func ExecuteCommand(commandString string, args []string, logger *log.Logger) (string, error) {
+func ExecuteCommand(commandString string, args []string, logger *log.Logger) (CommandOut, error) {
+	out := CommandOut{}
 	cmd := exec.Command(commandString, args...)
 
 	var cmdOut bytes.Buffer
@@ -31,20 +38,28 @@ func ExecuteCommand(commandString string, args []string, logger *log.Logger) (st
 	logger.Printf("Cmd args: %s", cmd.Args)
 
 	if err := cmd.Start(); err != nil {
-		return "", fmt.Errorf("cmd.Start: %v", err)
+		return out, fmt.Errorf("cmd.Start: %v", err)
 	}
 
 	if err := cmd.Wait(); err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
 				logger.Printf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
-				return "", fmt.Errorf("Exit Status: %d", status.ExitStatus())
+				out.Stdout = cmdOut.String()
+				out.Stderr = cmdErr.String()
+				out.Status = status.ExitStatus()
+				return out, fmt.Errorf("Exit Status: %d", status.ExitStatus())
 			}
 		} else {
 			logger.Printf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
-			return "", fmt.Errorf("cmd.Wait: %v", err)
+			out.Stdout = cmdOut.String()
+			out.Stderr = cmdErr.String()
+			return out, fmt.Errorf("cmd.Wait: %v", err)
 		}
 	}
 	logger.Printf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
-	return cmdOut.String(), nil
+	out.Stdout = cmdOut.String()
+	out.Stderr = cmdErr.String()
+	out.Status = 0
+	return out, nil
 }

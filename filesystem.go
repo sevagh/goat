@@ -30,6 +30,7 @@ func MountSingleDrive(driveName string, mountPath string, desiredFs string, logg
 }
 
 func checkFilesystem(driveName string, desiredFs string, logger *log.Logger) error {
+	logger.Printf("Checking filesystem on %s", driveName)
         cmd := "blkid"
 	args := []string{
 		"-o",
@@ -38,17 +39,18 @@ func checkFilesystem(driveName string, desiredFs string, logger *log.Logger) err
 		"TYPE",
 		driveName,
 	}
-	fs, err := ExecuteCommand(cmd, args, logger);
+	fsOut, err := ExecuteCommand(cmd, args, logger);
 	if err != nil {
 		logger.Printf("%v", err)
 		return err
 	}
-	switch fs {
-	case "":
+	if fsOut.Status == 2 {
 		return nil
+	}
+	switch fsOut.Stdout {
 	case desiredFs:
 		return nil
 	default:
-		return fmt.Errorf("Desired fs: %s, actual fs: %s", desiredFs, fs)
+		return fmt.Errorf("Desired fs: %s, actual fs: %s", desiredFs, fsOut.Stdout)
 	}
 }
