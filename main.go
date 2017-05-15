@@ -14,28 +14,25 @@ func main() {
 	ec2Instance, err := GetEc2InstanceData(logger)
 	if err != nil {
 		logger.Fatalf("%v", err)
-		os.Exit(-1)
 	}
 	ebsVolumes, err := FindEbsVolumes(&ec2Instance, logger)
 	if err != nil {
 		logger.Fatalf("%v", err)
-		os.Exit(-1)
 	}
 	attachedVolumes, err := AttachEbsVolumes(ec2Instance, ebsVolumes, logger)
 	if err != nil {
 		logger.Fatalf("%v", err)
-		os.Exit(-1)
 	}
 
 	for volId, vols := range attachedVolumes {
 		logger.Printf("Now mounting for volume %d", volId)
 		if len(vols) == 1 {
-			if err := MountSingleDrive(vols[0], vols[0].MountPath, logger); err != nil {
-				os.Exit(-1)
+			if err := MountSingleVolume(vols[0], logger); err != nil {
+				logger.Fatalf("%v", err)
 			}
 		} else {
-			if err := MountRaidDrives(vols, volId, vols[0].MountPath, vols[0].RaidLevel, logger); err != nil {
-				os.Exit(-1)
+			if err := MountRaidDrives(vols, volId, logger); err != nil {
+				logger.Fatalf("%v", err)
 			}
 		}
 	}

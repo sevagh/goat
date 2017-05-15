@@ -11,21 +11,26 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol, logger *log.Log
 	drivesToMount := map[int][]EbsVol{}
 	ctr := 0
 
+	logger.Printf("Now attaching EBS volumes")
 	var letterRunes = []rune("bcdefghijklmnopqrstuvwxyz")
 	for _, volume := range volumes {
-		drivesToMount[volume.VolumeId] = []EbsVol{}
 		if volume.AttachedName != "" {
 			logger.Printf("%s already attached\n", volume.EbsVolId)
 			drivesToMount[volume.VolumeId] = append(drivesToMount[volume.VolumeId], volume)
 		} else {
+			logger.Printf("Picking a drive that doesn't exist")
 			var deviceName string
 			for {
+				if ctr >= len(letterRunes) {
+					return drivesToMount, fmt.Errorf("Ran out of drive letter names")
+				}
 				deviceName = "/dev/xvd" + string(letterRunes[ctr])
 				ctr++
 				if !DoesDriveExist(deviceName, logger) {
 					break
 				}
 			}
+			logger.Printf("Executing AWS SDK attach command on attached volume %s", deviceName)
 			attachVolIn := &ec2.AttachVolumeInput{
 				Device:     &deviceName,
 				InstanceId: &ec2Instance.InstanceId,
