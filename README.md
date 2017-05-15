@@ -3,90 +3,110 @@
 
 <img src="./.github/kraken-logo.png" width="300">
 
-## What is it
+### What is it
 
-Kraken runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access). 
+Kraken is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
 
-By associating `instance tag.Prefix <-> volume tag.Prefix` and `instance tag.NodeId <-> volume tag.VolumeId`, it discovers which EBS volumes it needs to attach and mount.
+By setting your tags correctly, Kraken can discover, attach, RAID, mkfs, and mount EBS volumes to the EC2 instance where it's running.
+
+### Motivation
+
+The Terraform resource `aws_volume_attachment` isn't handled well when destroying a stack. See [here](https://github.com/hashicorp/terraform/issues/9000) for some discussion on the matter.
+
+We initially wrote instance-specific user-data shell scripts with hardcoded values (e.g. `mkfs.ext4 /dev/xvdb`, `mount /dev/xvdb /var/kafka_data`).
+
+With Kraken we can avoid needing to pass parameters or hardcoding values. All the required information comes from the EC2 instance and EBS volume tags.
 
 ### How do I use it
 
-Tag your EC2 instances:
+These are the tags you need:
 
-```
-Prefix: <logical-stack-name>
-NodeId: <machine node #>
-```
+| Tag Name   | Description             | EC2     | EBS    | Tag Value (examples)                                             |
+| ---------- | ----------------------- | ------- | -----  | ---------------------------------------------------------------- |
+| Prefix     | Logical stack name      | *Yes*   | *Yes*  | `my_app_v1.3.4`                                                  |
+| NodeId     | EC2 id within stack     | *Yes*   | *Yes*  | `0`, `1`, `2` for 3-node kafka                                   |
+| VolumeId   | Distinct volume id      |         | *Yes*  | `0`, `0`, for 2-disk RAID, `0`, `1` for 2 separate single disks  |
+| VolumeSize | # of disks in vol group |         | *Yes*  | 2 for 2-disk RAID, 1 for single disk/no RAID                     |
+| RaidLevel  | level of RAID (0 or 1)  |         | *Yes*  | 0 or 1 for RAID, ignored if VolumeSize == 1                      |
+| MountPath  | Linux path to mount vol |         | *Yes*  | `/var/kafka_data`                                                |
+| FsType     | Linux filesystem type   |         | *Yes*  | `ext4`, `vfat`                                                   |
 
-Tag your EBS volumes:
+Here's an example to clarify better.
 
-```
-Prefix: <logical-stack-name>
-VolumeId: <volume # corresponding 1:1 with node #>
-DiskId: <disk # within volume group>
-```
+#### 3 EC2 instances
 
-Run `kraken` from the EC2 instance to automatically mount the associated EBS volumes.
+We want a 3-instance Vertica cluster:
 
-### Usecase
+* EC2 instance:
+    * Prefix: adgear_vertica_v0.5 
+    * NodeId: 0
 
-Use this if you want to provision X instances + volumes with Terraform.
+* EC2 instance:
+    * Prefix: adgear_vertica_v0.5 
+    * NodeId: 1
 
-Disks > 1 will be mounted in RAID (coming soon).
+* EC2 instance:
+    * Prefix: adgear_vertica_v0.5 
+    * NodeId: 2
 
-### Outputs
+#### 9 volumes
 
-An early look at running outputs:
+We want 3 RAID0 volumes (2 disks each)
 
-Before attach:
+* 2x EBS volume for Node 0:
+    * Prefix: adgear_vertica_v0.5
+    * NodeId: 0
+    * VolumeId: 0
+    * VolumeSize: 2
+    * RaidLevel: 0
+    * MountPath: /vertica/data
+    * FsType: ext4
 
-```
-[dbadmin@ip-172-31-34-108 ~]$ ./kraken
-kraken: cli.go:12: RUNNING KRAKEN: Tuesday, 09-May-17 16:03:20 UTC
-kraken: aws.go:162: {
-  AttachTime: 2017-05-09 16:03:24.393 +0000 UTC,
-  Device: "/dev/xvde",
-  InstanceId: "i-02802839b3fa11cb2",
-  State: "attaching",
-  VolumeId: "vol-041081d4f86a36fd2"
-}
-kraken: aws.go:162: {
-  AttachTime: 2017-05-09 16:03:24.742 +0000 UTC,
-  Device: "/dev/xvdc",
-  InstanceId: "i-02802839b3fa11cb2",
-  State: "attaching",
-  VolumeId: "vol-0d9189f5a6c8c8a99"
-}
-kraken: aws.go:162: {
-  AttachTime: 2017-05-09 16:03:25.058 +0000 UTC,
-  Device: "/dev/xvdb",
-  InstanceId: "i-02802839b3fa11cb2",
-  State: "attaching",
-  VolumeId: "vol-07af31509a1ebe8ab"
-}
-kraken: aws.go:162: {
-  AttachTime: 2017-05-09 16:03:25.456 +0000 UTC,
-  Device: "/dev/xvdd",
-  InstanceId: "i-02802839b3fa11cb2",
-  State: "attaching",
-  VolumeId: "vol-001be1be9765a6cd1"
-}
-kraken: cli.go:18: Attached: [/dev/xvde /dev/xvdc /dev/xvdb /dev/xvdd
-```
+* 2x EBS volume for Node 1:
+    * Prefix: adgear_vertica_v0.5
+    * NodeId: 1
+    * VolumeId: 0
+    * VolumeSize: 2
+    * RaidLevel: 0
+    * MountPath: /vertica/data
+    * FsType: ext4
 
-After attach:
+* 2x EBS volume for Node 2:
+    * Prefix: adgear_vertica_v0.5
+    * NodeId: 2
+    * VolumeId: 0
+    * VolumeSize: 2
+    * RaidLevel: 0
+    * MountPath: /vertica/data
+    * FsType: ext4
 
-```
-[dbadmin@ip-172-31-34-108 ~]$ ./kraken
-kraken: cli.go:12: RUNNING KRAKEN: Tuesday, 09-May-17 17:18:26 UTC
-2017/05/09 13:18:26 Active attachments on volume vol-041081d4f86a36fd2, investigating...
-2017/05/09 13:18:26 Active attachment is on current instance-id, continuing
-2017/05/09 13:18:26 Active attachments on volume vol-0d9189f5a6c8c8a99, investigating...
-2017/05/09 13:18:26 Active attachment is on current instance-id, continuing
-2017/05/09 13:18:26 Active attachments on volume vol-07af31509a1ebe8ab, investigating...
-2017/05/09 13:18:26 Active attachment is on current instance-id, continuing
-2017/05/09 13:18:26 Active attachments on volume vol-001be1be9765a6cd1, investigating...
-2017/05/09 13:18:26 Active attachment is on current instance-id, continuing
-kraken: aws.go:168: Nothing to attach, returning existing attached device names
-kraken: cli.go:18: Attached: [/dev/xvde /dev/xvdc /dev/xvdb /dev/xvdd]
-```
+Additionally, we want 1 extra disk (single disks, no RAID) per node, for logs:
+
+* 1x EBS volume for Node 0:
+    * Prefix: adgear_vertica_v0.5
+    * NodeId: 0
+    * VolumeId: 1
+    * VolumeSize: 1
+    * RaidLevel: 0
+    * MountPath: /var/log/vertica
+    * FsType: ext4
+
+* 1x EBS volume for Node 1:
+    * Prefix: adgear_vertica_v0.5
+    * NodeId: 1
+    * VolumeId: 1
+    * VolumeSize: 1
+    * RaidLevel: 0
+    * MountPath: /var/log/vertica
+    * FsType: ext4
+
+* 1x EBS volume for Node 2:
+    * Prefix: adgear_vertica_v0.5
+    * NodeId: 2
+    * VolumeId: 1
+    * VolumeSize: 1
+    * RaidLevel: 0
+    * MountPath: /var/log/vertica
+    * FsType: ext4
+
+Run `kraken` from the EC2 instance (ideally at the user-data phase) to automatically mount the associated EBS volumes with the above properties.
