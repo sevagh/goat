@@ -27,7 +27,7 @@ func main() {
 	for volId, vols := range attachedVolumes {
 		logger.Printf("Now mounting for volume %d", volId)
 		if len(vols) == 1 {
-			if err := MountSingleDrive(vols[0], logger); err != nil {
+			if err := MountSingleVolume(vols[0], logger); err != nil {
 				logger.Fatalf("%v", err)
 			}
 		} else {
