@@ -16,6 +16,7 @@ type EbsVol struct {
 	VolumeSize   int
 	AttachedName string
 	MountPath    string
+	FsType       string
 }
 
 func FindEbsVolumes(ec2Instance *Ec2Instance, logger *log.Logger) ([]EbsVol, error) {
@@ -78,6 +79,8 @@ func FindEbsVolumes(ec2Instance *Ec2Instance, logger *log.Logger) ([]EbsVol, err
 				}
 			case "MountPath":
 				ebsVolume.MountPath = *tag.Value
+			case "FsType":
+				ebsVolume.FsType = *tag.Value
 			default:
 				logger.Printf("Unrecognized tag %s for vol %s, ignoring...", tag, *volume.VolumeId)
 			}
