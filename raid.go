@@ -19,8 +19,9 @@ func MountRaidDrives(drives []EbsVol, volId int, logger *log.Logger) error {
 
 	driveNames := []string{}
 	for _, drive := range drives {
+		logger.Printf("Checking if drive %s exists", drive.AttachedName)
 		var attempts int
-		for driveExists := false; driveExists == true; driveExists = DoesDriveExist(drive.AttachedName, logger) {
+		for !DoesDriveExist(drive.AttachedName, logger) {
 			time.Sleep(time.Duration(1 * time.Second))
 			attempts++
 			if attempts >= statAttempts {
@@ -38,7 +39,7 @@ func MountRaidDrives(drives []EbsVol, volId int, logger *log.Logger) error {
 		"--create",
 		raidDriveName,
 		"--level=" + strconv.Itoa(raidLevel),
-		"--name=KRAKEN",
+		"--name=KRAKEN" + strconv.Itoa(volId),
 		"--raid-devices=" + strconv.Itoa(len(driveNames)),
 	}
 	args = append(args, driveNames...)
