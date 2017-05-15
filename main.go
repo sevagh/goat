@@ -30,11 +30,11 @@ func main() {
 	for volId, vols := range attachedVolumes {
 		logger.Printf("Now mounting for volume %d", volId)
 		if len(vols) == 1 {
-			if err := MountSingleDrive(vols[0], vols[0].MountPath, logger); err != nil {
+			if err := MountSingleDrive(vols[0], logger); err != nil {
 				os.Exit(-1)
 			}
 		} else {
-			if err := MountRaidDrives(vols, volId, vols[0].MountPath, vols[0].RaidLevel, logger); err != nil {
+			if err := MountRaidDrives(vols, volId, logger); err != nil {
 				os.Exit(-1)
 			}
 		}

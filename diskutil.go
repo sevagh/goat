@@ -12,9 +12,9 @@ import (
 
 const statAttempts = 5
 
-func MountSingleDrive(drive EbsVol, mountPath string, logger *log.Logger) error {
+func MountSingleDrive(drive EbsVol, logger *log.Logger) error {
 	logger.Printf("Mounting single drive: %s", drive.AttachedName)
-	return mountSingleDrive(drive.AttachedName, mountPath, logger)
+	return mountSingleDrive(drive.AttachedName, drive.MountPath, logger)
 }
 
 func DoesDriveExist(driveName string, logger *log.Logger) bool {
@@ -24,8 +24,11 @@ func DoesDriveExist(driveName string, logger *log.Logger) bool {
 	return true
 }
 
-func MountRaidDrives(drives []EbsVol, volId int, mountPath string, raidLevel int, logger *log.Logger) error {
+func MountRaidDrives(drives []EbsVol, volId int, logger *log.Logger) error {
 	logger.Printf("Mounting raid drives")
+	raidLevel := drives[0].RaidLevel
+	mountPath := drives[0].MountPath
+
 	if raidLevel != 0 && raidLevel != 1 {
 		return fmt.Errorf("Valid raid levels are 0 and 1")
 	}
