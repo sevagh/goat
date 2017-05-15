@@ -18,9 +18,12 @@ func MountSingleDrive(drive EbsVol, logger *log.Logger) error {
 }
 
 func DoesDriveExist(driveName string, logger *log.Logger) bool {
+	logger.Printf("Checking if device %s exists", driveName)
 	if err := executeCommand("stat", []string{driveName}, logger); err != nil {
+		logger.Printf("%s doesn't exist", driveName)
 		return false
 	}
+	logger.Printf("%s exists", driveName)
 	return true
 }
 
@@ -41,7 +44,7 @@ func MountRaidDrives(drives []EbsVol, volId int, logger *log.Logger) error {
 			time.Sleep(time.Duration(1 * time.Second))
 			attempts++
 			if attempts >= statAttempts {
-				logger.Fatalf("Exceeded max (%d) stat attempts waiting for drive %s to exist", statAttempts, drive.AttachedName)
+				logger.Printf("Exceeded max (%d) stat attempts waiting for drive %s to exist", statAttempts, drive.AttachedName)
 				return fmt.Errorf("Stat failed")
 			}
 		}
@@ -61,7 +64,7 @@ func MountRaidDrives(drives []EbsVol, volId int, logger *log.Logger) error {
 	args = append(args, driveNames...)
 	logger.Printf("Executing: %s %s\n", cmd, args)
 	if err := executeCommand(cmd, args, logger); err != nil {
-		logger.Fatalf("%v", err)
+		logger.Printf("%v", err)
 		return err
 	}
 
@@ -76,7 +79,7 @@ func mountSingleDrive(driveName string, mountPath string, logger *log.Logger) er
 	}
 	logger.Printf("Executing: %s %s\n", cmd, args)
 	if err := executeCommand(cmd, args, logger); err != nil {
-		logger.Fatalf("%v", err)
+		logger.Printf("%v", err)
 		return err
 	}
 
@@ -100,11 +103,11 @@ func executeCommand(commandString string, args []string, logger *log.Logger) err
 	if err := cmd.Wait(); err != nil {
 		if exiterr, ok := err.(*exec.ExitError); ok {
 			if status, ok := exiterr.Sys().(syscall.WaitStatus); ok {
-				logger.Fatalf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
+				logger.Printf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
 				return fmt.Errorf("Exit Status: %d", status.ExitStatus())
 			}
 		} else {
-			logger.Fatalf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
+			logger.Printf("OUT: %s, ERR: %s", cmdOut.String(), cmdErr.String())
 			return fmt.Errorf("cmd.Wait: %v", err)
 		}
 	}
