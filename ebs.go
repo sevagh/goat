@@ -34,6 +34,12 @@ func FindEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 					aws.String(ec2Instance.NodeId),
 				},
 			},
+			&ec2.Filter{
+				Name: aws.String("availability-zone"),
+				Values: []*string{
+					aws.String(ec2Instance.Az),
+				},
+			},
 		},
 	}
 

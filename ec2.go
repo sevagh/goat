@@ -16,6 +16,12 @@ type Ec2Instance struct {
 	InstanceId string
 	Prefix     string
 	NodeId     string
+	Az         string 
+}
+
+type ec2Metadata struct {
+	region string
+	az     string
 }
 
 func GetEc2InstanceData() (Ec2Instance, error) {
@@ -28,21 +34,25 @@ func GetEc2InstanceData() (Ec2Instance, error) {
 			ExpiryWindow: 5 * time.Minute,
 		},
 	)
-	sess.Config.Credentials = creds
 
+	sess.Config.Credentials = creds
 	svc := ec2metadata.New(sess)
+
 	result, err := svc.GetMetadata("instance-id")
 	if err != nil {
 		return ec2Instance, err
 	}
 
-	region, err := getInstanceRegion(svc)
+	ec2Instance.InstanceId = result
+
+	meta, err := populateRegionInfo(svc)
 	if err != nil {
 		return ec2Instance, err
 	}
 
-	ec2Instance.InstanceId = result
-	sess.Config.Region = &region
+	ec2Instance.Az = meta.az
+	sess.Config.Region = &meta.region
+
 	ec2Svc := ec2.New(sess)
 	ec2Instance.Ec2Client = ec2Svc
 
@@ -54,12 +64,15 @@ func GetEc2InstanceData() (Ec2Instance, error) {
 	return ec2Instance, nil
 }
 
-func getInstanceRegion(svc *ec2metadata.EC2Metadata) (string, error) {
+func populateRegionInfo(svc *ec2metadata.EC2Metadata) (ec2Metadata, error) {
+	ret := ec2Metadata{}
 	id, err := svc.GetInstanceIdentityDocument()
 	if err != nil {
-		return "", err
+		return ret, err
 	}
-	return id.Region, nil
+	ret.az = id.AvailabilityZone
+	ret.region = id.Region
+	return ret, nil
 }
 
 func getInstanceTags(ec2Instance *Ec2Instance) error {
