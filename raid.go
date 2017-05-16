@@ -41,7 +41,8 @@ func MountRaidDrives(drives []EbsVol, volId int) error {
 	}
 
 	log.Printf("Checking if %s exists in mdadm", raidDriveName)
-	if _, err := ExecuteCommand(cmd, argsExist); err != nil {
+	_, err := ExecuteCommand(cmd, argsExist);
+	if DryRun || err != nil {
 		log.Printf("Raid drive doesn't exist, creating")
 		args := []string{
 			"--create",

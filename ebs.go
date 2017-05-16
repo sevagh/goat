@@ -84,7 +84,7 @@ func FindEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 			case "NodeId": //do nothing
 			case "Prefix": //do nothing
 			default:
-				log.Printf("Unrecognized tag %s for vol %s, ignoring...", tag, *volume.VolumeId)
+				log.Printf("Unrecognized tag %s for vol %s, ignoring...", *tag.Key, *volume.VolumeId)
 			}
 		}
 		volumes = append(volumes, ebsVolume)

@@ -8,6 +8,8 @@ import (
 	"github.com/docopt/docopt-go"
 )
 
+var DryRun = false
+
 func main() {
 	usage := `kraken - EC2/EBS utility
 
@@ -33,8 +35,7 @@ Options:
 		log.SetOutput(os.Stderr)
 	}
 
-	dryRun := arguments["--dry"].(bool)
-	DryRun = dryRun
+	DryRun = arguments["--dry"].(bool)
 
 	log.Printf("RUNNING KRAKEN: %s", currTime.Format(time.RFC850))
 
@@ -49,7 +50,7 @@ Options:
 	if ebsVolumes, err = FindEbsVolumes(&ec2Instance); err != nil {
 		log.Fatalf("%v", err)
 	}
-	if attachedVolumes, err = AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun); err != nil {
+	if attachedVolumes, err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
 		log.Fatalf("%v", err)
 	}
 	for volId, vols := range attachedVolumes {

@@ -16,8 +16,6 @@ type CommandOut struct {
 
 const statAttempts = 5
 
-var DryRun = false
-
 func DoesDriveExist(driveName string) bool {
 	log.Printf("Checking if device %s exists", driveName)
 	if _, err := ExecuteCommand("stat", []string{driveName}); err != nil {
@@ -37,10 +35,14 @@ func ExecuteCommand(commandString string, args []string) (CommandOut, error) {
 	cmd.Stdout = &cmdOut
 	cmd.Stderr = &cmdErr
 
-	log.Printf("Cmd args: %s", cmd.Args)
+	dryRunPrefix := ""
+	if DryRun {
+		dryRunPrefix = "[DRY]: "
+	}
+
+	log.Printf("%sCmd args: %s", dryRunPrefix, cmd.Args)
 
 	if DryRun {
-		log.Printf("DRY RUN: would have executed:\n\t%s %s", commandString, args)
 		out.Status = 0
 		return out, nil
 	}

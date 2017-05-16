@@ -10,7 +10,6 @@ func MountSingleVolume(drive EbsVol) error {
 	return MountSingleDrive(drive.AttachedName, drive.MountPath, drive.FsType)
 }
 
-
 func MountSingleDrive(driveName string, mountPath string, desiredFs string) error {
 	if err := checkAndCreateFilesystem(driveName, desiredFs); err != nil {
 		return err
@@ -57,6 +56,9 @@ func checkAndCreateFilesystem(driveName string, desiredFs string) error {
 		driveName,
 	}
 	fsOut, err := ExecuteCommand(cmd, args)
+	if DryRun {
+		return nil
+	}
 	if err != nil {
 		if fsOut.Status == 2 {
 			log.Printf("Creating fs %s on %s", desiredFs, driveName)
