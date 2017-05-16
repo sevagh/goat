@@ -3,21 +3,22 @@
 
 <img src="./.github/kraken-logo.png" width="300">
 
-### What is it
+### Introduction
 
 Kraken is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
 
 By setting your tags correctly, Kraken can discover, attach, RAID, mkfs, and mount EBS volumes to the EC2 instance where it's running.
 
-### Motivation
+### Behavior
 
-The Terraform resource `aws_volume_attachment` isn't handled well when destroying a stack. See [here](https://github.com/hashicorp/terraform/issues/9000) for some discussion on the matter.
+Kraken should behave correctly with no parameters. It is configured entirely with tags (explained [below](#tags)). It logs to `stderr` by default.
 
-We initially wrote instance-specific user-data shell scripts with hardcoded values (e.g. `mkfs.ext4 /dev/xvdb`, `mount /dev/xvdb /var/kafka_data`).
+It takes some options:
 
-With Kraken we can avoid needing to pass parameters or hardcoding values. All the required information comes from the EC2 instance and EBS volume tags.
+* `--dry` - dry run, don't execute any commands
+* `--quiet` - suppress outputs
 
-### How do I use it
+### Tags
 
 These are the tags you need:
 
@@ -110,3 +111,11 @@ Additionally, we want 1 extra disk (single disks, no RAID) per node, for logs:
     * FsType: ext4
 
 Run `kraken` from the EC2 instance (ideally at the user-data phase) to automatically mount the associated EBS volumes with the above properties.
+
+### Motivation
+
+The Terraform resource `aws_volume_attachment` isn't handled well when destroying a stack. See [here](https://github.com/hashicorp/terraform/issues/9000) for some discussion on the matter.
+
+We initially wrote instance-specific user-data shell scripts with hardcoded values (e.g. `mkfs.ext4 /dev/xvdb`, `mount /dev/xvdb /var/kafka_data`).
+
+With Kraken we can avoid needing to pass parameters or hardcoding values. All the required information comes from the EC2 instance and EBS volume tags.
