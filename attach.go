@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol) (map[int][]EbsVol, error) {
+func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol, dryRun bool) (map[int][]EbsVol, error) {
 	drivesToMount := map[int][]EbsVol{}
 	ctr := 0
 
@@ -35,6 +35,7 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol) (map[int][]EbsV
 				Device:     &deviceName,
 				InstanceId: &ec2Instance.InstanceId,
 				VolumeId:   &volume.EbsVolId,
+				DryRun:     &dryRun,
 			}
 			volAttachments, err := ec2Instance.Ec2Client.AttachVolume(attachVolIn)
 			if err != nil {
