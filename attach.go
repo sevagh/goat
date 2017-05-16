@@ -7,18 +7,18 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol, logger *log.Logger) (map[int][]EbsVol, error) {
+func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol) (map[int][]EbsVol, error) {
 	drivesToMount := map[int][]EbsVol{}
 	ctr := 0
 
-	logger.Printf("Now attaching EBS volumes")
+	log.Printf("Now attaching EBS volumes")
 	var letterRunes = []rune("bcdefghijklmnopqrstuvwxyz")
 	for _, volume := range volumes {
 		if volume.AttachedName != "" {
-			logger.Printf("%s already attached\n", volume.EbsVolId)
+			log.Printf("%s already attached\n", volume.EbsVolId)
 			drivesToMount[volume.VolumeId] = append(drivesToMount[volume.VolumeId], volume)
 		} else {
-			logger.Printf("Picking a drive that doesn't exist")
+			log.Printf("Picking a drive that doesn't exist")
 			var deviceName string
 			for {
 				if ctr >= len(letterRunes) {
@@ -26,11 +26,11 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol, logger *log.Log
 				}
 				deviceName = "/dev/xvd" + string(letterRunes[ctr])
 				ctr++
-				if !DoesDriveExist(deviceName, logger) {
+				if !DoesDriveExist(deviceName) {
 					break
 				}
 			}
-			logger.Printf("Executing AWS SDK attach command on attached volume %s", deviceName)
+			log.Printf("Executing AWS SDK attach command on attached volume %s", deviceName)
 			attachVolIn := &ec2.AttachVolumeInput{
 				Device:     &deviceName,
 				InstanceId: &ec2Instance.InstanceId,
@@ -40,7 +40,7 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol, logger *log.Log
 			if err != nil {
 				return drivesToMount, err
 			}
-			logger.Println(volAttachments)
+			log.Println(volAttachments)
 			volume.AttachedName = deviceName
 
 			drivesToMount[volume.VolumeId] = append(drivesToMount[volume.VolumeId], volume)
