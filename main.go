@@ -1,38 +1,67 @@
 package main
 
 import (
+	"github.com/docopt/docopt-go"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
 )
 
+var DryRun = false
+
 func main() {
+	usage := `kraken - EC2/EBS utility
+
+Usage:
+  kraken [-q | --quiet] [-d | --dry]
+  kraken -h | --help
+  kraken --version
+
+Options:
+  -q, --quiet   Suppress output
+  -d, --dry     Dry run
+  -h --help     Show this screen.
+  --version     Show version.`
+	arguments, _ := docopt.Parse(usage, nil, true, "kraken 0.1", false)
+
 	currTime := time.Now().UTC()
-	logger := log.New(os.Stderr, "kraken: ", log.Lshortfile)
-	logger.Printf("RUNNING KRAKEN: %s", currTime.Format(time.RFC850))
+	log.SetPrefix("KRAKEN: ")
+	log.SetFlags(log.Lshortfile)
 
-	ec2Instance, err := GetEc2InstanceData(logger)
-	if err != nil {
-		logger.Fatalf("%v", err)
-	}
-	ebsVolumes, err := FindEbsVolumes(&ec2Instance, logger)
-	if err != nil {
-		logger.Fatalf("%v", err)
-	}
-	attachedVolumes, err := AttachEbsVolumes(ec2Instance, ebsVolumes, logger)
-	if err != nil {
-		logger.Fatalf("%v", err)
+	if arguments["--quiet"].(bool) {
+		log.SetOutput(ioutil.Discard)
+	} else {
+		log.SetOutput(os.Stderr)
 	}
 
+	DryRun = arguments["--dry"].(bool)
+
+	log.Printf("RUNNING KRAKEN: %s", currTime.Format(time.RFC850))
+
+	var ec2Instance Ec2Instance
+	var ebsVolumes []EbsVol
+	var attachedVolumes map[int][]EbsVol
+	var err error
+
+	if ec2Instance, err = GetEc2InstanceData(); err != nil {
+		log.Fatalf("%v", err)
+	}
+	if ebsVolumes, err = FindEbsVolumes(&ec2Instance); err != nil {
+		log.Fatalf("%v", err)
+	}
+	if attachedVolumes, err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
+		log.Fatalf("%v", err)
+	}
 	for volId, vols := range attachedVolumes {
-		logger.Printf("Now mounting for volume %d", volId)
+		log.Printf("Now mounting for volume %d", volId)
 		if len(vols) == 1 {
-			if err := MountSingleVolume(vols[0], logger); err != nil {
-				logger.Fatalf("%v", err)
+			if err := MountSingleVolume(vols[0]); err != nil {
+				log.Fatalf("%v", err)
 			}
 		} else {
-			if err := MountRaidDrives(vols, volId, logger); err != nil {
-				logger.Fatalf("%v", err)
+			if err := MountRaidDrives(vols, volId); err != nil {
+				log.Fatalf("%v", err)
 			}
 		}
 	}
