@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -19,7 +18,7 @@ type Ec2Instance struct {
 	NodeId     string
 }
 
-func GetEc2InstanceData(logger *log.Logger) (Ec2Instance, error) {
+func GetEc2InstanceData() (Ec2Instance, error) {
 	var ec2Instance Ec2Instance
 	sess := session.New()
 
