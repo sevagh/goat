@@ -1,11 +1,11 @@
 package main
 
 import (
+	"github.com/docopt/docopt-go"
+	"io/ioutil"
 	"log"
 	"os"
-	"io/ioutil"
 	"time"
-	"github.com/docopt/docopt-go"
 )
 
 var DryRun = false

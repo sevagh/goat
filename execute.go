@@ -9,8 +9,8 @@ import (
 )
 
 type CommandOut struct {
-	Stdout    string
-	Stderr    string
+	Stdout string
+	Stderr string
 	Status int
 }
 

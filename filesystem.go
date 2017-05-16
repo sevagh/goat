@@ -1,8 +1,8 @@
 package main
 
 import (
-	"log"
 	"fmt"
+	"log"
 )
 
 func MountSingleVolume(drive EbsVol) error {
@@ -47,7 +47,7 @@ func mkdir(mountPath string) error {
 
 func checkAndCreateFilesystem(driveName string, desiredFs string) error {
 	log.Printf("Checking filesystem on %s", driveName)
-        cmd := "blkid"
+	cmd := "blkid"
 	args := []string{
 		"-o",
 		"value",
@@ -73,12 +73,12 @@ func checkAndCreateFilesystem(driveName string, desiredFs string) error {
 			}
 			return nil
 		} else {
-		    log.Printf("%v", err)
-		    return err
+			log.Printf("%v", err)
+			return err
 		}
 	}
 	switch fsOut.Stdout {
-	case desiredFs+"\n":
+	case desiredFs + "\n":
 		return nil
 	default:
 		return fmt.Errorf("Desired fs: %s, actual fs: %s", desiredFs, fsOut.Stdout)
