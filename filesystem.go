@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
+	"strings"
 )
 
 func MountSingleVolume(drive EbsVol) error {
@@ -17,6 +19,14 @@ func MountSingleDrive(driveName string, mountPath string, desiredFs string, labe
 	}
 	if err := mkdir(mountPath); err != nil {
 		return err
+	}
+
+	isMounted, err := isMountpointAlreadyMounted(mountPath)
+	if err != nil {
+		return err
+	}
+	if isMounted {
+		return fmt.Errorf("Something already mounted at %s", mountPath)
 	}
 	cmd := "mount"
 	args := []string{
@@ -108,4 +118,19 @@ func appendFstabEntry(label string, fs string, mountPoint string) error {
 		return err
 	}
 	return nil
+}
+
+func isMountpointAlreadyMounted(mountPoint string) (bool, error) {
+	if mountOut, err := ExecuteCommand("mount", []string{}); err != nil {
+		return true, err
+	} else {
+		for _, line := range strings.Split(mountOut.Stdout, "\n") {
+			for _, word := range strings.Split(line, "") {
+				if filepath.Clean(word) == filepath.Clean(mountPoint) {
+					return true, nil
+				}
+			}
+		}
+	}
+	return false, nil
 }
