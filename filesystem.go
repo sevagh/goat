@@ -40,7 +40,7 @@ func MountSingleDrive(driveName string, mountPath string, desiredFs string, labe
 	}
 
 	log.Printf("Appending fstab entry")
-	if err := appendFstabEntry(label, desiredFs, mountPath); err != nil {
+	if err := appendFstabEntry("KRAKEN-"+label, desiredFs, mountPath); err != nil {
 		return err
 	}
 
@@ -102,7 +102,7 @@ func checkAndCreateFilesystem(driveName string, desiredFs string, label string) 
 }
 
 func appendFstabEntry(label string, fs string, mountPoint string) error {
-	fstabEntry := fmt.Sprintf("LABEL=%s %s %s defaults 0 1", label, mountPoint, fs)
+	fstabEntry := fmt.Sprintf("LABEL=%s %s %s defaults 0 1\n", label, mountPoint, fs)
 	log.Printf("Appending to fstab: %s", fstabEntry)
 	if DryRun {
 		return nil
