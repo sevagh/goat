@@ -20,7 +20,7 @@ func RandDriveNamePicker() (string, error) {
 		}
 		ctr++
 	}
-	return deviceName, nil
+	return deviceName + string(runes[ctr]), nil
 }
 
 func RandRaidDriveNamePicker() (string, error) {
