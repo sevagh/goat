@@ -34,10 +34,12 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) erro
 				}
 				log.Println(volAttachments)
 				volume.AttachedName = deviceName
+
+				if !DoesDriveExistWithTimeout(deviceName) {
+					return fmt.Errorf("Drive %s doesn't exist", deviceName)
+				}
 			}
-			if !DoDrivesExist(volumes_) {
-				return fmt.Errorf("Attached drives can't be stat")
-			}
+			
 		}
 	}
 	return nil

@@ -7,17 +7,15 @@ import (
 
 const statAttempts = 5
 
-func DoDrivesExist(drives []EbsVol) bool {
-	for _, drive := range drives {
-		log.Printf("Checking if drive %s exists", drive.AttachedName)
-		var attempts int
-		for !DoesDriveExist(drive.AttachedName) {
-			time.Sleep(time.Duration(1 * time.Second))
-			attempts++
-			if attempts >= statAttempts {
-				log.Printf("Exceeded max (%d) stat attempts waiting for drive %s to exist", statAttempts, drive.AttachedName)
-				return false
-			}
+func DoesDriveExistWithTimeout(driveName string) bool {
+	log.Printf("Checking if drive %s exists", driveName)
+	var attempts int
+	for !DoesDriveExist(driveName) {
+		time.Sleep(time.Duration(1 * time.Second))
+		attempts++
+		if attempts >= statAttempts {
+			log.Printf("Exceeded max (%d) stat attempts waiting for drive %s to exist", statAttempts, driveName)
+			return false
 		}
 	}
 	return true
