@@ -16,7 +16,7 @@ type Ec2Instance struct {
 	InstanceId string
 	Prefix     string
 	NodeId     string
-	Az         string 
+	Az         string
 }
 
 type ec2Metadata struct {
@@ -95,9 +95,9 @@ func getInstanceTags(ec2Instance *Ec2Instance) error {
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
 			for _, tag := range instance.Tags {
-				if *tag.Key == "NodeId" {
+				if *tag.Key == "KRAKEN-IN:NodeId" {
 					ec2Instance.NodeId = *tag.Value
-				} else if *tag.Key == "Prefix" {
+				} else if *tag.Key == "KRAKEN-IN:Prefix" {
 					ec2Instance.Prefix = *tag.Value
 				}
 			}

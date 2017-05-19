@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"strconv"
-	"time"
 )
 
 func MountRaidDrives(drives []EbsVol, volId int) error {
@@ -17,22 +16,11 @@ func MountRaidDrives(drives []EbsVol, volId int) error {
 	}
 	log.Printf("Checking if drives exist")
 
-	driveNames := []string{}
-	for _, drive := range drives {
-		log.Printf("Checking if drive %s exists", drive.AttachedName)
-		var attempts int
-		for !DoesDriveExist(drive.AttachedName) {
-			time.Sleep(time.Duration(1 * time.Second))
-			attempts++
-			if attempts >= statAttempts {
-				log.Printf("Exceeded max (%d) stat attempts waiting for drive %s to exist", statAttempts, drive.AttachedName)
-				return fmt.Errorf("Stat failed")
-			}
-		}
-		driveNames = append(driveNames, drive.AttachedName)
+	var raidDriveName string
+	var err error
+	if raidDriveName, err = RandRaidDriveNamePicker(); err != nil {
+		return err
 	}
-
-	raidDriveName := "/dev/md" + strconv.Itoa(volId)
 
 	cmd := "mdadm"
 
@@ -41,7 +29,13 @@ func MountRaidDrives(drives []EbsVol, volId int) error {
 	}
 
 	log.Printf("Checking if %s exists in mdadm", raidDriveName)
-	_, err := ExecuteCommand(cmd, argsExist)
+	_, err = ExecuteCommand(cmd, argsExist)
+
+	driveNames := []string{}
+	for _, drive := range drives {
+		driveNames = append(driveNames, drive.AttachedName)
+	}
+
 	if DryRun || err != nil {
 		log.Printf("Raid drive doesn't exist, creating")
 		args := []string{

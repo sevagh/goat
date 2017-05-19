@@ -23,13 +23,13 @@ func FindEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 	params := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
-				Name: aws.String("tag:Prefix"),
+				Name: aws.String("tag:KRAKEN-IN:Prefix"),
 				Values: []*string{
 					aws.String(ec2Instance.Prefix),
 				},
 			},
 			&ec2.Filter{
-				Name: aws.String("tag:NodeId"),
+				Name: aws.String("tag:KRAKEN-IN:NodeId"),
 				Values: []*string{
 					aws.String(ec2Instance.NodeId),
 				},
@@ -68,27 +68,27 @@ func FindEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 		}
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
-			case "VolumeId":
+			case "KRAKEN-IN:VolumeId":
 				if ebsVolume.VolumeId, err = strconv.Atoi(*tag.Value); err != nil {
 					log.Printf("Couldn't parse tag VolumeId for vol %s as int", *volume.VolumeId)
 					return volumes, err
 				}
-			case "RaidLevel":
+			case "KRAKEN-IN:RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
 					log.Printf("Couldn't parse tag RaidLevel for vol %s as int", *volume.VolumeId)
 					return volumes, err
 				}
-			case "VolumeSize":
+			case "KRAKEN-IN:VolumeSize":
 				if ebsVolume.VolumeSize, err = strconv.Atoi(*tag.Value); err != nil {
 					log.Printf("Couldn't parse tag VolumeSize for vol %s as int", *volume.VolumeId)
 					return volumes, err
 				}
-			case "MountPath":
+			case "KRAKEN-IN:MountPath":
 				ebsVolume.MountPath = *tag.Value
-			case "FsType":
+			case "KRAKEN-IN:FsType":
 				ebsVolume.FsType = *tag.Value
-			case "NodeId": //do nothing
-			case "Prefix": //do nothing
+			case "KRAKEN-IN:NodeId": //do nothing
+			case "KRAKEN-IN:Prefix": //do nothing
 			default:
 				log.Printf("Unrecognized tag %s for vol %s, ignoring...", *tag.Key, *volume.VolumeId)
 			}

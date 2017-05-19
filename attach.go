@@ -9,26 +9,18 @@ import (
 
 func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol) (map[int][]EbsVol, error) {
 	drivesToMount := map[int][]EbsVol{}
-	ctr := 0
+	var deviceName string
+	var err error
 
 	log.Printf("Now attaching EBS volumes")
-	var letterRunes = []rune("bcdefghijklmnopqrstuvwxyz")
 	for _, volume := range volumes {
 		if volume.AttachedName != "" {
 			log.Printf("%s already attached\n", volume.EbsVolId)
 			drivesToMount[volume.VolumeId] = append(drivesToMount[volume.VolumeId], volume)
 		} else {
 			log.Printf("Picking a drive that doesn't exist")
-			var deviceName string
-			for {
-				if ctr >= len(letterRunes) {
-					return drivesToMount, fmt.Errorf("Ran out of drive letter names")
-				}
-				deviceName = "/dev/xvd" + string(letterRunes[ctr])
-				ctr++
-				if !DoesDriveExist(deviceName) {
-					break
-				}
+			if deviceName, err = RandDriveNamePicker(); err != nil {
+				return drivesToMount, err
 			}
 			log.Printf("Executing AWS SDK attach command on attached volume %s", deviceName)
 			attachVolIn := &ec2.AttachVolumeInput{
@@ -48,6 +40,10 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol) (map[int][]EbsV
 		}
 	}
 
+	return sanityCheckVols(drivesToMount)
+}
+
+func sanityCheckVols(drivesToMount map[int][]EbsVol) (map[int][]EbsVol, error) {
 	for _, volumes := range drivesToMount {
 		//check for volume mismatch
 		volSize := volumes[0].VolumeSize
@@ -65,6 +61,10 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol) (map[int][]EbsV
 			}
 			if len(volumes) != volSize {
 				return drivesToMount, fmt.Errorf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
+			}
+
+			if !DoDrivesExist(volumes) {
+				return drivesToMount, fmt.Errorf("Attached drives can't be stat")
 			}
 		}
 	}
