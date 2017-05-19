@@ -40,20 +40,19 @@ Options:
 	log.Printf("RUNNING KRAKEN: %s", currTime.Format(time.RFC850))
 
 	var ec2Instance Ec2Instance
-	var ebsVolumes []EbsVol
-	var attachedVolumes map[int][]EbsVol
+	var ebsVolumes map[int][]EbsVol
 	var err error
 
 	if ec2Instance, err = GetEc2InstanceData(); err != nil {
 		log.Fatalf("%v", err)
 	}
-	if ebsVolumes, err = FindEbsVolumes(&ec2Instance); err != nil {
+	if ebsVolumes, err = MapEbsVolumes(&ec2Instance); err != nil {
 		log.Fatalf("%v", err)
 	}
-	if attachedVolumes, err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
+	if err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
 		log.Fatalf("%v", err)
 	}
-	for volId, vols := range attachedVolumes {
+	for volId, vols := range ebsVolumes {
 		log.Printf("Now mounting for volume %d", volId)
 		if len(vols) == 1 {
 			if err := MountSingleVolume(vols[0]); err != nil {
