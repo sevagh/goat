@@ -39,5 +39,5 @@ func RandRaidDriveNamePicker() (string, error) {
 		}
 		ctr++
 	}
-	return deviceName, nil
+	return deviceName + string(runes[ctr]), nil
 }
