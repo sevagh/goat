@@ -39,7 +39,7 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) erro
 					return fmt.Errorf("Drive %s doesn't exist", deviceName)
 				}
 			}
-			
+
 		}
 	}
 	return nil
