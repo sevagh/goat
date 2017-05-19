@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[int][]EbsVol) error {
+func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) error {
 	var deviceName string
 	var err error
 
