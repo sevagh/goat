@@ -32,7 +32,11 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
 		drivesToMount[volume.VolumeName] = append(drivesToMount[volume.VolumeName], volume)
 	}
 
-	for _, volumes := range drivesToMount {
+	for volName, volumes := range drivesToMount {
+		//check if volName exists already
+		if DoesLabelExist("KRAKEN-"+volName) {
+			return drivesToMount, fmt.Errorf("Label already exists in /dev/disk/by-label")
+		}
 		//check for volume mismatch
 		volSize := volumes[0].VolumeSize
 		mountPath := volumes[0].MountPath
