@@ -125,7 +125,7 @@ func isMountpointAlreadyMounted(mountPoint string) (bool, error) {
 		return true, err
 	} else {
 		for _, line := range strings.Split(mountOut.Stdout, "\n") {
-			for _, word := range strings.Split(line, "") {
+			for _, word := range strings.Split(line, " ") {
 				if filepath.Clean(word) == filepath.Clean(mountPoint) {
 					return true, nil
 				}
