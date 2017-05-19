@@ -7,11 +7,11 @@ import (
 
 func MountSingleVolume(drive EbsVol) error {
 	log.Printf("Mounting single drive: %s", drive.AttachedName)
-	return MountSingleDrive(drive.AttachedName, drive.MountPath, drive.FsType)
+	return MountSingleDrive(drive.AttachedName, drive.MountPath, drive.FsType, drive.VolumeName)
 }
 
-func MountSingleDrive(driveName string, mountPath string, desiredFs string) error {
-	if err := checkAndCreateFilesystem(driveName, desiredFs); err != nil {
+func MountSingleDrive(driveName string, mountPath string, desiredFs string, label string) error {
+	if err := checkAndCreateFilesystem(driveName, desiredFs, label); err != nil {
 		return err
 	}
 	if err := mkdir(mountPath); err != nil {
@@ -45,7 +45,7 @@ func mkdir(mountPath string) error {
 	return nil
 }
 
-func checkAndCreateFilesystem(driveName string, desiredFs string) error {
+func checkAndCreateFilesystem(driveName string, desiredFs string, label string) error {
 	log.Printf("Checking filesystem on %s", driveName)
 	cmd := "blkid"
 	args := []string{
@@ -62,11 +62,11 @@ func checkAndCreateFilesystem(driveName string, desiredFs string) error {
 	if err != nil {
 		if fsOut.Status == 2 {
 			log.Printf("Creating fs %s on %s", desiredFs, driveName)
-			cmd = "mkfs"
+			cmd = "mkfs." + desiredFs
 			argsCreateFs := []string{
-				"-t",
-				desiredFs,
 				driveName,
+				"-L",
+				"KRAKEN-"+label,
 			}
 			if _, err := ExecuteCommand(cmd, argsCreateFs); err != nil {
 				return err

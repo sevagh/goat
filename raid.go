@@ -53,5 +53,5 @@ func MountRaidDrives(drives []EbsVol, volName string) error {
 		}
 	}
 
-	return MountSingleDrive(raidDriveName, mountPath, drives[0].FsType)
+	return MountSingleDrive(raidDriveName, mountPath, drives[0].FsType, volName)
 }
