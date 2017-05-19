@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 )
 
 func MountSingleVolume(drive EbsVol) error {
@@ -25,6 +26,11 @@ func MountSingleDrive(driveName string, mountPath string, desiredFs string, labe
 	log.Printf("Executing: %s %s", cmd, args)
 	if _, err := ExecuteCommand(cmd, args); err != nil {
 		log.Printf("%v", err)
+		return err
+	}
+
+	log.Printf("Appending fstab entry")
+	if err := appendFstabEntry(label, desiredFs, mountPath); err != nil {
 		return err
 	}
 
@@ -66,7 +72,7 @@ func checkAndCreateFilesystem(driveName string, desiredFs string, label string) 
 			argsCreateFs := []string{
 				driveName,
 				"-L",
-				"KRAKEN-"+label,
+				"KRAKEN-" + label,
 			}
 			if _, err := ExecuteCommand(cmd, argsCreateFs); err != nil {
 				return err
@@ -83,4 +89,23 @@ func checkAndCreateFilesystem(driveName string, desiredFs string, label string) 
 	default:
 		return fmt.Errorf("Desired fs: %s, actual fs: %s", desiredFs, fsOut.Stdout)
 	}
+}
+
+func appendFstabEntry(label string, fs string, mountPoint string) error {
+	fstabEntry := fmt.Sprintf("LABEL=%s %s %s defaults 0 1", label, mountPoint, fs)
+	log.Printf("Appending to fstab: %s", fstabEntry)
+	if DryRun {
+		return nil
+	}
+	f, err := os.OpenFile("/etc/fstab", os.O_APPEND|os.O_WRONLY, 0600)
+	if err != nil {
+		return err
+	}
+
+	defer f.Close()
+
+	if _, err = f.WriteString(fstabEntry); err != nil {
+		return err
+	}
+	return nil
 }
