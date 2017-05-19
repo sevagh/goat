@@ -11,13 +11,49 @@ import (
 
 type EbsVol struct {
 	EbsVolId     string
-	VolumeId     int
+	VolumeName   string
 	RaidLevel    int
 	VolumeSize   int
 	AttachedName string
 	MountPath    string
 	FsType       string
 }
+
+func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
+	drivesToMount := map[string][]EbsVol{}
+
+	volumes, err := findEbsVolumes(ec2Instance)
+	if err != nil {
+	    return drivesToMount, nil
+	}
+
+	log.Printf("Mapping EBS volumes")
+	for _, volume := range volumes {
+		drivesToMount[volume.VolumeName] = append(drivesToMount[volume.VolumeName], volume)
+	}
+
+	for _, volumes := range drivesToMount {
+		//check for volume mismatch
+		volSize := volumes[0].VolumeSize
+		mountPath := volumes[0].MountPath
+		fsType := volumes[0].FsType
+		raidLevel := volumes[0].RaidLevel
+		if len(volumes) == 1 && volSize == 1 {
+			continue
+		} else {
+			for _, vol := range volumes[1:] {
+				if volSize != vol.VolumeSize ||  mountPath != vol.MountPath || fsType != vol.FsType || raidLevel != vol.RaidLevel {
+					return drivesToMount, fmt.Errorf("Mismatched tags among disks of same volume")
+				}
+			}
+			if len(volumes) != volSize {
+				return drivesToMount, fmt.Errorf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
+			}
+		}
+	}
+	return drivesToMount, nil
+}
+
 
 func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 	params := &ec2.DescribeVolumesInput{
@@ -68,11 +104,8 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 		}
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
-			case "KRAKEN-IN:VolumeId":
-				if ebsVolume.VolumeId, err = strconv.Atoi(*tag.Value); err != nil {
-					log.Printf("Couldn't parse tag VolumeId for vol %s as int", *volume.VolumeId)
-					return volumes, err
-				}
+			case "KRAKEN-IN:VolumeName":
+				ebsVolume.VolumeName = *tag.Value
 			case "KRAKEN-IN:RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
 					log.Printf("Couldn't parse tag RaidLevel for vol %s as int", *volume.VolumeId)
@@ -96,39 +129,4 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 		volumes = append(volumes, ebsVolume)
 	}
 	return volumes, nil
-}
-
-func MapEbsVolumes(ec2Instance *Ec2Instance) (map[int][]EbsVol, error) {
-	drivesToMount := map[int][]EbsVol{}
-
-	volumes, err := findEbsVolumes(ec2Instance)
-	if err != nil {
-	    return drivesToMount, nil
-	}
-
-	log.Printf("Mapping EBS volumes")
-	for _, volume := range volumes {
-		drivesToMount[volume.VolumeId] = append(drivesToMount[volume.VolumeId], volume)
-	}
-
-	for _, volumes := range drivesToMount {
-		//check for volume mismatch
-		volSize := volumes[0].VolumeSize
-		mountPath := volumes[0].MountPath
-		fsType := volumes[0].FsType
-		raidLevel := volumes[0].RaidLevel
-		if len(volumes) == 1 && volSize == 1 {
-			continue
-		} else {
-			for _, vol := range volumes[1:] {
-				if volSize != vol.VolumeSize ||  mountPath != vol.MountPath || fsType != vol.FsType || raidLevel != vol.RaidLevel {
-					return drivesToMount, fmt.Errorf("Mismatched tags among disks of same volume")
-				}
-			}
-			if len(volumes) != volSize {
-				return drivesToMount, fmt.Errorf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
-			}
-		}
-	}
-	return drivesToMount, nil
 }

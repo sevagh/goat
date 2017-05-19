@@ -6,7 +6,7 @@ import (
 	"strconv"
 )
 
-func MountRaidDrives(drives []EbsVol, volId int) error {
+func MountRaidDrives(drives []EbsVol, volName string) error {
 	log.Printf("Mounting raid drives")
 	raidLevel := drives[0].RaidLevel
 	mountPath := drives[0].MountPath
@@ -42,7 +42,7 @@ func MountRaidDrives(drives []EbsVol, volId int) error {
 			"--create",
 			raidDriveName,
 			"--level=" + strconv.Itoa(raidLevel),
-			"--name=KRAKEN" + strconv.Itoa(volId),
+			"--name=KRAKEN-" + volName,
 			"--raid-devices=" + strconv.Itoa(len(driveNames)),
 		}
 		args = append(args, driveNames...)

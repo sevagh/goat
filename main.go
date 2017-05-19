@@ -40,7 +40,7 @@ Options:
 	log.Printf("RUNNING KRAKEN: %s", currTime.Format(time.RFC850))
 
 	var ec2Instance Ec2Instance
-	var ebsVolumes map[int][]EbsVol
+	var ebsVolumes map[string][]EbsVol
 	var err error
 
 	if ec2Instance, err = GetEc2InstanceData(); err != nil {
@@ -52,14 +52,14 @@ Options:
 	if err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
 		log.Fatalf("%v", err)
 	}
-	for volId, vols := range ebsVolumes {
-		log.Printf("Now mounting for volume %d", volId)
+	for volName, vols := range ebsVolumes {
+		log.Printf("Now mounting for volume %s", volName)
 		if len(vols) == 1 {
 			if err := MountSingleVolume(vols[0]); err != nil {
 				log.Fatalf("%v", err)
 			}
 		} else {
-			if err := MountRaidDrives(vols, volId); err != nil {
+			if err := MountRaidDrives(vols, volName); err != nil {
 				log.Fatalf("%v", err)
 			}
 		}
