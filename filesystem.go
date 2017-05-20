@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bool) error {
+func CheckFilesystem(driveName string, desiredFs string, label string) error {
 	cmd := "blkid"
 	args := []string{
 		"-o",
@@ -14,9 +14,6 @@ func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bo
 		driveName,
 	}
 	fsOut, err := ExecuteCommand(cmd, args)
-	if dryRun {
-		return nil
-	}
 	if err != nil {
 		if fsOut.Status == 2 {
 			//go ahead and create filesystem

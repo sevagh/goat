@@ -13,7 +13,7 @@ func main() {
 	usage := `kraken - EC2/EBS utility
 
 Usage:
-  kraken [-l=<log-level>] [--quiet] [--dry]
+  kraken [--log-level=<log-level>] [--quiet] [--dry]
   kraken -h | --help
   kraken --version
 
@@ -40,9 +40,6 @@ Options:
 		} else {
 			log.SetLevel(level)
 		}
-	}
-
-	if arguments["--verbose"].(bool) {
 	}
 
 	log.SetFormatter(&log.TextFormatter{})
