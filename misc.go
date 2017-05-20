@@ -38,7 +38,7 @@ func RandRaidDriveNamePicker() (string, error) {
 }
 
 func DrawAsciiBanner(headLine string) string {
-	return fmt.Sprintf("\n\n%[1]s\n# %[2]s #\n%[1]s\n\n",
+	return fmt.Sprintf("\n%[1]s\n# %[2]s #\n%[1]s\n",
 		strings.Repeat("#", len(headLine)+4),
 		headLine)
 }

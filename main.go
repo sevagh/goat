@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/docopt/docopt-go"
 	log "github.com/sirupsen/logrus"
-	"io/ioutil"
 	"os"
 )
 
@@ -13,24 +12,18 @@ func main() {
 	usage := `kraken - EC2/EBS utility
 
 Usage:
-  kraken [--log-level=<log-level>] [--quiet] [--dry]
+  kraken [--log-level=<log-level>] [--dry]
   kraken -h | --help
   kraken --version
 
 Options:
-  --quiet              Suppress logs
   --log-level=<level>  Log level (debug, info, warn, error, fatal)
   --dry                Dry run
   -h --help            Show this screen.
   --version            Show version.`
 	arguments, _ := docopt.Parse(usage, nil, true, "kraken 0.1", false)
 
-	if arguments["--quiet"].(bool) {
-		log.SetOutput(ioutil.Discard)
-	} else {
-		log.SetOutput(os.Stderr)
-	}
-
+	log.SetOutput(os.Stderr)
 	logLevel, ok := arguments["--log-level"].(string)
 	if !ok {
 		log.SetLevel(log.WarnLevel)
@@ -41,7 +34,6 @@ Options:
 			log.SetLevel(level)
 		}
 	}
-
 	log.SetFormatter(&log.TextFormatter{})
 
 	dryRun := arguments["--dry"].(bool)
