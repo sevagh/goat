@@ -1,8 +1,8 @@
 package main
 
 import (
-	"time"
 	log "github.com/sirupsen/logrus"
+	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"

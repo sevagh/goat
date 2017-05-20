@@ -40,7 +40,7 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) map[string][]EbsVol {
 		volGroupLogger := log.WithFields(log.Fields{"vol_name": volName})
 		//check if volName exists already
 		if DoesLabelExist(PREFIX + "-" + volName) {
-			volGroupLogger.Info("Label already exists in /dev/disk/by-label")
+			volGroupLogger.Warn("Label already exists in /dev/disk/by-label")
 			toDelete = append(toDelete, volName)
 			continue
 		}

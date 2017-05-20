@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os/exec"
 	"syscall"
 )
@@ -22,12 +21,6 @@ func ExecuteCommand(commandString string, args []string) (CommandOut, error) {
 	var cmdErr bytes.Buffer
 	cmd.Stdout = &cmdOut
 	cmd.Stderr = &cmdErr
-
-	if DryRun {
-		log.Printf("[DRY]: Cmd args: %s", cmd.Args)
-		out.Status = 0
-		return out, nil
-	}
 
 	if err := cmd.Start(); err != nil {
 		return out, fmt.Errorf("cmd.Start: %v", err)
