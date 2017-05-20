@@ -2,32 +2,28 @@ package main
 
 import (
 	"github.com/docopt/docopt-go"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"os"
-	"time"
 )
 
-var DryRun = false
+var PREFIX = "KRKN"
 
 func main() {
 	usage := `kraken - EC2/EBS utility
 
 Usage:
-  kraken [-q | --quiet] [-d | --dry]
+  kraken [--log-level=<log-level>] [--quiet] [--dry]
   kraken -h | --help
   kraken --version
 
 Options:
-  -q, --quiet   Suppress output
-  -d, --dry     Dry run
-  -h --help     Show this screen.
-  --version     Show version.`
+  --quiet              Suppress logs
+  --log-level=<level>  Log level (debug, info, warn, error, fatal)
+  --dry                Dry run
+  -h --help            Show this screen.
+  --version            Show version.`
 	arguments, _ := docopt.Parse(usage, nil, true, "kraken 0.1", false)
-
-	currTime := time.Now().UTC()
-	log.SetPrefix("KRAKEN: ")
-	log.SetFlags(log.Lshortfile)
 
 	if arguments["--quiet"].(bool) {
 		log.SetOutput(ioutil.Discard)
@@ -35,34 +31,40 @@ Options:
 		log.SetOutput(os.Stderr)
 	}
 
-	DryRun = arguments["--dry"].(bool)
-
-	log.Printf("RUNNING KRAKEN: %s", currTime.Format(time.RFC850))
-
-	var ec2Instance Ec2Instance
-	var ebsVolumes []EbsVol
-	var attachedVolumes map[int][]EbsVol
-	var err error
-
-	if ec2Instance, err = GetEc2InstanceData(); err != nil {
-		log.Fatalf("%v", err)
-	}
-	if ebsVolumes, err = FindEbsVolumes(&ec2Instance); err != nil {
-		log.Fatalf("%v", err)
-	}
-	if attachedVolumes, err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
-		log.Fatalf("%v", err)
-	}
-	for volId, vols := range attachedVolumes {
-		log.Printf("Now mounting for volume %d", volId)
-		if len(vols) == 1 {
-			if err := MountSingleVolume(vols[0]); err != nil {
-				log.Fatalf("%v", err)
-			}
+	logLevel, ok := arguments["--log-level"].(string)
+	if !ok {
+		log.SetLevel(log.WarnLevel)
+	} else {
+		if level, err := log.ParseLevel(logLevel); err != nil {
+			log.Fatalf("%v", err)
 		} else {
-			if err := MountRaidDrives(vols, volId); err != nil {
-				log.Fatalf("%v", err)
-			}
+			log.SetLevel(level)
 		}
+	}
+
+	log.SetFormatter(&log.TextFormatter{})
+
+	dryRun := arguments["--dry"].(bool)
+
+	log.Printf("%s", DrawAsciiBanner("WELCOME TO KRAKEN"))
+
+	log.Printf("%s", DrawAsciiBanner("1: COLLECTING EC2 INFO"))
+	ec2Instance := GetEc2InstanceData()
+
+	log.Printf("%s", DrawAsciiBanner("2: COLLECTING EBS INFO"))
+	ebsVolumes := MapEbsVolumes(&ec2Instance)
+
+	log.Printf("%s", DrawAsciiBanner("3: ATTACHING EBS VOLS"))
+	ebsVolumes = AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
+
+	log.Printf("%s", DrawAsciiBanner("4: MOUNTING ATTACHED VOLS"))
+
+	if len(ebsVolumes) == 0 {
+		log.Warn("Empty vols, nothing to do")
+		os.Exit(0)
+	}
+
+	for volName, vols := range ebsVolumes {
+		PrepAndMountDrives(volName, vols, dryRun)
 	}
 }

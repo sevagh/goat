@@ -1,72 +1,46 @@
 package main
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
+	log "github.com/sirupsen/logrus"
 )
 
-func AttachEbsVolumes(ec2Instance Ec2Instance, volumes []EbsVol) (map[int][]EbsVol, error) {
-	drivesToMount := map[int][]EbsVol{}
-	ctr := 0
+func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol, dryRun bool) map[string][]EbsVol {
+	var deviceName string
+	var err error
 
-	log.Printf("Now attaching EBS volumes")
-	var letterRunes = []rune("bcdefghijklmnopqrstuvwxyz")
-	for _, volume := range volumes {
-		if volume.AttachedName != "" {
-			log.Printf("%s already attached\n", volume.EbsVolId)
-			drivesToMount[volume.VolumeId] = append(drivesToMount[volume.VolumeId], volume)
-		} else {
-			log.Printf("Picking a drive that doesn't exist")
-			var deviceName string
-			for {
-				if ctr >= len(letterRunes) {
-					return drivesToMount, fmt.Errorf("Ran out of drive letter names")
-				}
-				deviceName = "/dev/xvd" + string(letterRunes[ctr])
-				ctr++
-				if !DoesDriveExist(deviceName) {
-					break
-				}
-			}
-			log.Printf("Executing AWS SDK attach command on attached volume %s", deviceName)
-			attachVolIn := &ec2.AttachVolumeInput{
-				Device:     &deviceName,
-				InstanceId: &ec2Instance.InstanceId,
-				VolumeId:   &volume.EbsVolId,
-				DryRun:     &DryRun,
-			}
-			volAttachments, err := ec2Instance.Ec2Client.AttachVolume(attachVolIn)
-			if err != nil {
-				return drivesToMount, err
-			}
-			log.Println(volAttachments)
-			volume.AttachedName = deviceName
+	localVolumes := map[string][]EbsVol{}
 
-			drivesToMount[volume.VolumeId] = append(drivesToMount[volume.VolumeId], volume)
+	for key, volumes_ := range volumes {
+		localVolumes[key] = []EbsVol{}
+		for _, volume := range volumes_ {
+			volLogger := log.WithFields(log.Fields{"vol_id": volume.EbsVolId, "vol_name": volume.VolumeName})
+			if volume.AttachedName == "" {
+				volLogger.Info("Volume is unattached, picking drive name")
+				if deviceName, err = RandDriveNamePicker(); err != nil {
+					volLogger.Fatal("Couldn't find an unused drive name")
+				}
+				attachVolIn := &ec2.AttachVolumeInput{
+					Device:     &deviceName,
+					InstanceId: &ec2Instance.InstanceId,
+					VolumeId:   &volume.EbsVolId,
+					DryRun:     &dryRun,
+				}
+				volLogger.Info("Executing AWS SDK attach command")
+				volAttachments, err := ec2Instance.Ec2Client.AttachVolume(attachVolIn)
+				if err != nil {
+					volLogger.Fatalf("Couldn't attach: %v", err)
+				}
+				volLogger.Info(volAttachments)
+				volume.AttachedName = deviceName
+
+				if !dryRun && !DoesDriveExistWithTimeout(deviceName) {
+					volLogger.Fatalf("Drive %s doesn't exist after attaching - checked with stat %d times", deviceName, statAttempts)
+				}
+				localVolumes[key] = append(localVolumes[key], volume)
+			}
+
 		}
 	}
-
-	for _, volumes := range drivesToMount {
-		//check for volume mismatch
-		volSize := volumes[0].VolumeSize
-		mountPath := volumes[0].MountPath
-		if len(volumes) == 1 && volSize == 1 {
-			continue
-		} else {
-			for _, vol := range volumes[1:] {
-				if volSize != vol.VolumeSize {
-					return drivesToMount, fmt.Errorf("Mismatched VolumeSize tags among disks of same volume")
-				}
-				if mountPath != vol.MountPath {
-					return drivesToMount, fmt.Errorf("Mismatched MountPath tags among disks of same volume")
-				}
-			}
-			if len(volumes) != volSize {
-				return drivesToMount, fmt.Errorf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
-			}
-		}
-	}
-	return drivesToMount, nil
+	return localVolumes
 }

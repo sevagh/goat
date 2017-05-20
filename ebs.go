@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -11,7 +11,7 @@ import (
 
 type EbsVol struct {
 	EbsVolId     string
-	VolumeId     int
+	VolumeName   string
 	RaidLevel    int
 	VolumeSize   int
 	AttachedName string
@@ -19,17 +19,65 @@ type EbsVol struct {
 	FsType       string
 }
 
-func FindEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
+func MapEbsVolumes(ec2Instance *Ec2Instance) map[string][]EbsVol {
+	drivesToMount := map[string][]EbsVol{}
+
+	log.Info("Searching for EBS volumes with previously established EC2 client")
+
+	volumes, err := findEbsVolumes(ec2Instance)
+	if err != nil {
+		log.Fatal("Error when searching for EBS volumes")
+	}
+
+	log.Info("Classifying EBS volumes based on tags")
+	for _, volume := range volumes {
+		drivesToMount[volume.VolumeName] = append(drivesToMount[volume.VolumeName], volume)
+	}
+
+	toDelete := []string{}
+
+	for volName, volumes := range drivesToMount {
+		volGroupLogger := log.WithFields(log.Fields{"vol_name": volName})
+		//check if volName exists already
+		if DoesLabelExist(PREFIX + "-" + volName) {
+			volGroupLogger.Warn("Label already exists in /dev/disk/by-label")
+			toDelete = append(toDelete, volName)
+			continue
+		}
+		//check for volume mismatch
+		volSize := volumes[0].VolumeSize
+		mountPath := volumes[0].MountPath
+		fsType := volumes[0].FsType
+		raidLevel := volumes[0].RaidLevel
+		if len(volumes) != volSize {
+			volGroupLogger.Fatalf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
+		}
+		for _, vol := range volumes[1:] {
+			volLogger := log.WithFields(log.Fields{"vol_id": vol.EbsVolId, "vol_name": vol.VolumeName})
+			if volSize != vol.VolumeSize || mountPath != vol.MountPath || fsType != vol.FsType || raidLevel != vol.RaidLevel {
+				volLogger.Fatal("Mismatched tags among disks of same volume")
+			}
+		}
+	}
+
+	for _, volName := range toDelete {
+		delete(drivesToMount, volName)
+	}
+
+	return drivesToMount
+}
+
+func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 	params := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
-				Name: aws.String("tag:Prefix"),
+				Name: aws.String("tag:" + PREFIX + "-IN:Prefix"),
 				Values: []*string{
 					aws.String(ec2Instance.Prefix),
 				},
 			},
 			&ec2.Filter{
-				Name: aws.String("tag:NodeId"),
+				Name: aws.String("tag:" + PREFIX + "-IN:NodeId"),
 				Values: []*string{
 					aws.String(ec2Instance.NodeId),
 				},
@@ -55,43 +103,47 @@ func FindEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 			EbsVolId: *volume.VolumeId,
 		}
 		if len(volume.Attachments) > 0 {
-			log.Printf("Active attachments on volume %s, investigating...", *volume.VolumeId)
 			for _, attachment := range volume.Attachments {
 				if *attachment.InstanceId != ec2Instance.InstanceId {
 					return volumes, fmt.Errorf("Volume %s attached to different instance-id: %s", *volume.VolumeId, attachment.InstanceId)
 				}
-				log.Printf("Active attachment is on current instance-id, continuing")
 				ebsVolume.AttachedName = *attachment.Device
 			}
 		} else {
 			ebsVolume.AttachedName = ""
 		}
+		krakenTagCtr := 0
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
-			case "VolumeId":
-				if ebsVolume.VolumeId, err = strconv.Atoi(*tag.Value); err != nil {
-					log.Printf("Couldn't parse tag VolumeId for vol %s as int", *volume.VolumeId)
-					return volumes, err
-				}
-			case "RaidLevel":
+			case PREFIX + "-IN:VolumeName":
+				ebsVolume.VolumeName = *tag.Value
+				krakenTagCtr++
+			case PREFIX + "-IN:RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
-					log.Printf("Couldn't parse tag RaidLevel for vol %s as int", *volume.VolumeId)
-					return volumes, err
+					return volumes, fmt.Errorf("Couldn't parse RaidLevel tag as int: %v", err)
 				}
-			case "VolumeSize":
+				krakenTagCtr++
+			case PREFIX + "-IN:VolumeSize":
 				if ebsVolume.VolumeSize, err = strconv.Atoi(*tag.Value); err != nil {
-					log.Printf("Couldn't parse tag VolumeSize for vol %s as int", *volume.VolumeId)
-					return volumes, err
+					return volumes, fmt.Errorf("Couldn't parse VolumeSize tag as int: %v", err)
 				}
-			case "MountPath":
+				krakenTagCtr++
+			case PREFIX + "-IN:MountPath":
 				ebsVolume.MountPath = *tag.Value
-			case "FsType":
+				krakenTagCtr++
+			case PREFIX + "-IN:FsType":
 				ebsVolume.FsType = *tag.Value
-			case "NodeId": //do nothing
-			case "Prefix": //do nothing
+				krakenTagCtr++
+			case PREFIX + "-IN:NodeId": //do nothing
+				krakenTagCtr++
+			case PREFIX + "-IN:Prefix": //do nothing
+				krakenTagCtr++
 			default:
-				log.Printf("Unrecognized tag %s for vol %s, ignoring...", *tag.Key, *volume.VolumeId)
 			}
+		}
+
+		if krakenTagCtr != 7 {
+			return volumes, fmt.Errorf("Missing required KRK-IN tags VolumeName, RaidLevel, MountPath, VolumeSize, NodeId, Prefix, FsType")
 		}
 		volumes = append(volumes, ebsVolume)
 	}

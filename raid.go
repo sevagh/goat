@@ -1,63 +1,46 @@
 package main
 
 import (
-	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"strconv"
-	"time"
 )
 
-func MountRaidDrives(drives []EbsVol, volId int) error {
-	log.Printf("Mounting raid drives")
-	raidLevel := drives[0].RaidLevel
-	mountPath := drives[0].MountPath
+func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
+	raidLogger := log.WithFields(log.Fields{"vol_name": volName, "drives": drives})
 
-	if raidLevel != 0 && raidLevel != 1 {
-		return fmt.Errorf("Valid raid levels are 0 and 1")
+	raidLogger.Info("Mounting raid drives")
+
+	var raidDriveName string
+	var err error
+	raidLogger.Info("Searching for unused RAID drive name")
+	if raidDriveName, err = RandRaidDriveNamePicker(); err != nil {
+		raidLogger.Fatalf("Couldn't select unused RAID drive name: %v", err)
 	}
-	log.Printf("Checking if drives exist")
+
+	if dryRun {
+		return raidDriveName
+	}
+
+	raidLevel := drives[0].RaidLevel
+	cmd := "mdadm"
 
 	driveNames := []string{}
 	for _, drive := range drives {
-		log.Printf("Checking if drive %s exists", drive.AttachedName)
-		var attempts int
-		for !DoesDriveExist(drive.AttachedName) {
-			time.Sleep(time.Duration(1 * time.Second))
-			attempts++
-			if attempts >= statAttempts {
-				log.Printf("Exceeded max (%d) stat attempts waiting for drive %s to exist", statAttempts, drive.AttachedName)
-				return fmt.Errorf("Stat failed")
-			}
-		}
 		driveNames = append(driveNames, drive.AttachedName)
 	}
 
-	raidDriveName := "/dev/md" + strconv.Itoa(volId)
-
-	cmd := "mdadm"
-
-	argsExist := []string{
+	args := []string{
+		"--create",
 		raidDriveName,
+		"--level=" + strconv.Itoa(raidLevel),
+		"--name=\"" + PREFIX + "-" + volName + "\"",
+		"--raid-devices=" + strconv.Itoa(len(driveNames)),
+	}
+	args = append(args, driveNames...)
+	log.Info("Creating RAID drive: %s %s", cmd, args)
+	if _, err := ExecuteCommand(cmd, args); err != nil {
+		raidLogger.Fatalf("Error when executing mdadm command: %v", err)
 	}
 
-	log.Printf("Checking if %s exists in mdadm", raidDriveName)
-	_, err := ExecuteCommand(cmd, argsExist)
-	if DryRun || err != nil {
-		log.Printf("Raid drive doesn't exist, creating")
-		args := []string{
-			"--create",
-			raidDriveName,
-			"--level=" + strconv.Itoa(raidLevel),
-			"--name=KRAKEN" + strconv.Itoa(volId),
-			"--raid-devices=" + strconv.Itoa(len(driveNames)),
-		}
-		args = append(args, driveNames...)
-		log.Printf("Executing: %s %s\n", cmd, args)
-		if _, err := ExecuteCommand(cmd, args); err != nil {
-			log.Printf("%v", err)
-			return err
-		}
-	}
-
-	return MountSingleDrive(raidDriveName, mountPath, drives[0].FsType)
+	return raidDriveName
 }
