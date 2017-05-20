@@ -42,5 +42,6 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) erro
 
 		}
 	}
+	log.Printf("VOL MAP AFTER ATTACH: %s", volumes)
 	return nil
 }

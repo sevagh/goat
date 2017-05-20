@@ -53,6 +53,8 @@ Options:
 	if err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
 		log.Fatalf("%v", err)
 	}
+
+	log.Printf("VOL MAP RETURN FROM ATTACH: %s", ebsVolumes)
 	for volName, vols := range ebsVolumes {
 		log.Printf("Now mounting for volume %s", volName)
 		if len(vols) == 1 {
