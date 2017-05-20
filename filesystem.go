@@ -35,9 +35,12 @@ func MountSingleDrive(driveName string, mountPath string, desiredFs string, labe
 	}
 
 	cmd := "mount"
+	args := []string{
+		mountPath,
+	}
 
-	log.Printf("Executing: %s", cmd)
-	if _, err := ExecuteCommand(cmd, []string{}); err != nil {
+	log.Printf("Executing: %s %s", cmd, args)
+	if _, err := ExecuteCommand(cmd, args); err != nil {
 		log.Printf("%v", err)
 		return err
 	}
