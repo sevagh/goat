@@ -2,11 +2,17 @@ package main
 
 import (
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"os"
 )
 
 func AppendToFstab(label string, fs string, mountPoint string, dryRun bool) error {
 	fstabEntry := fmt.Sprintf("LABEL=%s %s %s defaults 0 1\n", label, mountPoint, fs)
+	if dryRun {
+		log.Info("FSTAB: would have appended: %s", fstabEntry)
+		return nil
+	}
+
 	f, err := os.OpenFile("/etc/fstab", os.O_APPEND|os.O_WRONLY, 0600)
 	if err != nil {
 		return err

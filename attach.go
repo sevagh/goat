@@ -34,7 +34,7 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol, dryR
 				volLogger.Info(volAttachments)
 				volume.AttachedName = deviceName
 
-				if !DoesDriveExistWithTimeout(deviceName) {
+				if !dryRun && !DoesDriveExistWithTimeout(deviceName) {
 					volLogger.Fatalf("Drive %s doesn't exist after attaching - checked with stat %d times", deviceName, statAttempts)
 				}
 				localVolumes[key] = append(localVolumes[key], volume)

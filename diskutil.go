@@ -19,26 +19,38 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 	desiredFs := vols[0].FsType
 
 	driveLogger.Info("Checking for existing filesystem")
-	if err := CheckFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
-		driveLogger.Fatalf("Checking for existing filesystem: %v", err)
+	if !dryRun {
+		if err := CheckFilesystem(driveName, desiredFs, volName); err != nil {
+			driveLogger.Fatalf("Checking for existing filesystem: %v", err)
+		}
+		if err := CreateFilesystem(driveName, desiredFs, volName); err != nil {
+			driveLogger.Fatalf("Error when creating filesystem: %v", err)
+		}
 	}
 
 	driveLogger.Info("Checking if something already mounted at %s", mountPath)
 	if isMounted, err := IsMountpointAlreadyMounted(mountPath); err != nil {
-		driveLogger.Fatalf("Checking mount point for existing mounts: %v", err)
+		driveLogger.Fatalf("Error when checking mount point for existing mounts: %v", err)
 	} else {
 		if isMounted {
 			driveLogger.Fatalf("Something already mounted at %s", mountPath)
 		}
 	}
 
-	if err := Mkdir(mountPath); err != nil {
-		driveLogger.Fatalf("Couldn't mkdir: %v", err)
+	if !dryRun {
+		if err := Mkdir(mountPath); err != nil {
+			driveLogger.Fatalf("Couldn't mkdir: %v", err)
+		}
 	}
 
 	driveLogger.Info("Appending fstab entry")
 	if err := AppendToFstab(PREFIX+"-"+volName, desiredFs, mountPath, dryRun); err != nil {
 		driveLogger.Fatalf("Couldn't append to fstab: %v", err)
+	}
+
+	if dryRun {
+		driveLogger.Printf("Dry run complete, nothing to mount")
+		return
 	}
 
 	driveLogger.Info("Now mounting")
