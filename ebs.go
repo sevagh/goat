@@ -35,7 +35,8 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
 	for volName, volumes := range drivesToMount {
 		//check if volName exists already
 		if DoesLabelExist("KRAKEN-" + volName) {
-			return drivesToMount, fmt.Errorf("Label already exists in /dev/disk/by-label")
+			log.Printf("Label already exists in /dev/disk/by-label")
+			delete(drivesToMount, volName)
 		}
 		//check for volume mismatch
 		volSize := volumes[0].VolumeSize
