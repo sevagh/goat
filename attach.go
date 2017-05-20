@@ -5,7 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) map[string][]EbsVol {
+func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol, dryRun bool) map[string][]EbsVol {
 	var deviceName string
 	var err error
 
@@ -24,7 +24,7 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) map[
 					Device:     &deviceName,
 					InstanceId: &ec2Instance.InstanceId,
 					VolumeId:   &volume.EbsVolId,
-					DryRun:     &DryRun,
+					DryRun:     &dryRun,
 				}
 				volLogger.Info("Executing AWS SDK attach command")
 				volAttachments, err := ec2Instance.Ec2Client.AttachVolume(attachVolIn)

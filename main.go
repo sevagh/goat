@@ -7,7 +7,6 @@ import (
 	"os"
 )
 
-var DryRun = false
 var PREFIX = "KRKN"
 
 func main() {
@@ -39,7 +38,7 @@ Options:
 		if level, err := log.ParseLevel(logLevel); err != nil {
 			log.Fatalf("%v", err)
 		} else {
-		    log.SetLevel(level)
+			log.SetLevel(level)
 		}
 	}
 
@@ -48,7 +47,7 @@ Options:
 
 	log.SetFormatter(&log.TextFormatter{})
 
-	DryRun = arguments["--dry"].(bool)
+	dryRun := arguments["--dry"].(bool)
 
 	log.Printf("%s", DrawAsciiBanner("WELCOME TO KRAKEN"))
 
@@ -59,18 +58,16 @@ Options:
 	ebsVolumes := MapEbsVolumes(&ec2Instance)
 
 	log.Printf("%s", DrawAsciiBanner("3: ATTACHING EBS VOLS"))
-	ebsVolumes = AttachEbsVolumes(ec2Instance, ebsVolumes)
+	ebsVolumes = AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
 
 	log.Printf("%s", DrawAsciiBanner("4: MOUNTING ATTACHED VOLS"))
+
+	if len(ebsVolumes) == 0 {
+		log.Warn("Empty vols, nothing to do")
+		os.Exit(0)
+	}
+
 	for volName, vols := range ebsVolumes {
-		if len(vols) == 1 {
-			if err := MountSingleDrive(vols[0].AttachedName, vols[0].MountPath, vols[0].FsType, vols[0].VolumeName); err != nil {
-				log.Fatalf("%v", err)
-			}
-		} else {
-			if err := MountRaidDrives(vols, volName); err != nil {
-				log.Fatalf("%v", err)
-			}
-		}
+		PrepAndMountDrives(volName, vols, dryRun)
 	}
 }
