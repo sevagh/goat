@@ -37,22 +37,19 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
 		if DoesLabelExist(PREFIX + "-" + volName) {
 			log.Printf("Label already exists in /dev/disk/by-label")
 			delete(drivesToMount, volName)
+			continue
 		}
 		//check for volume mismatch
 		volSize := volumes[0].VolumeSize
 		mountPath := volumes[0].MountPath
 		fsType := volumes[0].FsType
 		raidLevel := volumes[0].RaidLevel
-		if len(volumes) == 1 && volSize == 1 {
-			continue
-		} else {
-			if len(volumes) != volSize {
-				return drivesToMount, fmt.Errorf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
-			}
-			for _, vol := range volumes[1:] {
-				if volSize != vol.VolumeSize || mountPath != vol.MountPath || fsType != vol.FsType || raidLevel != vol.RaidLevel {
-					return drivesToMount, fmt.Errorf("Mismatched tags among disks of same volume")
-				}
+		if len(volumes) != volSize {
+			return drivesToMount, fmt.Errorf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
+		}
+		for _, vol := range volumes[1:] {
+			if volSize != vol.VolumeSize || mountPath != vol.MountPath || fsType != vol.FsType || raidLevel != vol.RaidLevel {
+				return drivesToMount, fmt.Errorf("Mismatched tags among disks of same volume")
 			}
 		}
 	}
