@@ -28,19 +28,17 @@ func MountSingleDrive(driveName string, mountPath string, desiredFs string, labe
 	if isMounted {
 		return fmt.Errorf("Something already mounted at %s", mountPath)
 	}
-	cmd := "mount"
-	args := []string{
-		driveName,
-		mountPath,
-	}
-	log.Printf("Executing: %s %s", cmd, args)
-	if _, err := ExecuteCommand(cmd, args); err != nil {
-		log.Printf("%v", err)
-		return err
-	}
 
 	log.Printf("Appending fstab entry")
 	if err := appendFstabEntry("KRAKEN-"+label, desiredFs, mountPath); err != nil {
+		return err
+	}
+
+	cmd := "mount"
+	
+	log.Printf("Executing: %s", cmd)
+	if _, err := ExecuteCommand(cmd, []string{}); err != nil {
+		log.Printf("%v", err)
 		return err
 	}
 
