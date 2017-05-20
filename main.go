@@ -9,6 +9,7 @@ import (
 )
 
 var DryRun = false
+var PREFIX = "KRKN"
 
 func main() {
 	usage := `kraken - EC2/EBS utility
@@ -26,7 +27,7 @@ Options:
 	arguments, _ := docopt.Parse(usage, nil, true, "kraken 0.1", false)
 
 	currTime := time.Now().UTC()
-	log.SetPrefix("KRAKEN: ")
+	log.SetPrefix(PREFIX + ": ")
 	log.SetFlags(log.Lshortfile)
 
 	if arguments["--quiet"].(bool) {

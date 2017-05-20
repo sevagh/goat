@@ -34,7 +34,7 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
 
 	for volName, volumes := range drivesToMount {
 		//check if volName exists already
-		if DoesLabelExist("KRAKEN-" + volName) {
+		if DoesLabelExist(PREFIX + "-" + volName) {
 			log.Printf("Label already exists in /dev/disk/by-label")
 			delete(drivesToMount, volName)
 		}
@@ -63,13 +63,13 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 	params := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
-				Name: aws.String("tag:KRAKEN-IN:Prefix"),
+				Name: aws.String("tag:" + PREFIX + "-IN:Prefix"),
 				Values: []*string{
 					aws.String(ec2Instance.Prefix),
 				},
 			},
 			&ec2.Filter{
-				Name: aws.String("tag:KRAKEN-IN:NodeId"),
+				Name: aws.String("tag:" + PREFIX + "-IN:NodeId"),
 				Values: []*string{
 					aws.String(ec2Instance.NodeId),
 				},
@@ -108,24 +108,24 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 		}
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
-			case "KRAKEN-IN:VolumeName":
+			case PREFIX + "-IN:VolumeName":
 				ebsVolume.VolumeName = *tag.Value
-			case "KRAKEN-IN:RaidLevel":
+			case PREFIX + "-IN:RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
 					log.Printf("Couldn't parse tag RaidLevel for vol %s as int", *volume.VolumeId)
 					return volumes, err
 				}
-			case "KRAKEN-IN:VolumeSize":
+			case PREFIX + "-IN:VolumeSize":
 				if ebsVolume.VolumeSize, err = strconv.Atoi(*tag.Value); err != nil {
 					log.Printf("Couldn't parse tag VolumeSize for vol %s as int", *volume.VolumeId)
 					return volumes, err
 				}
-			case "KRAKEN-IN:MountPath":
+			case PREFIX + "-IN:MountPath":
 				ebsVolume.MountPath = *tag.Value
-			case "KRAKEN-IN:FsType":
+			case PREFIX + "-IN:FsType":
 				ebsVolume.FsType = *tag.Value
-			case "KRAKEN-IN:NodeId": //do nothing
-			case "KRAKEN-IN:Prefix": //do nothing
+			case PREFIX + "-IN:NodeId": //do nothing
+			case PREFIX + "-IN:Prefix": //do nothing
 			default:
 				log.Printf("Unrecognized tag %s for vol %s, ignoring...", *tag.Key, *volume.VolumeId)
 			}
