@@ -50,7 +50,7 @@ Options:
 	if ebsVolumes, err = MapEbsVolumes(&ec2Instance); err != nil {
 		log.Fatalf("%v", err)
 	}
-	if err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
+	if ebsVolumes, err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
 		log.Fatalf("%v", err)
 	}
 
