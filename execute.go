@@ -3,7 +3,7 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os/exec"
 	"syscall"
 )

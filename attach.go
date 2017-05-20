@@ -1,13 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"log"
-
 	"github.com/aws/aws-sdk-go/service/ec2"
+	log "github.com/sirupsen/logrus"
 )
 
-func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) (map[string][]EbsVol, error) {
+func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) map[string][]EbsVol {
 	var deviceName string
 	var err error
 
@@ -16,10 +14,11 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) (map
 	for key, volumes_ := range volumes {
 		localVolumes[key] = []EbsVol{}
 		for _, volume := range volumes_ {
-			log.Printf("Operating on volume: %s", volume)
+			volLogger := log.WithFields(log.Fields{"vol_id": volume.EbsVolId, "vol_name": volume.VolumeName})
 			if volume.AttachedName == "" {
+				volLogger.Info("Volume is unattached, picking drive name")
 				if deviceName, err = RandDriveNamePicker(); err != nil {
-					return localVolumes, err
+					volLogger.Fatal("Couldn't find an unused drive name")
 				}
 				attachVolIn := &ec2.AttachVolumeInput{
 					Device:     &deviceName,
@@ -27,20 +26,21 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol) (map
 					VolumeId:   &volume.EbsVolId,
 					DryRun:     &DryRun,
 				}
+				volLogger.Info("Executing AWS SDK attach command")
 				volAttachments, err := ec2Instance.Ec2Client.AttachVolume(attachVolIn)
 				if err != nil {
-					return localVolumes, err
+					volLogger.Fatalf("Couldn't attach: %v", err)
 				}
-				log.Println(volAttachments)
+				volLogger.Info(volAttachments)
 				volume.AttachedName = deviceName
 
 				if !DoesDriveExistWithTimeout(deviceName) {
-					return localVolumes, fmt.Errorf("Drive %s doesn't exist", deviceName)
+					volLogger.Fatalf("Drive %s doesn't exist after attaching - checked with stat %d times", deviceName, statAttempts)
 				}
 				localVolumes[key] = append(localVolumes[key], volume)
 			}
 
 		}
 	}
-	return localVolumes, nil
+	return localVolumes
 }

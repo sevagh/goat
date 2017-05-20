@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -19,15 +19,17 @@ type EbsVol struct {
 	FsType       string
 }
 
-func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
+func MapEbsVolumes(ec2Instance *Ec2Instance) map[string][]EbsVol {
 	drivesToMount := map[string][]EbsVol{}
+
+	log.Info("Searching for EBS volumes with previously established EC2 client")
 
 	volumes, err := findEbsVolumes(ec2Instance)
 	if err != nil {
-		return drivesToMount, nil
+		log.Fatal("Error when searching for EBS volumes")
 	}
 
-	log.Printf("Mapping EBS volumes")
+	log.Info("Classifying EBS volumes based on tags")
 	for _, volume := range volumes {
 		drivesToMount[volume.VolumeName] = append(drivesToMount[volume.VolumeName], volume)
 	}
@@ -35,9 +37,10 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
 	toDelete := []string{}
 
 	for volName, volumes := range drivesToMount {
+		volGroupLogger := log.WithFields(log.Fields{"vol_name": volName})
 		//check if volName exists already
 		if DoesLabelExist(PREFIX + "-" + volName) {
-			log.Printf("Label already exists in /dev/disk/by-label")
+			volGroupLogger.Info("Label already exists in /dev/disk/by-label")
 			toDelete = append(toDelete, volName)
 			continue
 		}
@@ -47,20 +50,21 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
 		fsType := volumes[0].FsType
 		raidLevel := volumes[0].RaidLevel
 		if len(volumes) != volSize {
-			return drivesToMount, fmt.Errorf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
+			volGroupLogger.Fatalf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
 		}
 		for _, vol := range volumes[1:] {
+			volLogger := log.WithFields(log.Fields{"vol_id": vol.EbsVolId, "vol_name": vol.VolumeName})
 			if volSize != vol.VolumeSize || mountPath != vol.MountPath || fsType != vol.FsType || raidLevel != vol.RaidLevel {
-				return drivesToMount, fmt.Errorf("Mismatched tags among disks of same volume")
+				volLogger.Fatal("Mismatched tags among disks of same volume")
 			}
 		}
 	}
 
-	for _, volName := range(toDelete) {
+	for _, volName := range toDelete {
 		delete(drivesToMount, volName)
 	}
 
-	return drivesToMount, nil
+	return drivesToMount
 }
 
 func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
@@ -108,26 +112,38 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 		} else {
 			ebsVolume.AttachedName = ""
 		}
+		krakenTagCtr := 0
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
 			case PREFIX + "-IN:VolumeName":
 				ebsVolume.VolumeName = *tag.Value
+				krakenTagCtr++
 			case PREFIX + "-IN:RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse RaidLevel tag as int: %v", err)
 				}
+				krakenTagCtr++
 			case PREFIX + "-IN:VolumeSize":
 				if ebsVolume.VolumeSize, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse VolumeSize tag as int: %v", err)
 				}
+				krakenTagCtr++
 			case PREFIX + "-IN:MountPath":
 				ebsVolume.MountPath = *tag.Value
+				krakenTagCtr++
 			case PREFIX + "-IN:FsType":
 				ebsVolume.FsType = *tag.Value
+				krakenTagCtr++
 			case PREFIX + "-IN:NodeId": //do nothing
+				krakenTagCtr++
 			case PREFIX + "-IN:Prefix": //do nothing
+				krakenTagCtr++
 			default:
 			}
+		}
+
+		if krakenTagCtr != 7 {
+			return volumes, fmt.Errorf("Missing required KRK-IN tags VolumeName, RaidLevel, MountPath, VolumeSize, NodeId, Prefix, FsType")
 		}
 		volumes = append(volumes, ebsVolume)
 	}
