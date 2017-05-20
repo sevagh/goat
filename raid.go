@@ -42,7 +42,7 @@ func MountRaidDrives(drives []EbsVol, volName string) error {
 			"--create",
 			raidDriveName,
 			"--level=" + strconv.Itoa(raidLevel),
-			"--name=KRAKEN-" + volName,
+			"--name=\"KRAKEN-" + volName + "\"",
 			"--raid-devices=" + strconv.Itoa(len(driveNames)),
 		}
 		args = append(args, driveNames...)
