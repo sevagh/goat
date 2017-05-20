@@ -44,21 +44,23 @@ Options:
 	var ebsVolumes map[string][]EbsVol
 	var err error
 
+	log.Printf("%s", DrawAsciiBanner("1: COLLECTING EC2 INFO"))
 	if ec2Instance, err = GetEc2InstanceData(); err != nil {
 		log.Fatalf("%v", err)
 	}
+	log.Printf("%s", DrawAsciiBanner("2: COLLECTING EBS INFO"))
 	if ebsVolumes, err = MapEbsVolumes(&ec2Instance); err != nil {
 		log.Fatalf("%v", err)
 	}
+	log.Printf("%s", DrawAsciiBanner("3: ATTACHING EBS VOLS"))
 	if ebsVolumes, err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
 		log.Fatalf("%v", err)
 	}
 
-	log.Printf("VOL MAP RETURN FROM ATTACH: %s", ebsVolumes)
+	log.Printf("%s", DrawAsciiBanner("4: MOUNTING ATTACHED VOLS"))
 	for volName, vols := range ebsVolumes {
-		log.Printf("Now mounting for volume %s", volName)
 		if len(vols) == 1 {
-			if err := MountSingleVolume(vols[0]); err != nil {
+			if err := MountSingleDrive(vols[0].AttachedName, vols[0].MountPath, vols[0].FsType, vols[0].VolumeName); err != nil {
 				log.Fatalf("%v", err)
 			}
 		} else {

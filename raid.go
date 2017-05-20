@@ -14,7 +14,6 @@ func MountRaidDrives(drives []EbsVol, volName string) error {
 	if raidLevel != 0 && raidLevel != 1 {
 		return fmt.Errorf("Valid raid levels are 0 and 1")
 	}
-	log.Printf("Checking if drives exist")
 
 	var raidDriveName string
 	var err error
@@ -28,7 +27,6 @@ func MountRaidDrives(drives []EbsVol, volName string) error {
 		raidDriveName,
 	}
 
-	log.Printf("Checking if %s exists in mdadm", raidDriveName)
 	_, err = ExecuteCommand(cmd, argsExist)
 
 	driveNames := []string{}
@@ -37,7 +35,6 @@ func MountRaidDrives(drives []EbsVol, volName string) error {
 	}
 
 	if DryRun || err != nil {
-		log.Printf("Raid drive doesn't exist, creating")
 		args := []string{
 			"--create",
 			raidDriveName,
@@ -46,9 +43,8 @@ func MountRaidDrives(drives []EbsVol, volName string) error {
 			"--raid-devices=" + strconv.Itoa(len(driveNames)),
 		}
 		args = append(args, driveNames...)
-		log.Printf("Executing: %s %s\n", cmd, args)
+		log.Printf("Creating RAID drive: %s %s", cmd, args)
 		if _, err := ExecuteCommand(cmd, args); err != nil {
-			log.Printf("%v", err)
 			return err
 		}
 	}
