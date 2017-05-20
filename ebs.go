@@ -32,11 +32,13 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
 		drivesToMount[volume.VolumeName] = append(drivesToMount[volume.VolumeName], volume)
 	}
 
+	toDelete := []string{}
+
 	for volName, volumes := range drivesToMount {
 		//check if volName exists already
 		if DoesLabelExist(PREFIX + "-" + volName) {
 			log.Printf("Label already exists in /dev/disk/by-label")
-			delete(drivesToMount, volName)
+			toDelete = append(toDelete, volName)
 			continue
 		}
 		//check for volume mismatch
@@ -53,6 +55,11 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) (map[string][]EbsVol, error) {
 			}
 		}
 	}
+
+	for _, volName := range(toDelete) {
+		delete(drivesToMount, volName)
+	}
+
 	return drivesToMount, nil
 }
 
