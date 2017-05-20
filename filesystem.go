@@ -8,25 +8,21 @@ import (
 	"strings"
 )
 
-func MountSingleVolume(drive EbsVol) error {
-	log.Printf("Mounting single drive: %s", drive.AttachedName)
-	return MountSingleDrive(drive.AttachedName, drive.MountPath, drive.FsType, drive.VolumeName)
-}
-
 func MountSingleDrive(driveName string, mountPath string, desiredFs string, label string) error {
+	log.Printf("Checking for existing filesystem and/or creating it")
 	if err := checkAndCreateFilesystem(driveName, desiredFs, label); err != nil {
 		return err
 	}
-	if err := mkdir(mountPath); err != nil {
-		return err
-	}
-
+	log.Printf("Checking if something already mounted at %s", mountPath)
 	isMounted, err := isMountpointAlreadyMounted(mountPath)
 	if err != nil {
 		return err
 	}
 	if isMounted {
 		return fmt.Errorf("Something already mounted at %s", mountPath)
+	}
+	if err := mkdir(mountPath); err != nil {
+		return err
 	}
 
 	log.Printf("Appending fstab entry")
@@ -39,9 +35,8 @@ func MountSingleDrive(driveName string, mountPath string, desiredFs string, labe
 		mountPath,
 	}
 
-	log.Printf("Executing: %s %s", cmd, args)
+	log.Printf("Running mount command")
 	if _, err := ExecuteCommand(cmd, args); err != nil {
-		log.Printf("%v", err)
 		return err
 	}
 
@@ -54,16 +49,13 @@ func mkdir(mountPath string) error {
 		"-p",
 		mountPath,
 	}
-	log.Printf("Executing: %s %s", cmd, args)
 	if _, err := ExecuteCommand(cmd, args); err != nil {
-		log.Printf("%v", err)
 		return err
 	}
 	return nil
 }
 
 func checkAndCreateFilesystem(driveName string, desiredFs string, label string) error {
-	log.Printf("Checking filesystem on %s", driveName)
 	cmd := "blkid"
 	args := []string{
 		"-o",
@@ -78,7 +70,6 @@ func checkAndCreateFilesystem(driveName string, desiredFs string, label string) 
 	}
 	if err != nil {
 		if fsOut.Status == 2 {
-			log.Printf("Creating fs %s on %s", desiredFs, driveName)
 			cmd = "mkfs." + desiredFs
 			argsCreateFs := []string{
 				driveName,
@@ -90,7 +81,6 @@ func checkAndCreateFilesystem(driveName string, desiredFs string, label string) 
 			}
 			return nil
 		} else {
-			log.Printf("%v", err)
 			return err
 		}
 	}
@@ -104,7 +94,6 @@ func checkAndCreateFilesystem(driveName string, desiredFs string, label string) 
 
 func appendFstabEntry(label string, fs string, mountPoint string) error {
 	fstabEntry := fmt.Sprintf("LABEL=%s %s %s defaults 0 1\n", label, mountPoint, fs)
-	log.Printf("Appending to fstab: %s", fstabEntry)
 	if DryRun {
 		return nil
 	}

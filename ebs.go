@@ -99,12 +99,10 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 			EbsVolId: *volume.VolumeId,
 		}
 		if len(volume.Attachments) > 0 {
-			log.Printf("Active attachments on volume %s, investigating...", *volume.VolumeId)
 			for _, attachment := range volume.Attachments {
 				if *attachment.InstanceId != ec2Instance.InstanceId {
 					return volumes, fmt.Errorf("Volume %s attached to different instance-id: %s", *volume.VolumeId, attachment.InstanceId)
 				}
-				log.Printf("Active attachment is on current instance-id, continuing")
 				ebsVolume.AttachedName = *attachment.Device
 			}
 		} else {
@@ -116,13 +114,11 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 				ebsVolume.VolumeName = *tag.Value
 			case PREFIX + "-IN:RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
-					log.Printf("Couldn't parse tag RaidLevel for vol %s as int", *volume.VolumeId)
-					return volumes, err
+					return volumes, fmt.Errorf("Couldn't parse RaidLevel tag as int: %v", err)
 				}
 			case PREFIX + "-IN:VolumeSize":
 				if ebsVolume.VolumeSize, err = strconv.Atoi(*tag.Value); err != nil {
-					log.Printf("Couldn't parse tag VolumeSize for vol %s as int", *volume.VolumeId)
-					return volumes, err
+					return volumes, fmt.Errorf("Couldn't parse VolumeSize tag as int: %v", err)
 				}
 			case PREFIX + "-IN:MountPath":
 				ebsVolume.MountPath = *tag.Value
@@ -131,7 +127,6 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 			case PREFIX + "-IN:NodeId": //do nothing
 			case PREFIX + "-IN:Prefix": //do nothing
 			default:
-				log.Printf("Unrecognized tag %s for vol %s, ignoring...", *tag.Key, *volume.VolumeId)
 			}
 		}
 		volumes = append(volumes, ebsVolume)

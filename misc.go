@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 func RandDriveNamePicker() (string, error) {
@@ -40,4 +41,10 @@ func RandRaidDriveNamePicker() (string, error) {
 		ctr++
 	}
 	return deviceName + string(runes[ctr]), nil
+}
+
+func DrawAsciiBanner(headLine string) string {
+	return fmt.Sprintf("\n\n%[1]s\n# %[2]s #\n%[1]s\n\n",
+		strings.Repeat("#", len(headLine) + 4),
+		headLine)
 }
