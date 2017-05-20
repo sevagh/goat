@@ -32,6 +32,9 @@ func DoesDriveExist(driveName string) bool {
 }
 
 func DoesLabelExist(label string) bool {
+	if DryRun {
+		return false
+	}
 	log.Println("Checking if label exists")
 	if _, err := ExecuteCommand("ls", []string{"/dev/disk/by-label/" + label}); err != nil {
 		log.Printf("%s doesn't exist", label)
