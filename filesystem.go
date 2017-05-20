@@ -2,51 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
 )
 
-func MountSingleVolume(drive EbsVol) error {
-	log.Printf("Mounting single drive: %s", drive.AttachedName)
-	return MountSingleDrive(drive.AttachedName, drive.MountPath, drive.FsType)
-}
-
-func MountSingleDrive(driveName string, mountPath string, desiredFs string) error {
-	if err := checkAndCreateFilesystem(driveName, desiredFs); err != nil {
-		return err
-	}
-	if err := mkdir(mountPath); err != nil {
-		return err
-	}
-	cmd := "mount"
-	args := []string{
-		driveName,
-		mountPath,
-	}
-	log.Printf("Executing: %s %s", cmd, args)
-	if _, err := ExecuteCommand(cmd, args); err != nil {
-		log.Printf("%v", err)
-		return err
-	}
-
-	return nil
-}
-
-func mkdir(mountPath string) error {
-	cmd := "mkdir"
-	args := []string{
-		"-p",
-		mountPath,
-	}
-	log.Printf("Executing: %s %s", cmd, args)
-	if _, err := ExecuteCommand(cmd, args); err != nil {
-		log.Printf("%v", err)
-		return err
-	}
-	return nil
-}
-
-func checkAndCreateFilesystem(driveName string, desiredFs string) error {
-	log.Printf("Checking filesystem on %s", driveName)
+func CheckFilesystem(driveName string, desiredFs string, label string) error {
 	cmd := "blkid"
 	args := []string{
 		"-o",
@@ -56,24 +14,11 @@ func checkAndCreateFilesystem(driveName string, desiredFs string) error {
 		driveName,
 	}
 	fsOut, err := ExecuteCommand(cmd, args)
-	if DryRun {
-		return nil
-	}
 	if err != nil {
 		if fsOut.Status == 2 {
-			log.Printf("Creating fs %s on %s", desiredFs, driveName)
-			cmd = "mkfs"
-			argsCreateFs := []string{
-				"-t",
-				desiredFs,
-				driveName,
-			}
-			if _, err := ExecuteCommand(cmd, argsCreateFs); err != nil {
-				return err
-			}
+			//go ahead and create filesystem
 			return nil
 		} else {
-			log.Printf("%v", err)
 			return err
 		}
 	}
@@ -83,4 +28,17 @@ func checkAndCreateFilesystem(driveName string, desiredFs string) error {
 	default:
 		return fmt.Errorf("Desired fs: %s, actual fs: %s", desiredFs, fsOut.Stdout)
 	}
+}
+
+func CreateFilesystem(driveName string, desiredFs string, label string) error {
+	cmd := "mkfs." + desiredFs
+	args := []string{
+		driveName,
+		"-L",
+		PREFIX + "-" + label,
+	}
+	if _, err := ExecuteCommand(cmd, args); err != nil {
+		return err
+	}
+	return nil
 }
