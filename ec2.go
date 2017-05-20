@@ -2,6 +2,7 @@ package main
 
 import (
 	"time"
+	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -24,7 +25,7 @@ type ec2Metadata struct {
 	az     string
 }
 
-func GetEc2InstanceData() (Ec2Instance, error) {
+func GetEc2InstanceData() Ec2Instance {
 	var ec2Instance Ec2Instance
 	sess := session.New()
 
@@ -35,33 +36,44 @@ func GetEc2InstanceData() (Ec2Instance, error) {
 		},
 	)
 
+	log.Info("Establishing metadata client")
+
 	sess.Config.Credentials = creds
 	svc := ec2metadata.New(sess)
 
 	result, err := svc.GetMetadata("instance-id")
 	if err != nil {
-		return ec2Instance, err
+		log.Fatalf("Couldn't get self instance-id from metadata: %v", err)
 	}
 
 	ec2Instance.InstanceId = result
 
 	meta, err := populateRegionInfo(svc)
 	if err != nil {
-		return ec2Instance, err
+		log.Fatalf("Couldn't access InstanceIdentityDocument: %v", err)
 	}
 
 	ec2Instance.Az = meta.az
 	sess.Config.Region = &meta.region
+
+	log.WithFields(log.Fields{"instance_id": result}).Info("Retrieved metadata successfully")
+
+	ec2Logger := log.WithFields(log.Fields{"instance_id": result, "region": meta.region, "az": meta.az})
+	ec2Logger.Info("Using metadata to initialize EC2 SDK client")
 
 	ec2Svc := ec2.New(sess)
 	ec2Instance.Ec2Client = ec2Svc
 
 	err = getInstanceTags(&ec2Instance)
 	if err != nil {
-		return ec2Instance, err
+		ec2Logger.Fatalf("Couldn't get tags: %v", err)
 	}
 
-	return ec2Instance, nil
+	if ec2Instance.NodeId == "" || ec2Instance.Prefix == "" {
+		ec2Logger.Fatal("This instance is missing required KRKN-IN tags NodeId, Prefix")
+	}
+
+	return ec2Instance
 }
 
 func populateRegionInfo(svc *ec2metadata.EC2Metadata) (ec2Metadata, error) {

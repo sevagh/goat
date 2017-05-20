@@ -2,10 +2,9 @@ package main
 
 import (
 	"github.com/docopt/docopt-go"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
-	"log"
 	"os"
-	"time"
 )
 
 var DryRun = false
@@ -15,20 +14,17 @@ func main() {
 	usage := `kraken - EC2/EBS utility
 
 Usage:
-  kraken [-q | --quiet] [-d | --dry]
+  kraken [-l=<log-level>] [--quiet] [--dry]
   kraken -h | --help
   kraken --version
 
 Options:
-  -q, --quiet   Suppress output
-  -d, --dry     Dry run
-  -h --help     Show this screen.
-  --version     Show version.`
+  --quiet              Suppress logs
+  --log-level=<level>  Log level (debug, info, warn, error, fatal)
+  --dry                Dry run
+  -h --help            Show this screen.
+  --version            Show version.`
 	arguments, _ := docopt.Parse(usage, nil, true, "kraken 0.1", false)
-
-	currTime := time.Now().UTC()
-	log.SetPrefix(PREFIX + ": ")
-	log.SetFlags(log.Lshortfile)
 
 	if arguments["--quiet"].(bool) {
 		log.SetOutput(ioutil.Discard)
@@ -36,26 +32,34 @@ Options:
 		log.SetOutput(os.Stderr)
 	}
 
+	logLevel, ok := arguments["--log-level"].(string)
+	if !ok {
+		log.SetLevel(log.WarnLevel)
+	} else {
+		if level, err := log.ParseLevel(logLevel); err != nil {
+			log.Fatalf("%v", err)
+		} else {
+		    log.SetLevel(level)
+		}
+	}
+
+	if arguments["--verbose"].(bool) {
+	}
+
+	log.SetFormatter(&log.TextFormatter{})
+
 	DryRun = arguments["--dry"].(bool)
 
-	log.Printf("RUNNING KRAKEN: %s", currTime.Format(time.RFC850))
-
-	var ec2Instance Ec2Instance
-	var ebsVolumes map[string][]EbsVol
-	var err error
+	log.Printf("%s", DrawAsciiBanner("WELCOME TO KRAKEN"))
 
 	log.Printf("%s", DrawAsciiBanner("1: COLLECTING EC2 INFO"))
-	if ec2Instance, err = GetEc2InstanceData(); err != nil {
-		log.Fatalf("%v", err)
-	}
+	ec2Instance := GetEc2InstanceData()
+
 	log.Printf("%s", DrawAsciiBanner("2: COLLECTING EBS INFO"))
-	if ebsVolumes, err = MapEbsVolumes(&ec2Instance); err != nil {
-		log.Fatalf("%v", err)
-	}
+	ebsVolumes := MapEbsVolumes(&ec2Instance)
+
 	log.Printf("%s", DrawAsciiBanner("3: ATTACHING EBS VOLS"))
-	if ebsVolumes, err = AttachEbsVolumes(ec2Instance, ebsVolumes); err != nil {
-		log.Fatalf("%v", err)
-	}
+	ebsVolumes = AttachEbsVolumes(ec2Instance, ebsVolumes)
 
 	log.Printf("%s", DrawAsciiBanner("4: MOUNTING ATTACHED VOLS"))
 	for volName, vols := range ebsVolumes {
