@@ -38,7 +38,7 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		"--raid-devices=" + strconv.Itoa(len(driveNames)),
 	}
 	args = append(args, driveNames...)
-	raidLogger.Info("Creating RAID drive: %s %s", cmd, args)
+	raidLogger.Infof("Creating RAID drive: %s %s", cmd, args)
 	if _, err := ExecuteCommand(cmd, args); err != nil {
 		raidLogger.Fatalf("Error when executing mdadm command: %v", err)
 	}
@@ -49,7 +49,7 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		"--scan",
 	}
 
-	raidLogger.Info("Persisting mdadm settings: %s %s", cmd, args)
+	raidLogger.Infof("Persisting mdadm settings: %s %s", cmd, args)
 	if out, err := ExecuteCommand(cmd, args); err != nil {
 		raidLogger.Fatalf("Error when executing mdadm command: %v", err)
 	} else {
