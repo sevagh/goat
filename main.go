@@ -17,23 +17,20 @@ Usage:
   kraken --version
 
 Options:
-  --log-level=<level>  Log level (debug, info, warn, error, fatal)
+  --log-level=<level>  Log level (debug, info, warn, error, fatal) [default: info]
   --dry                Dry run
   -h --help            Show this screen.
   --version            Show version.`
 	arguments, _ := docopt.Parse(usage, nil, true, "kraken 0.1", false)
 
 	log.SetOutput(os.Stderr)
-	logLevel, ok := arguments["--log-level"].(string)
-	if !ok {
-		log.SetLevel(log.WarnLevel)
+	logLevel := arguments["--log-level"].(string)
+	if level, err := log.ParseLevel(logLevel); err != nil {
+		log.Fatalf("%v", err)
 	} else {
-		if level, err := log.ParseLevel(logLevel); err != nil {
-			log.Fatalf("%v", err)
-		} else {
-			log.SetLevel(level)
-		}
+		log.SetLevel(level)
 	}
+
 	log.SetFormatter(&log.TextFormatter{})
 
 	dryRun := arguments["--dry"].(bool)

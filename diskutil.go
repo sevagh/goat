@@ -2,6 +2,7 @@ package main
 
 import (
 	log "github.com/sirupsen/logrus"
+	"os"
 )
 
 func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
@@ -38,7 +39,7 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 	}
 
 	if !dryRun {
-		if err := Mkdir(mountPath); err != nil {
+		if err := os.MkdirAll(mountPath, 0777); err != nil {
 			driveLogger.Fatalf("Couldn't mkdir: %v", err)
 		}
 	}
