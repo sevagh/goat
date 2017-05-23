@@ -1,8 +1,8 @@
 package main
 
 import (
-	"os"
 	log "github.com/sirupsen/logrus"
+	"os"
 )
 
 func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
