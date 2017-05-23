@@ -34,7 +34,7 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		"--create",
 		raidDriveName,
 		"--level=" + strconv.Itoa(raidLevel),
-		"--name=\"" + PREFIX + "-" + volName + "\"",
+		"--name='" + PREFIX + "-" + volName + "'",
 		"--raid-devices=" + strconv.Itoa(len(driveNames)),
 	}
 	args = append(args, driveNames...)
