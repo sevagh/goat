@@ -62,7 +62,7 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 }
 
 func appendToMdadmConf(content string) error {
-	f, err := os.OpenFile("/etc/mdadm.conf", os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	f, err := os.OpenFile("/etc/mdadm.conf", os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return err
 	}
