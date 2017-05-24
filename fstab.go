@@ -9,7 +9,7 @@ import (
 func AppendToFstab(label string, fs string, mountPoint string, dryRun bool) error {
 	fstabEntry := fmt.Sprintf("LABEL=%s %s %s defaults 0 1\n", label, mountPoint, fs)
 	if dryRun {
-		log.Info("FSTAB: would have appended: %s", fstabEntry)
+		log.WithFields(log.Fields{"label": label, "fs": fs, "mount_point": mountPoint}).Infof("FSTAB: would have appended: %s", fstabEntry)
 		return nil
 	}
 
