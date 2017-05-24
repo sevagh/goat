@@ -1,7 +1,4 @@
-[![ReportCard][ReportCard-Image]][ReportCard-Url]
-
-[ReportCard-Url]: http://goreportcard.com/report/sevagh/kraken
-[ReportCard-Image]: http://goreportcard.com/badge/sevagh/kraken
+[![ReportCard](http://goreportcard.com/badge/sevagh/kraken)](http://goreportcard.com/report/sevagh/kraken) [![GitHub tag](https://img.shields.io/github/tag/sevagh/kraken.svg)](https://github.com/sevagh/kraken/releases)
 
 # kraken
 ### Attach & mount EBS volumes from inside EC2 instances
