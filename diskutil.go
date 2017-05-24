@@ -48,13 +48,8 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 		driveLogger.Fatalf("Couldn't append to fstab: %v", err)
 	}
 
-	if dryRun {
-		driveLogger.Printf("Dry run complete, nothing to mount")
-		return
-	}
-
 	driveLogger.Info("Now mounting")
-	if err := Mount(mountPath); err != nil {
+	if err := Mount(mountPath, dryRun); err != nil {
 		driveLogger.Fatalf("Couldn't mount: %v", err)
 	}
 }
