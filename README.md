@@ -35,6 +35,10 @@ Kraken's workflow is roughly the following:
 
 The filesystem and fstab entries are created with the label `KRKN-{volumeName}` for convenience. Running Kraken multiple times will result in Kraken detecting the existing label it intended to create and not proceeding.
 
+### Run phase
+
+In production I run `kraken` at the EC2 user-data phase (executed from a bash script). Further exploration is needed to perhaps embed kraken properly into `systemd` or `cloud-init`.
+
 ### Tags
 
 These are the tags you need:
