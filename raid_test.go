@@ -13,7 +13,7 @@ func TestCreateRaidArray(t *testing.T) {
 
 	fakeEbsVols := []EbsVol{
 		EbsVol{
-			EbsVolId:     "1",
+			EbsVolID:     "1",
 			VolumeName:   "raid_test_1",
 			RaidLevel:    0,
 			VolumeSize:   2,
@@ -22,7 +22,7 @@ func TestCreateRaidArray(t *testing.T) {
 			FsType:       "ext999",
 		},
 		EbsVol{
-			EbsVolId:     "2",
+			EbsVolID:     "2",
 			VolumeName:   "raid_test_1",
 			RaidLevel:    0,
 			VolumeSize:   2,
