@@ -1,10 +1,10 @@
 package main
 
 import (
-	"testing"
-	"strings"
 	"bytes"
 	log "github.com/sirupsen/logrus"
+	"strings"
+	"testing"
 )
 
 func TestAppendToFstab(t *testing.T) {
@@ -15,7 +15,7 @@ func TestAppendToFstab(t *testing.T) {
 	}
 
 	bufString := buf.String()
-	if ! strings.Contains(bufString, "FSTAB: would have appended: LABEL=test_label /dummy/path ext999 defaults 0 1") {
-	    t.Errorf("printed wrong thing to stderr. Actual: %s", bufString)
+	if !strings.Contains(bufString, "FSTAB: would have appended: LABEL=test_label /dummy/path ext999 defaults 0 1") {
+		t.Errorf("printed wrong thing to stderr. Actual: %s", bufString)
 	}
 }

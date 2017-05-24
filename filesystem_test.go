@@ -1,10 +1,10 @@
 package main
 
 import (
-	"testing"
-	"strings"
 	"bytes"
 	log "github.com/sirupsen/logrus"
+	"strings"
+	"testing"
 )
 
 func TestCheckFilesystem(t *testing.T) {
@@ -16,7 +16,7 @@ func TestCheckFilesystem(t *testing.T) {
 	}
 
 	bufString := buf.String()
-	if ! strings.Contains(bufString, "FILESYSTEM: would have executed blkid [-o value -s TYPE /dev/dummy]") {
-	    t.Errorf("printed wrong thing to stderr. Actual: %s", bufString)
+	if !strings.Contains(bufString, "FILESYSTEM: would have executed blkid [-o value -s TYPE /dev/dummy]") {
+		t.Errorf("printed wrong thing to stderr. Actual: %s", bufString)
 	}
 }
