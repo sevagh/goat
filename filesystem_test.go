@@ -7,15 +7,16 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func TestAppendToFstab(t *testing.T) {
+func TestCheckFilesystem(t *testing.T) {
 	buf := new(bytes.Buffer)
 	log.SetOutput(buf)
-	if err := AppendToFstab("test_label", "ext999", "/dummy/path", true); err != nil {
+
+	if err := CheckFilesystem("/dev/dummy", "ext999", "dummy_label", true); err != nil {
 		t.Errorf("Error: %v", err)
 	}
 
 	bufString := buf.String()
-	if ! strings.Contains(bufString, "FSTAB: would have appended: LABEL=test_label /dummy/path ext999 defaults 0 1") {
+	if ! strings.Contains(bufString, "FILESYSTEM: would have executed blkid [-o value -s TYPE /dev/dummy]") {
 	    t.Errorf("printed wrong thing to stderr. Actual: %s", bufString)
 	}
 }
