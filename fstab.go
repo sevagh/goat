@@ -6,6 +6,7 @@ import (
 	"os"
 )
 
+//AppendToFstab appends a line to fstab with the given parameters. It takes dryRun as a param, where it says what it would have appended without actually modifying '/etc/fstab'
 func AppendToFstab(label string, fs string, mountPoint string, dryRun bool) error {
 	fstabEntry := fmt.Sprintf("LABEL=%s %s %s defaults 0 1\n", label, mountPoint, fs)
 	if dryRun {

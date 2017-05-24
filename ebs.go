@@ -9,8 +9,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
+//EbsVol is a struct defining the discovered EBS volumes and its kraken metadata parsed from the tags
 type EbsVol struct {
-	EbsVolId     string
+	EbsVolID     string
 	VolumeName   string
 	RaidLevel    int
 	VolumeSize   int
@@ -19,7 +20,8 @@ type EbsVol struct {
 	FsType       string
 }
 
-func MapEbsVolumes(ec2Instance *Ec2Instance) map[string][]EbsVol {
+//MapEbsVolumes discovers and creates a {'VolumeName':[]EbsVol} map for all the required EBS volumes given an EC2Instance struct
+func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 	drivesToMount := map[string][]EbsVol{}
 
 	log.Info("Searching for EBS volumes with previously established EC2 client")
@@ -53,7 +55,7 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) map[string][]EbsVol {
 			volGroupLogger.Fatalf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
 		}
 		for _, vol := range volumes[1:] {
-			volLogger := log.WithFields(log.Fields{"vol_id": vol.EbsVolId, "vol_name": vol.VolumeName})
+			volLogger := log.WithFields(log.Fields{"vol_id": vol.EbsVolID, "vol_name": vol.VolumeName})
 			if volSize != vol.VolumeSize || mountPath != vol.MountPath || fsType != vol.FsType || raidLevel != vol.RaidLevel {
 				volLogger.Fatal("Mismatched tags among disks of same volume")
 			}
@@ -67,7 +69,7 @@ func MapEbsVolumes(ec2Instance *Ec2Instance) map[string][]EbsVol {
 	return drivesToMount
 }
 
-func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
+func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 	params := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
@@ -79,7 +81,7 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 			&ec2.Filter{
 				Name: aws.String("tag:" + PREFIX + "-IN:NodeId"),
 				Values: []*string{
-					aws.String(ec2Instance.NodeId),
+					aws.String(ec2Instance.NodeID),
 				},
 			},
 			&ec2.Filter{
@@ -100,11 +102,11 @@ func findEbsVolumes(ec2Instance *Ec2Instance) ([]EbsVol, error) {
 
 	for _, volume := range result.Volumes {
 		ebsVolume := EbsVol{
-			EbsVolId: *volume.VolumeId,
+			EbsVolID: *volume.VolumeId,
 		}
 		if len(volume.Attachments) > 0 {
 			for _, attachment := range volume.Attachments {
-				if *attachment.InstanceId != ec2Instance.InstanceId {
+				if *attachment.InstanceId != ec2Instance.InstanceID {
 					return volumes, fmt.Errorf("Volume %s attached to different instance-id: %s", *volume.VolumeId, attachment.InstanceId)
 				}
 				ebsVolume.AttachedName = *attachment.Device

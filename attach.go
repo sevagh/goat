@@ -5,16 +5,17 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol, dryRun bool) map[string][]EbsVol {
+//AttachEbsVolumes attaches the given map of {'VolumeName':[]EbsVol} with the EC2 client in the provided ec2Instance
+func AttachEbsVolumes(ec2Instance EC2Instance, volumes map[string][]EbsVol, dryRun bool) map[string][]EbsVol {
 	var deviceName string
 	var err error
 
 	localVolumes := map[string][]EbsVol{}
 
-	for key, volumes_ := range volumes {
+	for key, volumes := range volumes {
 		localVolumes[key] = []EbsVol{}
-		for _, volume := range volumes_ {
-			volLogger := log.WithFields(log.Fields{"vol_id": volume.EbsVolId, "vol_name": volume.VolumeName})
+		for _, volume := range volumes {
+			volLogger := log.WithFields(log.Fields{"vol_id": volume.EbsVolID, "vol_name": volume.VolumeName})
 			if volume.AttachedName == "" {
 				volLogger.Info("Volume is unattached, picking drive name")
 				if deviceName, err = RandDriveNamePicker(); err != nil {
@@ -22,8 +23,8 @@ func AttachEbsVolumes(ec2Instance Ec2Instance, volumes map[string][]EbsVol, dryR
 				}
 				attachVolIn := &ec2.AttachVolumeInput{
 					Device:     &deviceName,
-					InstanceId: &ec2Instance.InstanceId,
-					VolumeId:   &volume.EbsVolId,
+					InstanceId: &ec2Instance.InstanceID,
+					VolumeId:   &volume.EbsVolID,
 					DryRun:     &dryRun,
 				}
 				volLogger.Info("Executing AWS SDK attach command")

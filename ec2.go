@@ -12,11 +12,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-type Ec2Instance struct {
+//EC2Instance is a struct containing current instance info + a connected EC2 client
+type EC2Instance struct {
 	Ec2Client  *ec2.EC2
-	InstanceId string
+	InstanceID string
 	Prefix     string
-	NodeId     string
+	NodeID     string
 	Az         string
 }
 
@@ -25,8 +26,9 @@ type ec2Metadata struct {
 	az     string
 }
 
-func GetEc2InstanceData() Ec2Instance {
-	var ec2Instance Ec2Instance
+//GetEC2InstanceData returns a populated EC2Instance struct with the current EC2 instances' metadata
+func GetEC2InstanceData() EC2Instance {
+	var ec2Instance EC2Instance
 	sess := session.New()
 
 	creds := credentials.NewCredentials(
@@ -46,7 +48,7 @@ func GetEc2InstanceData() Ec2Instance {
 		log.Fatalf("Couldn't get self instance-id from metadata: %v", err)
 	}
 
-	ec2Instance.InstanceId = result
+	ec2Instance.InstanceID = result
 
 	meta, err := populateRegionInfo(svc)
 	if err != nil {
@@ -69,7 +71,7 @@ func GetEc2InstanceData() Ec2Instance {
 		ec2Logger.Fatalf("Couldn't get tags: %v", err)
 	}
 
-	if ec2Instance.NodeId == "" || ec2Instance.Prefix == "" {
+	if ec2Instance.NodeID == "" || ec2Instance.Prefix == "" {
 		ec2Logger.Fatal("This instance is missing required KRKN-IN tags NodeId, Prefix")
 	}
 
@@ -87,13 +89,13 @@ func populateRegionInfo(svc *ec2metadata.EC2Metadata) (ec2Metadata, error) {
 	return ret, nil
 }
 
-func getInstanceTags(ec2Instance *Ec2Instance) error {
+func getInstanceTags(ec2Instance *EC2Instance) error {
 	params := &ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
 				Name: aws.String("instance-id"),
 				Values: []*string{
-					aws.String(ec2Instance.InstanceId),
+					aws.String(ec2Instance.InstanceID),
 				},
 			},
 		},
@@ -108,7 +110,7 @@ func getInstanceTags(ec2Instance *Ec2Instance) error {
 		for _, instance := range reservation.Instances {
 			for _, tag := range instance.Tags {
 				if *tag.Key == PREFIX+"-IN:NodeId" {
-					ec2Instance.NodeId = *tag.Value
+					ec2Instance.NodeID = *tag.Value
 				} else if *tag.Key == PREFIX+"-IN:Prefix" {
 					ec2Instance.Prefix = *tag.Value
 				}
