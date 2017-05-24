@@ -18,10 +18,6 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		raidLogger.Fatalf("Couldn't select unused RAID drive name: %v", err)
 	}
 
-	if dryRun {
-		return raidDriveName
-	}
-
 	raidLevel := drives[0].RaidLevel
 	cmd := "mdadm"
 
@@ -38,7 +34,10 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		"--raid-devices=" + strconv.Itoa(len(driveNames)),
 	}
 	args = append(args, driveNames...)
-	raidLogger.Infof("Creating RAID drive: %s %s", cmd, args)
+	raidLogger.Infof("RAID: Creating RAID drive: %s %s", cmd, args)
+	if dryRun {
+		return raidDriveName
+	}
 	if _, err := ExecuteCommand(cmd, args); err != nil {
 		raidLogger.Fatalf("Error when executing mdadm command: %v", err)
 	}
