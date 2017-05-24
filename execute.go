@@ -7,12 +7,14 @@ import (
 	"syscall"
 )
 
+//CommandOut is a struct containing the return code, stdout, and stderr of an executed command
 type CommandOut struct {
 	Stdout string
 	Stderr string
 	Status int
 }
 
+//ExecuteCommand executes a given command + args and returns a CommandOut struct with an error if the command fails
 func ExecuteCommand(commandString string, args []string) (CommandOut, error) {
 	out := CommandOut{}
 	cmd := exec.Command(commandString, args...)

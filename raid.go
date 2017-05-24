@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+//CreateRaidArray runs the appropriate mdadm command for the given list of EbsVol that should be raided together. It takes dryRun as a boolean, where it tells you which mdadm it would have run
 func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 	raidLogger := log.WithFields(log.Fields{"vol_name": volName, "drives": drives})
 

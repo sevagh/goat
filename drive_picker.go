@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strings"
 )
 
+//RandDriveNamePicker returns a /dev/xvd[b-z] string, whichever is the first that doesn't exist
 func RandDriveNamePicker() (string, error) {
 	ctr := 0
 	deviceName := "/dev/xvd"
@@ -21,6 +21,7 @@ func RandDriveNamePicker() (string, error) {
 	return deviceName + string(runes[ctr]), nil
 }
 
+//RandRaidDriveNamePicker returns a /dev/md[0-9] string, whichever is the first that doesn't exist
 func RandRaidDriveNamePicker() (string, error) {
 	ctr := 0
 	deviceName := "/dev/md"
@@ -35,10 +36,4 @@ func RandRaidDriveNamePicker() (string, error) {
 		ctr++
 	}
 	return deviceName + string(runes[ctr]), nil
-}
-
-func DrawAsciiBanner(headLine string) string {
-	return fmt.Sprintf("\n%[1]s\n# %[2]s #\n%[1]s\n",
-		strings.Repeat("#", len(headLine)+4),
-		headLine)
 }

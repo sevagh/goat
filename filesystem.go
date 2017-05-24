@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+//CheckFilesystem checks for a filesystem on a given drive using blkid. It returns ok if there is no filesystem or the filesystem is the correct type. Error if there's a different filesystem
 func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bool) error {
 	cmd := "blkid"
 	args := []string{
@@ -25,9 +26,8 @@ func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bo
 		if fsOut.Status == 2 {
 			//go ahead and create filesystem
 			return nil
-		} else {
-			return err
 		}
+		return err
 	}
 	switch fsOut.Stdout {
 	case desiredFs + "\n":
@@ -37,6 +37,7 @@ func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bo
 	}
 }
 
+//CreateFilesystem executes mkfs.<desired_filesystem> on the requested drive. It can do a dryRun where it logs its command without running it
 func CreateFilesystem(driveName string, desiredFs string, label string, dryRun bool) error {
 	cmd := "mkfs." + desiredFs
 	args := []string{
