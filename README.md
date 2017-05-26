@@ -53,6 +53,10 @@ These are the tags you need:
 | KRKN-IN:MountPath    | Linux path to mount vol |         | *Yes*  | `/var/kafka_data`                                                |
 | KRKN-IN:FsType       | Linux filesystem type   |         | *Yes*  | `ext4`, `vfat`                                                   |
 
+### Examples
+
+[Link to my official example repo.](https://github.com/sevagh/kraken-example). Also, the [Gitpitch presentation](https://gitpitch.com/sevagh/kraken/gitpitch#) has a partial demonstration.
+
 Here's an example to clarify better.
 
 2-instance Vertica cluster:
