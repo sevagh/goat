@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/sevagh/kraken.svg?branch=master)](https://travis-ci.org/sevagh/kraken) [![ReportCard](http://goreportcard.com/badge/sevagh/kraken)](http://goreportcard.com/report/sevagh/kraken) [![GitHub tag](https://img.shields.io/github/tag/sevagh/kraken.svg)](https://github.com/sevagh/kraken/releases) 
+[![Build Status](https://api.travis-ci.org/sevagh/kraken.svg?branch=master)](https://travis-ci.org/sevagh/kraken) [![ReportCard](http://goreportcard.com/badge/sevagh/kraken)](http://goreportcard.com/report/sevagh/kraken) [![GitHub tag](https://img.shields.io/github/tag/sevagh/kraken.svg)](https://github.com/sevagh/kraken/releases) [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/sevagh/kraken/gitpitch?grs=github&t=white)
 
 *VERY EARLY ALPHA - USE AT YOUR OWN RISK*
 
