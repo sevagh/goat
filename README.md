@@ -1,11 +1,11 @@
-[![Build Status](https://api.travis-ci.org/sevagh/kraken.svg?branch=master)](https://travis-ci.org/sevagh/kraken) [![ReportCard](http://goreportcard.com/badge/sevagh/kraken)](http://goreportcard.com/report/sevagh/kraken) [![GitHub tag](https://img.shields.io/github/tag/sevagh/kraken.svg)](https://github.com/sevagh/kraken/releases) [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/sevagh/kraken?grs=github&t=white)
+[![Build Status](https://api.travis-ci.org/sevagh/kraken.svg?branch=master)](https://travis-ci.org/sevagh/kraken) [![ReportCard](http://goreportcard.com/badge/sevagh/kraken)](http://goreportcard.com/report/sevagh/kraken) [![GitHub tag](https://img.shields.io/github/tag/sevagh/kraken.svg)](https://github.com/sevagh/kraken/releases) [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/sevagh/kraken/gitpitch?grs=github&t=white)
 
 *VERY EARLY ALPHA - USE AT YOUR OWN RISK*
 
 # kraken
 ### Attach & mount EBS volumes from inside EC2 instances
 
-<img src="https://raw.githubusercontent.com/sevagh/kraken/master/assets/logo.png" width="300">
+<img src="https://raw.githubusercontent.com/sevagh/kraken/gitpitch/assets/logo.png" width="300">
 
 ### Introduction
 
