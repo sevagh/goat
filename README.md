@@ -55,7 +55,7 @@ These are the tags you need:
 
 ### Examples
 
-[Link to my official example repo](https://github.com/sevagh/kraken-example). Also, the [Gitpitch presentation](https://gitpitch.com/sevagh/kraken/gitpitch#) has a partial demonstration.
+[Link to the example Terraform HCL scripts](./kraken-example). Also, the [Gitpitch presentation](https://gitpitch.com/sevagh/kraken/gitpitch#) has a partial demonstration.
 
 Here's an example to clarify better.
 
