@@ -116,7 +116,7 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 			ebsVolume.AttachedName = ""
 		}
 		tagCtr := 0
-		ebsVolume.Touched = true
+		ebsVolume.Touched = false
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
 			case PREFIX + "-IN:VolumeName":

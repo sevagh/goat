@@ -16,7 +16,9 @@ func PrepAndMountDrives(volName string, vols []EbsVol, ec2Instance EC2Instance, 
 		driveLogger.Info("Creating RAID array")
 		driveName = CreateRaidArray(vols, volName, dryRun)
 		if !vols[0].Touched {
-			WritebackTag(vols, &ec2Instance, dryRun)
+			if err := WritebackTag(vols, &ec2Instance, dryRun); err != nil {
+				driveLogger.Fatalf("Error when writing back tags: %v", err)
+			}
 		}
 	}
 
