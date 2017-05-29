@@ -39,9 +39,8 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 	} else {
 		args = []string{
 			"--assemble",
-			"--scan",
-			"--update",
-			"--homehost",
+			raidDriveName,
+			"--update=homehost",
 		}
 	}
 
