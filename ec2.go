@@ -14,7 +14,7 @@ import (
 
 //EC2Instance is a struct containing current instance info + a connected EC2 client
 type EC2Instance struct {
-	Ec2Client  *ec2.EC2
+	EC2Client  *ec2.EC2
 	InstanceID string
 	Prefix     string
 	NodeID     string
@@ -64,7 +64,7 @@ func GetEC2InstanceData() EC2Instance {
 	ec2Logger.Info("Using metadata to initialize EC2 SDK client")
 
 	ec2Svc := ec2.New(sess)
-	ec2Instance.Ec2Client = ec2Svc
+	ec2Instance.EC2Client = ec2Svc
 
 	err = getInstanceTags(&ec2Instance)
 	if err != nil {
@@ -101,7 +101,7 @@ func getInstanceTags(ec2Instance *EC2Instance) error {
 		},
 	}
 
-	result, err := ec2Instance.Ec2Client.DescribeInstances(params)
+	result, err := ec2Instance.EC2Client.DescribeInstances(params)
 	if err != nil {
 		return err
 	}

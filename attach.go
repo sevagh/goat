@@ -28,7 +28,7 @@ func AttachEbsVolumes(ec2Instance EC2Instance, volumes map[string][]EbsVol, dryR
 					DryRun:     &dryRun,
 				}
 				volLogger.Info("Executing AWS SDK attach command")
-				volAttachments, err := ec2Instance.Ec2Client.AttachVolume(attachVolIn)
+				volAttachments, err := ec2Instance.EC2Client.AttachVolume(attachVolIn)
 				if err != nil {
 					volLogger.Fatalf("Couldn't attach: %v", err)
 				}

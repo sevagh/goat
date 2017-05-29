@@ -57,7 +57,7 @@ Options:
 	}
 
 	for volName, vols := range ebsVolumes {
-		PrepAndMountDrives(volName, vols, dryRun)
+		PrepAndMountDrives(volName, vols, ec2Instance, dryRun)
 	}
 }
 
