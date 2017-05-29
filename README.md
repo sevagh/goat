@@ -1,11 +1,11 @@
-[![Build Status](https://api.travis-ci.org/sevagh/ebs_raid_wizard.svg?branch=master)](https://travis-ci.org/sevagh/ebs_raid_wizard) [![ReportCard](http://goreportcard.com/badge/sevagh/ebs_raid_wizard)](http://goreportcard.com/report/sevagh/ebs_raid_wizard) [![GitHub tag](https://img.shields.io/github/tag/sevagh/ebs_raid_wizard.svg)](https://github.com/sevagh/ebs_raid_wizard/releases) [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/sevagh/ebs_raid_wizard/gitpitch?grs=github&t=white)
+[![Build Status](https://api.travis-ci.org/sevagh/ebs_wizard.svg?branch=master)](https://travis-ci.org/sevagh/ebs_wizard) [![ReportCard](http://goreportcard.com/badge/sevagh/ebs_wizard)](http://goreportcard.com/report/sevagh/ebs_wizard) [![GitHub tag](https://img.shields.io/github/tag/sevagh/ebs_wizard.svg)](https://github.com/sevagh/ebs_wizard/releases) [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/sevagh/ebs_wizard/gitpitch?grs=github&t=white)
 
 *VERY EARLY ALPHA - USE AT YOUR OWN RISK*
 
-# ebs_raid_wizard
+# ebs_wizard
 ### Attach & mount EBS volumes and RAID arrays from inside EC2 instances
 
-`ebs_raid_wizard` is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
+`ebs_wizard` is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
 
 By setting your tags correctly, the wizard can discover, attach, RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
 
@@ -33,7 +33,7 @@ The filesystem and fstab entries are created with the label `EWIZ-{volumeName}` 
 
 ### Run phase
 
-In production I run `ebs_raid_wizard` at the EC2 user-data phase (executed from a bash script). Further exploration is needed to perhaps embed it properly into `systemd` or `cloud-init`.
+In production I run `ebs_wizard` at the EC2 user-data phase (executed from a bash script). Further exploration is needed to perhaps embed it properly into `systemd` or `cloud-init`.
 
 ### Tags
 
@@ -51,7 +51,7 @@ These are the tags you need:
 
 ### Examples
 
-[Link to the example Terraform HCL scripts](https://github.com/sevagh/ebs_raid_wizard/tree/example). Also, the [Gitpitch presentation](https://gitpitch.com/sevagh/ebs_raid_wizard/gitpitch#) has a partial demonstration.
+[Link to the example Terraform HCL scripts](https://github.com/sevagh/ebs_wizard/tree/example). Also, the [Gitpitch presentation](https://gitpitch.com/sevagh/ebs_wizard/gitpitch#) has a partial demonstration.
 
 Here's an example to clarify better.
 
@@ -105,7 +105,7 @@ Additionally, we want 1 extra disk (single disks, no RAID) per node, for logs:
     * EWIZ-IN:MountPath: /vertica/log
     * EWIZ-IN:FsType: ext4
 
-Run `ebs_raid_wizard` from the EC2 instance (ideally at the user-data phase) to automatically mount the associated EBS volumes with the above properties:
+Run `ebs_wizard` from the EC2 instance (ideally at the user-data phase) to automatically mount the associated EBS volumes with the above properties:
 
 ```
 [dbadmin@ip-172-31-46-84 ~]$ ls /dev/disk/by-label/
