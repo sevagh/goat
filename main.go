@@ -9,22 +9,22 @@ import (
 )
 
 //PREFIX defines the prefix to use for all tags and labels
-var PREFIX = "EWIZ"
+var PREFIX = "GOAT"
 
 func main() {
-	usage := `ebs_raid_wizard - EC2/EBS utility
+	usage := `goat - EC2/EBS utility
 
 Usage:
-  ebs_raid_wizard [--log-level=<log-level>] [--dry]
-  ebs_raid_wizard -h | --help
-  ebs_raid_wizard --version
+  goat [--log-level=<log-level>] [--dry]
+  goat -h | --help
+  goat --version
 
 Options:
   --log-level=<level>  Log level (debug, info, warn, error, fatal) [default: info]
   --dry                Dry run
   -h --help            Show this screen.
   --version            Show version.`
-	arguments, _ := docopt.Parse(usage, nil, true, "ebs_raid_wizard 0.1", false)
+	arguments, _ := docopt.Parse(usage, nil, true, "goat 0.2", false)
 
 	log.SetOutput(os.Stderr)
 	logLevel := arguments["--log-level"].(string)
@@ -38,7 +38,7 @@ Options:
 
 	dryRun := arguments["--dry"].(bool)
 
-	log.Printf("%s", drawASCIIBanner("WELCOME TO EBS_RAID_WIZARD"))
+	log.Printf("%s", drawASCIIBanner("WELCOME TO GOAT"))
 
 	log.Printf("%s", drawASCIIBanner("1: COLLECTING EC2 INFO"))
 	ec2Instance := GetEC2InstanceData()
