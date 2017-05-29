@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 )
 
-//EbsVol is a struct defining the discovered EBS volumes and its kraken metadata parsed from the tags
+//EbsVol is a struct defining the discovered EBS volumes and its metadata parsed from the tags
 type EbsVol struct {
 	EbsVolID     string
 	VolumeName   string
@@ -114,37 +114,37 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 		} else {
 			ebsVolume.AttachedName = ""
 		}
-		krakenTagCtr := 0
+		tagCtr := 0
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
 			case PREFIX + "-IN:VolumeName":
 				ebsVolume.VolumeName = *tag.Value
-				krakenTagCtr++
+				tagCtr++
 			case PREFIX + "-IN:RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse RaidLevel tag as int: %v", err)
 				}
-				krakenTagCtr++
+				tagCtr++
 			case PREFIX + "-IN:VolumeSize":
 				if ebsVolume.VolumeSize, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse VolumeSize tag as int: %v", err)
 				}
-				krakenTagCtr++
+				tagCtr++
 			case PREFIX + "-IN:MountPath":
 				ebsVolume.MountPath = *tag.Value
-				krakenTagCtr++
+				tagCtr++
 			case PREFIX + "-IN:FsType":
 				ebsVolume.FsType = *tag.Value
-				krakenTagCtr++
+				tagCtr++
 			case PREFIX + "-IN:NodeId": //do nothing
-				krakenTagCtr++
+				tagCtr++
 			case PREFIX + "-IN:Prefix": //do nothing
-				krakenTagCtr++
+				tagCtr++
 			default:
 			}
 		}
 
-		if krakenTagCtr != 7 {
+		if tagCtr != 7 {
 			return volumes, fmt.Errorf("Missing required KRK-IN tags VolumeName, RaidLevel, MountPath, VolumeSize, NodeId, Prefix, FsType")
 		}
 		volumes = append(volumes, ebsVolume)
