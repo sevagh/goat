@@ -27,19 +27,22 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		driveNames = append(driveNames, drive.AttachedName)
 	}
 
+	nameString := "--name='" + PREFIX + "-" + volName + "'"
+
 	var args []string
 	if !drives[0].Touched {
 		args = []string{
 			"--create",
 			raidDriveName,
 			"--level=" + strconv.Itoa(raidLevel),
-			"--name='" + PREFIX + "-" + volName + "'",
+			nameString,
 			"--raid-devices=" + strconv.Itoa(len(driveNames)),
 		}
 	} else {
 		args = []string{
 			"--assemble",
 			raidDriveName,
+			nameString,
 			"--update=homehost",
 		}
 	}
