@@ -1,17 +1,17 @@
-[![Build Status](https://api.travis-ci.org/sevagh/ebs_wizard.svg?branch=master)](https://travis-ci.org/sevagh/ebs_wizard) [![ReportCard](http://goreportcard.com/badge/sevagh/ebs_wizard)](http://goreportcard.com/report/sevagh/ebs_wizard) [![GitHub tag](https://img.shields.io/github/tag/sevagh/ebs_wizard.svg)](https://github.com/sevagh/ebs_wizard/releases) [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/sevagh/ebs_wizard/gitpitch?grs=github&t=white)
+[![Build Status](https://api.travis-ci.org/sevagh/goat.svg?branch=master)](https://travis-ci.org/sevagh/goat) [![ReportCard](http://goreportcard.com/badge/sevagh/goat)](http://goreportcard.com/report/sevagh/goat) [![GitHub tag](https://img.shields.io/github/tag/sevagh/goat.svg)](https://github.com/sevagh/goat/releases) [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/sevagh/goat/gitpitch?grs=github&t=white)
 
 *VERY EARLY ALPHA - USE AT YOUR OWN RISK*
 
-# ebs_wizard
+# goat 
 ### Attach & mount EBS volumes and RAID arrays from inside EC2 instances
 
-`ebs_wizard` is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
+`goat` is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
 
-By setting your tags correctly, the wizard can discover, attach, RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
+By setting your tags correctly, `goat` can discover, attach, RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
 
 ### Behavior
 
-The wizard should behave correctly with no parameters. It is configured entirely with tags (explained [below](#tags)). It logs to `stderr` by default.
+`goat` should behave correctly with no parameters. It is configured entirely with tags (explained [below](#tags)). It logs to `stderr` by default.
 
 It takes some options:
 
@@ -29,11 +29,11 @@ The workflow is roughly the following:
     * `mkfs` to make the filesystem
     * `/etc/fstab` entries to preserve behavior on reboot
 
-The filesystem and fstab entries are created with the label `EWIZ-{volumeName}` for convenience. Running the wizard multiple times will result in it detecting the existing label it intended to create and not proceeding.
+The filesystem and fstab entries are created with the label `GOAT-{volumeName}` for convenience. Running `goat` multiple times will result in it detecting the existing label it intended to create and not proceeding.
 
 ### Run phase
 
-In production I run `ebs_wizard` at the EC2 user-data phase (executed from a bash script). Further exploration is needed to perhaps embed it properly into `systemd` or `cloud-init`.
+In production I run `goat` at the EC2 user-data phase (executed from a bash script). Further exploration is needed to perhaps embed it properly into `systemd` or `cloud-init`.
 
 ### Tags
 
@@ -41,83 +41,83 @@ These are the tags you need:
 
 | Tag Name             | Description             | EC2     | EBS    | Tag Value (examples)                                             |
 | -------------------- | ----------------------- | ------- | -----  | ---------------------------------------------------------------- |
-| EWIZ-IN:Prefix       | Logical stack name      | *Yes*   | *Yes*  | `my_app_v1.3.4`                                                  |
-| EWIZ-IN:NodeId       | EC2 id within stack     | *Yes*   | *Yes*  | `0`, `1`, `2` for 3-node kafka                                   |
-| EWIZ-IN:VolumeName   | Distinct volume name    |         | *Yes*  | `data`, `log` - RAID disks must use the same VolumeName          |
-| EWIZ-IN:VolumeSize   | # of disks in vol group |         | *Yes*  | 2 for 2-disk RAID, 1 for single disk/no RAID                     |
-| EWIZ-IN:RaidLevel    | level of RAID (0 or 1)  |         | *Yes*  | 0 or 1 for RAID, ignored if VolumeSize == 1                      |
-| EWIZ-IN:MountPath    | Linux path to mount vol |         | *Yes*  | `/var/kafka_data`                                                |
-| EWIZ-IN:FsType       | Linux filesystem type   |         | *Yes*  | `ext4`, `vfat`                                                   |
+| GOAT-IN:Prefix       | Logical stack name      | *Yes*   | *Yes*  | `my_app_v1.3.4`                                                  |
+| GOAT-IN:NodeId       | EC2 id within stack     | *Yes*   | *Yes*  | `0`, `1`, `2` for 3-node kafka                                   |
+| GOAT-IN:VolumeName   | Distinct volume name    |         | *Yes*  | `data`, `log` - RAID disks must use the same VolumeName          |
+| GOAT-IN:VolumeSize   | # of disks in vol group |         | *Yes*  | 2 for 2-disk RAID, 1 for single disk/no RAID                     |
+| GOAT-IN:RaidLevel    | level of RAID (0 or 1)  |         | *Yes*  | 0 or 1 for RAID, ignored if VolumeSize == 1                      |
+| GOAT-IN:MountPath    | Linux path to mount vol |         | *Yes*  | `/var/kafka_data`                                                |
+| GOAT-IN:FsType       | Linux filesystem type   |         | *Yes*  | `ext4`, `vfat`                                                   |
 
 ### Examples
 
-[Link to the example Terraform HCL scripts](https://github.com/sevagh/ebs_wizard/tree/example). Also, the [Gitpitch presentation](https://gitpitch.com/sevagh/ebs_wizard/gitpitch#) has a partial demonstration.
+[Link to the example Terraform HCL scripts](https://github.com/sevagh/goat/tree/example). Also, the [Gitpitch presentation](https://gitpitch.com/sevagh/goat/gitpitch#) has a partial demonstration.
 
 Here's an example to clarify better.
 
 2-instance Vertica cluster:
 
 * EC2 instance:
-    * EWIZ-IN:Prefix: adgear_vertica_v0.5 
-    * EWIZ-IN:NodeId: 0
+    * GOAT-IN:Prefix: adgear_vertica_v0.5 
+    * GOAT-IN:NodeId: 0
 
 * EC2 instance:
-    * EWIZ-IN:Prefix: adgear_vertica_v0.5 
-    * EWIZ-IN:NodeId: 1
+    * GOAT-IN:Prefix: adgear_vertica_v0.5 
+    * GOAT-IN:NodeId: 1
 
 We want 2 RAID0 volumes (2 disks each), so 4 total disks (2 per instance):
 
 * 2x EBS volume for Node 0:
-    * EWIZ-IN:Prefix: adgear_vertica_v0.5
-    * EWIZ-IN:NodeId: 0
-    * EWIZ-IN:VolumeName: vdata
-    * EWIZ-IN:VolumeSize: 2
-    * EWIZ-IN:RaidLevel: 0
-    * EWIZ-IN:MountPath: /vertica/data
-    * EWIZ-IN:FsType: ext4
+    * GOAT-IN:Prefix: adgear_vertica_v0.5
+    * GOAT-IN:NodeId: 0
+    * GOAT-IN:VolumeName: vdata
+    * GOAT-IN:VolumeSize: 2
+    * GOAT-IN:RaidLevel: 0
+    * GOAT-IN:MountPath: /vertica/data
+    * GOAT-IN:FsType: ext4
 
 * 2x EBS volume for Node 1:
-    * EWIZ-IN:Prefix: adgear_vertica_v0.5
-    * EWIZ-IN:NodeId: 1
-    * EWIZ-IN:VolumeName: vdata
-    * EWIZ-IN:VolumeSize: 2
-    * EWIZ-IN:RaidLevel: 0
-    * EWIZ-IN:MountPath: /vertica/data
-    * EWIZ-IN:FsType: ext4
+    * GOAT-IN:Prefix: adgear_vertica_v0.5
+    * GOAT-IN:NodeId: 1
+    * GOAT-IN:VolumeName: vdata
+    * GOAT-IN:VolumeSize: 2
+    * GOAT-IN:RaidLevel: 0
+    * GOAT-IN:MountPath: /vertica/data
+    * GOAT-IN:FsType: ext4
 
 Additionally, we want 1 extra disk (single disks, no RAID) per node, for logs:
 
 * 1x EBS volume for Node 0:
-    * EWIZ-IN:Prefix: adgear_vertica_v0.5
-    * EWIZ-IN:NodeId: 0
-    * EWIZ-IN:VolumeName: vlog
-    * EWIZ-IN:VolumeSize: 1
-    * EWIZ-IN:RaidLevel: 0
-    * EWIZ-IN:MountPath: /vertica/log
-    * EWIZ-IN:FsType: ext4
+    * GOAT-IN:Prefix: adgear_vertica_v0.5
+    * GOAT-IN:NodeId: 0
+    * GOAT-IN:VolumeName: vlog
+    * GOAT-IN:VolumeSize: 1
+    * GOAT-IN:RaidLevel: 0
+    * GOAT-IN:MountPath: /vertica/log
+    * GOAT-IN:FsType: ext4
 
 * 1x EBS volume for Node 1:
-    * EWIZ-IN:Prefix: adgear_vertica_v0.5
-    * EWIZ-IN:NodeId: 1
-    * EWIZ-IN:VolumeName: vlog
-    * EWIZ-IN:VolumeSize: 1
-    * EWIZ-IN:RaidLevel: 0
-    * EWIZ-IN:MountPath: /vertica/log
-    * EWIZ-IN:FsType: ext4
+    * GOAT-IN:Prefix: adgear_vertica_v0.5
+    * GOAT-IN:NodeId: 1
+    * GOAT-IN:VolumeName: vlog
+    * GOAT-IN:VolumeSize: 1
+    * GOAT-IN:RaidLevel: 0
+    * GOAT-IN:MountPath: /vertica/log
+    * GOAT-IN:FsType: ext4
 
-Run `ebs_wizard` from the EC2 instance (ideally at the user-data phase) to automatically mount the associated EBS volumes with the above properties:
+Run `goat` from the EC2 instance (ideally at the user-data phase) to automatically mount the associated EBS volumes with the above properties:
 
 ```
 [dbadmin@ip-172-31-46-84 ~]$ ls /dev/disk/by-label/
-EWIZ-vdata  EWIZ-vlog
+GOAT-vdata  GOAT-vlog
 [dbadmin@ip-172-31-46-84 ~]$
 [dbadmin@ip-172-31-46-84 ~]$
 [dbadmin@ip-172-31-46-84 ~]$ tail -n1 /etc/fstab
-LABEL=EWIZ-log /vertica/log ext4 defaults 0 1
-LABEL=EWIZ-vdata /vertica/data ext4 defaults 0 1
+LABEL=GOAT-log /vertica/log ext4 defaults 0 1
+LABEL=GOAT-vdata /vertica/data ext4 defaults 0 1
 [dbadmin@ip-172-31-46-84 ~]$ sudo mdadm /dev/md0
 ...
-           Name : "EWIZ-vdata"
+           Name : "GOAT-vdata"
            UUID : ddf766d8:ab73e885:e6e35b57:3dc7eb28
          Events : 0
 ...
@@ -132,4 +132,4 @@ The Terraform resource `aws_volume_attachment` isn't handled well when destroyin
 
 We initially wrote instance-specific user-data shell scripts with hardcoded values (e.g. `mkfs.ext4 /dev/xvdb`, `mount /dev/xvdb /var/kafka_data`).
 
-With this wizard we can avoid needing to pass parameters or hardcoding values. All the required information comes from the EC2 instance and EBS volume tags.
+With `goat` we can avoid needing to pass parameters or hardcoding values. All the required information comes from the EC2 instance and EBS volume tags.

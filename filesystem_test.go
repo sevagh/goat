@@ -30,7 +30,7 @@ func TestCreateFilesystem(t *testing.T) {
 	}
 
 	bufString := buf.String()
-	if !strings.Contains(bufString, "FILESYSTEM: would have executed mkfs.ext999 [/dev/dummy -L EWIZ-dummy_label]") {
+	if !strings.Contains(bufString, "FILESYSTEM: would have executed mkfs.ext999 [/dev/dummy -L GOAT-dummy_label]") {
 		t.Errorf("logged wrong thing. Actual: %s", bufString)
 	}
 }
