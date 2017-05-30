@@ -37,8 +37,6 @@ func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 		drivesToMount[volume.VolumeName] = append(drivesToMount[volume.VolumeName], volume)
 	}
 
-	toDelete := []string{}
-
 	for volName, volumes := range drivesToMount {
 		volGroupLogger := log.WithFields(log.Fields{"vol_name": volName})
 
