@@ -58,4 +58,9 @@ func PrepAndMountDrives(volName string, vols []EbsVol, ec2Instance EC2Instance, 
 	if err := Mount(mountPath, dryRun); err != nil {
 		driveLogger.Fatalf("Couldn't mount: %v", err)
 	}
+
+	driveLogger.Info("Now persisting mdadm conf")
+	if err := PersistMdadm(); err != nil {
+		driveLogger.Fatalf("Couldn't persist mdadm conf: %v", err)
+	}
 }
