@@ -2,7 +2,7 @@
 
 *VERY EARLY ALPHA - USE AT YOUR OWN RISK*
 
-# goat 
+# goat :goat:
 ### Attach & mount EBS volumes and RAID arrays from inside EC2 instances
 
 `goat` is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
