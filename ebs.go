@@ -36,16 +36,9 @@ func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 		drivesToMount[volume.VolumeName] = append(drivesToMount[volume.VolumeName], volume)
 	}
 
-	toDelete := []string{}
-
 	for volName, volumes := range drivesToMount {
 		volGroupLogger := log.WithFields(log.Fields{"vol_name": volName})
-		//check if volName exists already
-		if DoesLabelExist(PREFIX + "-" + volName) {
-			volGroupLogger.Warn("Label already exists in /dev/disk/by-label")
-			toDelete = append(toDelete, volName)
-			continue
-		}
+
 		//check for volume mismatch
 		volSize := volumes[0].VolumeSize
 		mountPath := volumes[0].MountPath
@@ -60,10 +53,6 @@ func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 				volLogger.Fatal("Mismatched tags among disks of same volume")
 			}
 		}
-	}
-
-	for _, volName := range toDelete {
-		delete(drivesToMount, volName)
 	}
 
 	return drivesToMount
@@ -95,7 +84,7 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 
 	volumes := []EbsVol{}
 
-	result, err := ec2Instance.Ec2Client.DescribeVolumes(params)
+	result, err := ec2Instance.EC2Client.DescribeVolumes(params)
 	if err != nil {
 		return volumes, err
 	}
@@ -107,7 +96,7 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 		if len(volume.Attachments) > 0 {
 			for _, attachment := range volume.Attachments {
 				if *attachment.InstanceId != ec2Instance.InstanceID {
-					return volumes, fmt.Errorf("Volume %s attached to different instance-id: %s", *volume.VolumeId, attachment.InstanceId)
+					return volumes, fmt.Errorf("Volume %s attached to different instance-id: %s", *volume.VolumeId, *attachment.InstanceId)
 				}
 				ebsVolume.AttachedName = *attachment.Device
 			}
