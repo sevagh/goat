@@ -18,7 +18,6 @@ type EbsVol struct {
 	AttachedName string
 	MountPath    string
 	FsType       string
-	Touched      bool
 }
 
 //MapEbsVolumes discovers and creates a {'VolumeName':[]EbsVol} map for all the required EBS volumes given an EC2Instance struct
@@ -105,7 +104,6 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 			ebsVolume.AttachedName = ""
 		}
 		tagCtr := 0
-		ebsVolume.Touched = false
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
 			case PREFIX + "-IN:VolumeName":
@@ -131,8 +129,6 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 				tagCtr++
 			case PREFIX + "-IN:Prefix": //do nothing
 				tagCtr++
-			case PREFIX + "-OUT:Touched":
-				ebsVolume.Touched = true
 			default:
 			}
 		}
