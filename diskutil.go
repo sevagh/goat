@@ -6,7 +6,7 @@ import (
 )
 
 //PrepAndMountDrives prepares the filesystem, RAIDs (if necessary) and mounts a given list of EbsVol (can be size 1 for non-RAID)
-func PrepAndMountDrives(volName string, vols []EbsVol, ec2Instance EC2Instance, dryRun bool) {
+func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 	driveLogger := log.WithFields(log.Fields{"vol_name": volName, "vols": vols})
 
 	mountPath := vols[0].MountPath
