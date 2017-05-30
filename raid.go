@@ -27,13 +27,17 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		driveNames = append(driveNames, drive.AttachedName)
 	}
 
-	args := []string{
+	nameString := "--name='" + PREFIX + "-" + volName + "'"
+
+	var args []string
+	args = []string{
 		"--create",
 		raidDriveName,
 		"--level=" + strconv.Itoa(raidLevel),
-		"--name='" + PREFIX + "-" + volName + "'",
+		nameString,
 		"--raid-devices=" + strconv.Itoa(len(driveNames)),
 	}
+
 	args = append(args, driveNames...)
 	raidLogger.Infof("RAID: Creating RAID drive: %s %s", cmd, args)
 	if dryRun {
@@ -43,25 +47,27 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		raidLogger.Fatalf("Error when executing mdadm command: %v", err)
 	}
 
-	args = []string{
+	return raidDriveName
+}
+
+//PersistMdadm dumps the current mdadm config to /etc/mdadm.conf
+func PersistMdadm() error {
+	cmd := "mdadm"
+
+	args := []string{
 		"--verbose",
 		"--detail",
 		"--scan",
 	}
 
-	raidLogger.Infof("Persisting mdadm settings: %s %s", cmd, args)
-	if out, err := ExecuteCommand(cmd, args); err != nil {
-		raidLogger.Fatalf("Error when executing mdadm command: %v", err)
-	} else {
-		if err := appendToMdadmConf(out.Stdout); err != nil {
-			raidLogger.Fatalf("Error when persisting mdadm settings to /etc/mdadm.conf: %v", err)
-		}
+	log.Infof("Persisting mdadm settings: %s %s", cmd, args)
+
+	var out CommandOut
+	var err error
+	if out, err = ExecuteCommand(cmd, args); err != nil {
+		log.Fatalf("Error when executing mdadm command: %v", err)
 	}
 
-	return raidDriveName
-}
-
-func appendToMdadmConf(content string) error {
 	f, err := os.OpenFile("/etc/mdadm.conf", os.O_WRONLY|os.O_CREATE, 0600)
 	if err != nil {
 		return err
@@ -69,7 +75,7 @@ func appendToMdadmConf(content string) error {
 
 	defer f.Close()
 
-	if _, err = f.WriteString(content); err != nil {
+	if _, err = f.WriteString(out.Stdout); err != nil {
 		return err
 	}
 	return nil
