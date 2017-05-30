@@ -9,6 +9,17 @@
 
 By setting your tags correctly, `goat` can discover, attach, RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
 
+### Usage
+
+Put this in your EC2 user-data (or at any script which runs at boot):
+
+```
+$ yum install -y wget mdadm
+$ wget https://github.com/sevagh/goat/releases/download/0.2.0/goat
+$ chmod +x ./goat
+$ ./goat >/var/log/goat.log 2>&1
+```
+
 ### Behavior
 
 `goat` should behave correctly with no parameters. It is configured entirely with tags (explained [below](#tags)). It logs to `stderr` by default.
