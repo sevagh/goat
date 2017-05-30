@@ -4,13 +4,13 @@ import (
 	"time"
 )
 
-const statAttempts = 5
+const statAttempts = 10
 
-//DoesDriveExistWithTimeout makes 5 attempts, 1 second sleep between each, to stat a drive to check for its existence
+//DoesDriveExistWithTimeout makes 10 attempts, 2 second sleep between each, to stat a drive to check for its existence
 func DoesDriveExistWithTimeout(driveName string) bool {
 	var attempts int
 	for !DoesDriveExist(driveName) {
-		time.Sleep(time.Duration(1 * time.Second))
+		time.Sleep(time.Duration(2 * time.Second))
 		attempts++
 		if attempts >= statAttempts {
 			return false
