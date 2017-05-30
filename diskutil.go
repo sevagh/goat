@@ -8,28 +8,33 @@ import (
 //PrepAndMountDrives prepares the filesystem, RAIDs (if necessary) and mounts a given list of EbsVol (can be size 1 for non-RAID)
 func PrepAndMountDrives(volName string, vols []EbsVol, ec2Instance EC2Instance, dryRun bool) {
 	driveLogger := log.WithFields(log.Fields{"vol_name": volName, "vols": vols})
-	var driveName string
-	if len(vols) == 1 {
-		driveLogger.Info("Single drive, no RAID")
-		driveName = vols[0].AttachedName
-	} else {
-		driveLogger.Info("Creating RAID array")
-		driveName = CreateRaidArray(vols, volName, dryRun)
-		if err := WritebackTag(vols, &ec2Instance, dryRun); err != nil {
-			driveLogger.Fatalf("Error when writing back tags: %v", err)
-		}
-	}
 
 	mountPath := vols[0].MountPath
 	desiredFs := vols[0].FsType
 
-	driveLogger.Info("Checking for existing filesystem")
+	if DoesLabelExist(PREFIX + "-" + volName) {
+		driveLogger.Info("Label already exists, jumping to mount phase")
+	} else {
+		var driveName string
+		if len(vols) == 1 {
+			driveLogger.Info("Single drive, no RAID")
+			driveName = vols[0].AttachedName
+		} else {
+			driveLogger.Info("Creating RAID array")
+			driveName = CreateRaidArray(vols, volName, dryRun)
+			if err := WritebackTag(vols, &ec2Instance, dryRun); err != nil {
+				driveLogger.Fatalf("Error when writing back tags: %v", err)
+			}
+		}
 
-	if err := CheckFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
-		driveLogger.Fatalf("Checking for existing filesystem: %v", err)
-	}
-	if err := CreateFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
-		driveLogger.Fatalf("Error when creating filesystem: %v", err)
+		driveLogger.Info("Checking for existing filesystem")
+
+		if err := CheckFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
+			driveLogger.Fatalf("Checking for existing filesystem: %v", err)
+		}
+		if err := CreateFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
+			driveLogger.Fatalf("Error when creating filesystem: %v", err)
+		}
 	}
 
 	driveLogger.Info("Checking if something already mounted at %s", mountPath)

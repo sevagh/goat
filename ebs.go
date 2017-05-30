@@ -41,12 +41,7 @@ func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 
 	for volName, volumes := range drivesToMount {
 		volGroupLogger := log.WithFields(log.Fields{"vol_name": volName})
-		//check if volName exists already
-		if DoesLabelExist(PREFIX + "-" + volName) {
-			volGroupLogger.Warn("Label already exists in /dev/disk/by-label")
-			toDelete = append(toDelete, volName)
-			continue
-		}
+
 		//check for volume mismatch
 		volSize := volumes[0].VolumeSize
 		mountPath := volumes[0].MountPath
@@ -61,10 +56,6 @@ func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 				volLogger.Fatal("Mismatched tags among disks of same volume")
 			}
 		}
-	}
-
-	for _, volName := range toDelete {
-		delete(drivesToMount, volName)
 	}
 
 	return drivesToMount
