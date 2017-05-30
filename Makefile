@@ -9,7 +9,6 @@ deps:
 	@dep ensure
 
 test: build
-	@golint
 	@go fmt . 
 	@go vet .
 	@go test -v

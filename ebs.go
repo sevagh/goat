@@ -108,7 +108,7 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 		if len(volume.Attachments) > 0 {
 			for _, attachment := range volume.Attachments {
 				if *attachment.InstanceId != ec2Instance.InstanceID {
-					return volumes, fmt.Errorf("Volume %s attached to different instance-id: %s", *volume.VolumeId, attachment.InstanceId)
+					return volumes, fmt.Errorf("Volume %s attached to different instance-id: %s", *volume.VolumeId, *attachment.InstanceId)
 				}
 				ebsVolume.AttachedName = *attachment.Device
 			}
