@@ -20,6 +20,24 @@ $ chmod +x ./goat
 $ ./goat >/var/log/goat.log 2>&1
 ```
 
+#### systemd
+
+Alternatively, I provide a file called `goat.service` in this repo.
+
+To install:
+
+```
+$ sudo -s
+$ wget https://github.com/sevagh/goat/releases/download/0.2.0/goat \
+	-O /usr/bin/goat
+$ wget https://github.com/sevagh/goat/blob/master/goat.service \
+	-O /etc/systemd/system/goat.service
+$ systemctl daemon-reload
+$ systemctl enable goat.service
+```
+
+This should run goat oneshot at boot, and log to journalctl with unit goat (i.e. `journalctl -u goat` to inspect the output).
+
 ### Behavior
 
 `goat` should behave correctly with no parameters. It is configured entirely with tags (explained [below](#tags)). It logs to `stderr` by default.
