@@ -9,34 +9,18 @@
 
 By setting your tags correctly, `goat` can discover, attach, RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
 
-### Usage
+### RPM-based install
 
-Put this in your EC2 user-data (or at any script which runs at boot):
+Goat is systemd-based (you can download the binary and run it yourself for alternative cases) and has been developed for CentOS.
 
-```
-$ yum install -y wget mdadm
-$ wget https://github.com/sevagh/goat/releases/download/0.2.0/goat
-$ chmod +x ./goat
-$ ./goat >/var/log/goat.log 2>&1
-```
-
-#### systemd
-
-Alternatively, I provide a file called `goat.service` in this repo.
-
-To install:
+Install the rpm from the releases page, which enables it in systemd automatically:
 
 ```
-$ sudo -s
-$ wget https://github.com/sevagh/goat/releases/download/0.2.0/goat \
-	-O /usr/bin/goat
-$ wget https://github.com/sevagh/goat/blob/master/goat.service \
-	-O /etc/systemd/system/goat.service
-$ systemctl daemon-reload
-$ systemctl enable goat.service
+$ wget https://github.com/sevagh/goat/releases/download/0.2.0/goat.rpm
+$ sudo yum install ./goat.rpm
+$ sudo systemctl start goat
+$ journalctl -u goat
 ```
-
-This should run goat oneshot at boot, and log to journalctl with unit goat (i.e. `journalctl -u goat` to inspect the output).
 
 ### Behavior
 
