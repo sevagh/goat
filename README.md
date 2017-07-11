@@ -16,7 +16,7 @@ Goat is systemd-based (you can download the binary and run it yourself for alter
 Install the rpm from the releases page, which enables it in systemd automatically:
 
 ```
-$ sudo rpm -i https://github.com/sevagh/goat/releases/download/0.2.0/goat-0.2.0-1.fc25.x86_64.rpm
+$ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.2.0/goat-0.2.0-1.fc25.x86_64.rpm
 $ sudo systemctl start goat
 $ ...
 $ journalctl -u goat
