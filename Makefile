@@ -17,13 +17,6 @@ test: build
 	@go vet .
 	@go test -v
 
-download:
-	@curl -L https://github.com/sevagh/goat/releases/download/$(VERSION)/goat --output $(RELEASEBIN)
-	@chmod +x $(RELEASEBIN)
-
-install_release:
-	@cp $(RELEASEBIN) $(INSTALLBIN)
-
 rpm:
 	@rpmlint specfile.spec
 	@rpmbuild -ba specfile.spec --define "_sourcedir $$PWD" --define "_version $(VERSION)"
