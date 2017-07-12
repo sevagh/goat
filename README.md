@@ -17,6 +17,7 @@ Install the rpm from the releases page, which enables it in systemd automaticall
 
 ```
 $ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.2.0/goat-0.2.0-1.fc25.x86_64.rpm
+$ sudo systemctl enable goat
 $ sudo systemctl start goat
 $ ...
 $ journalctl -u goat
