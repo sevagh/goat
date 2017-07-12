@@ -11,6 +11,7 @@ import (
 
 //PREFIX defines the prefix to use for all tags and labels
 var PREFIX = "GOAT"
+var VERSION string
 
 func main() {
 	usage := `goat - EC2/EBS utility
@@ -26,7 +27,7 @@ Options:
   --debug              Interactive prompts to continue between phases
   -h --help            Show this screen.
   --version            Show version.`
-	arguments, _ := docopt.Parse(usage, nil, true, "goat 0.2", false)
+	arguments, _ := docopt.Parse(usage, nil, true, fmt.Sprintf("goat %s", VERSION), false)
 
 	log.SetOutput(os.Stderr)
 	logLevel := arguments["--log-level"].(string)
