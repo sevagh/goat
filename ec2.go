@@ -72,7 +72,7 @@ func GetEC2InstanceData() EC2Instance {
 	}
 
 	if ec2Instance.NodeID == "" || ec2Instance.Prefix == "" {
-		ec2Logger.Fatal("This instance is missing required KRKN-IN tags NodeId, Prefix")
+		ec2Logger.Fatal("This instance is missing required GOAT-IN tags NodeId, Prefix")
 	}
 
 	return ec2Instance
