@@ -1,7 +1,7 @@
 %define pkgname goat
 
 Name: %{pkgname}
-Version: 0.2.0 
+Version: %{_version}
 Release: 1%{?dist}
 Summary: Attach and mount EBS volumes 
 

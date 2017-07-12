@@ -1,9 +1,9 @@
-VERSION := 0.2.0
+VERSION := 0.3.0
 RELEASEBIN := $(CURDIR)/goat
 INSTALLBIN := /usr/bin/goat
 
 build:
-	@go build .
+	@go build -ldflags "-X main.VERSION=$(VERSION)" .
 
 install:
 	@go install .
@@ -26,4 +26,4 @@ install_release:
 
 rpm:
 	@rpmlint specfile.spec
-	@rpmbuild -ba specfile.spec --define "_sourcedir $$PWD"
+	@rpmbuild -ba specfile.spec --define "_sourcedir $$PWD" --define "_version $(VERSION)"
