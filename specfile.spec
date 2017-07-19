@@ -10,7 +10,7 @@ URL: https://github.com/sevagh/goat
 Source0: %{pkgname}
 Source1: %{pkgname}.service
 
-Requires: systemd
+Requires: systemd mdadm
 
 
 %description
