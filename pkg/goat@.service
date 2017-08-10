@@ -1,5 +1,5 @@
 [Unit]
-Description=GOAT: EBS-EC2 attach utility
+Description=GOAT: EC2-%i attach utility
 Documentation=https://github.com/sevagh/goat
 Requires=network.target remote-fs.target
 After=network.target remote-fs.target
@@ -9,7 +9,7 @@ ConditionPathExists=/usr/bin/goat
 Type=oneshot
 User=root
 Group=root
-ExecStart=/usr/bin/goat --log-level=info
+ExecStart=/usr/bin/goat %i --log-level=info
 SyslogIdentifier=goat
 
 [Install]
