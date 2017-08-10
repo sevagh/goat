@@ -1,4 +1,4 @@
-package main
+package raidutil
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -10,8 +10,8 @@ import (
 )
 
 //CreateRaidArray runs the appropriate mdadm command for the given list of EbsVol that should be raided together. It takes dryRun as a boolean, where it tells you which mdadm it would have run
-func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
-	raidLogger := log.WithFields(log.Fields{"vol_name": volName, "drives": drives})
+func CreateRaidArray(driveNames []string, volName string, raidLevel int, dryRun bool) string {
+	raidLogger := log.WithFields(log.Fields{"vol_name": volName, "drives": driveNames})
 
 	raidLogger.Info("Mounting raid drives")
 
@@ -22,13 +22,7 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		raidLogger.Fatalf("Couldn't select unused RAID drive name: %v", err)
 	}
 
-	raidLevel := drives[0].RaidLevel
 	cmd := "mdadm"
-
-	driveNames := []string{}
-	for _, drive := range drives {
-		driveNames = append(driveNames, drive.AttachedName)
-	}
 
 	nameString := "--name='GOAT-" + volName + "'"
 

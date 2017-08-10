@@ -6,6 +6,7 @@ import (
 
 	"github.com/sevagh/goat/driveutil"
 	"github.com/sevagh/goat/fsutil"
+	"github.com/sevagh/goat/raidutil"
 )
 
 //PrepAndMountDrives prepares the filesystem, RAIDs (if necessary) and mounts a given list of EbsVol (can be size 1 for non-RAID)
@@ -24,7 +25,11 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 			driveName = vols[0].AttachedName
 		} else {
 			driveLogger.Info("Creating RAID array")
-			driveName = CreateRaidArray(vols, volName, dryRun)
+			driveNames := []string{}
+			for _, vol := range vols {
+				driveNames = append(driveNames, vol.AttachedName)
+			}
+			driveName = raidutil.CreateRaidArray(driveNames, volName, vols[0].RaidLevel, dryRun)
 		}
 
 		driveLogger.Info("Checking for existing filesystem")
@@ -63,7 +68,7 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 	}
 
 	driveLogger.Info("Now persisting mdadm conf")
-	if err := PersistMdadm(); err != nil {
+	if err := raidutil.PersistMdadm(); err != nil {
 		driveLogger.Fatalf("Couldn't persist mdadm conf: %v", err)
 	}
 }

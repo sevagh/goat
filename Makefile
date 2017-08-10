@@ -13,7 +13,7 @@ deps:
 test: build
 	@go fmt . 
 	@go vet .
-	@go test -v
+	@go test -v ./...
 
 lint:
 	@gofmt -w .
