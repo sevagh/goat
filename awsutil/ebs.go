@@ -1,4 +1,4 @@
-package main
+package awsutil
 
 import (
 	"fmt"

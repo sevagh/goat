@@ -7,6 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strings"
+
+	"github.com/sevagh/goat/awsutil"
 )
 
 var VERSION string
@@ -43,13 +45,13 @@ Options:
 	log.Printf("%s", drawASCIIBanner("WELCOME TO GOAT", debug))
 
 	log.Printf("%s", drawASCIIBanner("1: COLLECTING EC2 INFO", debug))
-	ec2Instance := GetEC2InstanceData()
+	ec2Instance := awsutil.GetEC2InstanceData()
 
 	log.Printf("%s", drawASCIIBanner("2: COLLECTING EBS INFO", debug))
-	ebsVolumes := MapEbsVolumes(&ec2Instance)
+	ebsVolumes := awsutil.MapEbsVolumes(&ec2Instance)
 
 	log.Printf("%s", drawASCIIBanner("3: ATTACHING EBS VOLS", debug))
-	ebsVolumes = AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
+	ebsVolumes = awsutil.AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
 
 	log.Printf("%s", drawASCIIBanner("4: MOUNTING ATTACHED VOLS", debug))
 

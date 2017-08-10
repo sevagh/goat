@@ -4,13 +4,14 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 
+	"github.com/sevagh/goat/awsutil"
 	"github.com/sevagh/goat/driveutil"
 	"github.com/sevagh/goat/fsutil"
 	"github.com/sevagh/goat/raidutil"
 )
 
 //PrepAndMountDrives prepares the filesystem, RAIDs (if necessary) and mounts a given list of EbsVol (can be size 1 for non-RAID)
-func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
+func PrepAndMountDrives(volName string, vols []awsutil.EbsVol, dryRun bool) {
 	driveLogger := log.WithFields(log.Fields{"vol_name": volName, "vols": vols})
 
 	mountPath := vols[0].MountPath
