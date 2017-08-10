@@ -19,4 +19,4 @@ lint:
 	@gofmt -w .
 
 package:
-	@GOAT_VERSION=$(VERSION) $(MAKE) -C pkg/
+	@GOAT_VERSION=$(VERSION) $(MAKE) -C ./.pkg/

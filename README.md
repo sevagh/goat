@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/sevagh/goat.svg?branch=master)](https://travis-ci.org/sevagh/goat) [![ReportCard](http://goreportcard.com/badge/sevagh/goat)](http://goreportcard.com/report/sevagh/goat) [![GitHub tag](https://img.shields.io/github/tag/sevagh/goat.svg)](https://github.com/sevagh/goat/releases) [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/sevagh/goat/gitpitch?grs=github&t=white)
+[![Build Status](https://api.travis-ci.org/sevagh/goat.svg?branch=master)](https://travis-ci.org/sevagh/goat) [![ReportCard](http://goreportcard.com/badge/sevagh/goat)](http://goreportcard.com/report/sevagh/goat) [![GitHub tag](https://img.shields.io/github/tag/sevagh/goat.svg)](https://github.com/sevagh/goat/releases)
 
 *VERY EARLY ALPHA - USE AT YOUR OWN RISK*
 
@@ -103,7 +103,7 @@ These are the tags you need:
 
 #### Examples
 
-[Link to the example Terraform HCL scripts](./terraform-example). Also, the [Gitpitch presentation](https://gitpitch.com/sevagh/goat/gitpitch#) has a partial demonstration.
+[Link to the example Terraform HCL scripts](./.tf-example).
 
 Here's an example to clarify better.
 
