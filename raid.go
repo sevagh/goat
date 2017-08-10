@@ -29,7 +29,7 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 		driveNames = append(driveNames, drive.AttachedName)
 	}
 
-	nameString := "--name='" + PREFIX + "-" + volName + "'"
+	nameString := "--name='GOAT-" + volName + "'"
 
 	var args []string
 	args = []string{

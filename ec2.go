@@ -109,9 +109,9 @@ func getInstanceTags(ec2Instance *EC2Instance) error {
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
 			for _, tag := range instance.Tags {
-				if *tag.Key == PREFIX+"-IN:NodeId" {
+				if *tag.Key == "GOAT-IN:NodeId" {
 					ec2Instance.NodeID = *tag.Value
-				} else if *tag.Key == PREFIX+"-IN:Prefix" {
+				} else if *tag.Key == "GOAT-IN:Prefix" {
 					ec2Instance.Prefix = *tag.Value
 				}
 			}

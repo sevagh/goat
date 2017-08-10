@@ -9,8 +9,6 @@ import (
 	"strings"
 )
 
-//PREFIX defines the prefix to use for all tags and labels
-var PREFIX = "GOAT"
 var VERSION string
 
 func main() {

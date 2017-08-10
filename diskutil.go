@@ -52,7 +52,7 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 	}
 
 	driveLogger.Info("Appending fstab entry")
-	if err := fsutil.AppendToFstab(PREFIX+"-"+volName, desiredFs, mountPath, dryRun); err != nil {
+	if err := fsutil.AppendToFstab("GOAT-"+volName, desiredFs, mountPath, dryRun); err != nil {
 		driveLogger.Fatalf("Couldn't append to fstab: %v", err)
 	}
 

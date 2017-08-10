@@ -62,13 +62,13 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 	params := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			&ec2.Filter{
-				Name: aws.String("tag:" + PREFIX + "-IN:Prefix"),
+				Name: aws.String("tag:GOAT-IN:Prefix"),
 				Values: []*string{
 					aws.String(ec2Instance.Prefix),
 				},
 			},
 			&ec2.Filter{
-				Name: aws.String("tag:" + PREFIX + "-IN:NodeId"),
+				Name: aws.String("tag:GOAT-IN:NodeId"),
 				Values: []*string{
 					aws.String(ec2Instance.NodeID),
 				},
@@ -106,28 +106,28 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 		tagCtr := 0
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
-			case PREFIX + "-IN:VolumeName":
+			case "GOAT-IN:VolumeName":
 				ebsVolume.VolumeName = *tag.Value
 				tagCtr++
-			case PREFIX + "-IN:RaidLevel":
+			case "GOAT-IN:RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse RaidLevel tag as int: %v", err)
 				}
 				tagCtr++
-			case PREFIX + "-IN:VolumeSize":
+			case "GOAT-IN:VolumeSize":
 				if ebsVolume.VolumeSize, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse VolumeSize tag as int: %v", err)
 				}
 				tagCtr++
-			case PREFIX + "-IN:MountPath":
+			case "GOAT-IN:MountPath":
 				ebsVolume.MountPath = *tag.Value
 				tagCtr++
-			case PREFIX + "-IN:FsType":
+			case "GOAT-IN:FsType":
 				ebsVolume.FsType = *tag.Value
 				tagCtr++
-			case PREFIX + "-IN:NodeId": //do nothing
+			case "GOAT-IN:NodeId": //do nothing
 				tagCtr++
-			case PREFIX + "-IN:Prefix": //do nothing
+			case "GOAT-IN:Prefix": //do nothing
 				tagCtr++
 			default:
 			}
