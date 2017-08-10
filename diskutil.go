@@ -12,7 +12,7 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 	mountPath := vols[0].MountPath
 	desiredFs := vols[0].FsType
 
-	if DoesLabelExist(PREFIX + "-" + volName) {
+	if DoesDriveExist("/dev/disk/by-label/GOAT-" + volName) {
 		driveLogger.Info("Label already exists, jumping to mount phase")
 	} else {
 		var driveName string

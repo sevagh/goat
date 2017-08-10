@@ -26,19 +26,3 @@ func DoesDriveExist(driveName string) bool {
 	}
 	return true
 }
-
-//DoesLabelExist checks /dev/disk/by-label to search for a labelled filesystem
-func DoesLabelExist(label string) bool {
-	if _, err := ExecuteCommand("ls", []string{"/dev/disk/by-label/" + label}); err != nil {
-		return false
-	}
-	return true
-}
-
-//DoesRaidDriveExist uses mdadm to check if a given RAID device exists
-func DoesRaidDriveExist(raidDriveName string) bool {
-	if _, err := ExecuteCommand("mdadm", []string{raidDriveName}); err != nil {
-		return false
-	}
-	return true
-}

@@ -17,6 +17,9 @@ test: build
 	@go vet .
 	@go test -v
 
+lint:
+	@gofmt -w .
+
 rpm:
 	@rpmlint specfile.spec
 	@rpmbuild -ba specfile.spec --define "_sourcedir $$PWD" --define "_version $(VERSION)"
