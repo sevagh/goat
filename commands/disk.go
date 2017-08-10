@@ -10,8 +10,27 @@ import (
 	"github.com/sevagh/goat/raidutil"
 )
 
-//PrepAndMountDrives prepares the filesystem, RAIDs (if necessary) and mounts a given list of EbsVol (can be size 1 for non-RAID)
-func PrepAndMountDrives(volName string, vols []awsutil.EbsVol, dryRun bool) {
+//GoatDisk runs Goat for your EBS volumes - attach, mount, mkfs, etc.
+func GoatDisk(ec2Instance awsutil.EC2Instance, dryRun bool, debug bool) {
+	log.Printf("%s", DrawASCIIBanner("2: COLLECTING EBS INFO", debug))
+	ebsVolumes := awsutil.MapEbsVolumes(&ec2Instance)
+
+	log.Printf("%s", DrawASCIIBanner("3: ATTACHING EBS VOLS", debug))
+	ebsVolumes = awsutil.AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
+
+	log.Printf("%s", DrawASCIIBanner("4: MOUNTING ATTACHED VOLS", debug))
+
+	if len(ebsVolumes) == 0 {
+		log.Warn("Empty vols, nothing to do")
+		os.Exit(0)
+	}
+
+	for volName, vols := range ebsVolumes {
+		prepAndMountDrives(volName, vols, dryRun)
+	}
+}
+
+func prepAndMountDrives(volName string, vols []awsutil.EbsVol, dryRun bool) {
 	driveLogger := log.WithFields(log.Fields{"vol_name": volName, "vols": vols})
 
 	mountPath := vols[0].MountPath
@@ -71,25 +90,5 @@ func PrepAndMountDrives(volName string, vols []awsutil.EbsVol, dryRun bool) {
 	driveLogger.Info("Now persisting mdadm conf")
 	if err := raidutil.PersistMdadm(); err != nil {
 		driveLogger.Fatalf("Couldn't persist mdadm conf: %v", err)
-	}
-}
-
-//GoatDisk runs Goat for your EBS volumes - attach, mount, mkfs, etc.
-func GoatDisk(ec2Instance awsutil.EC2Instance, dryRun bool, debug bool) {
-	log.Printf("%s", DrawASCIIBanner("2: COLLECTING EBS INFO", debug))
-	ebsVolumes := awsutil.MapEbsVolumes(&ec2Instance)
-
-	log.Printf("%s", DrawASCIIBanner("3: ATTACHING EBS VOLS", debug))
-	ebsVolumes = awsutil.AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
-
-	log.Printf("%s", DrawASCIIBanner("4: MOUNTING ATTACHED VOLS", debug))
-
-	if len(ebsVolumes) == 0 {
-		log.Warn("Empty vols, nothing to do")
-		os.Exit(0)
-	}
-
-	for volName, vols := range ebsVolumes {
-		PrepAndMountDrives(volName, vols, dryRun)
 	}
 }
