@@ -4,6 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 
+	"github.com/sevagh/goat/driveutil"
 	"github.com/sevagh/goat/fsutil"
 )
 
@@ -14,7 +15,7 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 	mountPath := vols[0].MountPath
 	desiredFs := vols[0].FsType
 
-	if DoesDriveExist("/dev/disk/by-label/GOAT-" + volName) {
+	if driveutil.DoesDriveExist("/dev/disk/by-label/GOAT-" + volName) {
 		driveLogger.Info("Label already exists, jumping to mount phase")
 	} else {
 		var driveName string

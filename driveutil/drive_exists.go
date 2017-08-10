@@ -1,4 +1,4 @@
-package main
+package driveutil
 
 import (
 	"time"
@@ -6,15 +6,13 @@ import (
 	"github.com/sevagh/goat/execute"
 )
 
-const statAttempts = 10
-
 //DoesDriveExistWithTimeout makes 10 attempts, 2 second sleep between each, to stat a drive to check for its existence
-func DoesDriveExistWithTimeout(driveName string) bool {
+func DoesDriveExistWithTimeout(driveName string, maxAttempts int) bool {
 	var attempts int
 	for !DoesDriveExist(driveName) {
 		time.Sleep(time.Duration(2 * time.Second))
 		attempts++
-		if attempts >= statAttempts {
+		if attempts >= maxAttempts {
 			return false
 		}
 	}

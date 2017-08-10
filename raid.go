@@ -5,6 +5,7 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/sevagh/goat/driveutil"
 	"github.com/sevagh/goat/execute"
 )
 
@@ -17,7 +18,7 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 	var raidDriveName string
 	var err error
 	raidLogger.Info("Searching for unused RAID drive name")
-	if raidDriveName, err = RandRaidDriveNamePicker(); err != nil {
+	if raidDriveName, err = driveutil.RandRaidDriveNamePicker(); err != nil {
 		raidLogger.Fatalf("Couldn't select unused RAID drive name: %v", err)
 	}
 
