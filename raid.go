@@ -4,6 +4,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
+
+	"github.com/sevagh/goat/execute"
 )
 
 //CreateRaidArray runs the appropriate mdadm command for the given list of EbsVol that should be raided together. It takes dryRun as a boolean, where it tells you which mdadm it would have run
@@ -43,7 +45,7 @@ func CreateRaidArray(drives []EbsVol, volName string, dryRun bool) string {
 	if dryRun {
 		return raidDriveName
 	}
-	if _, err := ExecuteCommand(cmd, args); err != nil {
+	if _, err := execute.ExecuteCommand(cmd, args); err != nil {
 		raidLogger.Fatalf("Error when executing mdadm command: %v", err)
 	}
 
@@ -62,9 +64,9 @@ func PersistMdadm() error {
 
 	log.Infof("Persisting mdadm settings: %s %s", cmd, args)
 
-	var out CommandOut
+	var out execute.CommandOut
 	var err error
-	if out, err = ExecuteCommand(cmd, args); err != nil {
+	if out, err = execute.ExecuteCommand(cmd, args); err != nil {
 		log.Fatalf("Error when executing mdadm command: %v", err)
 	}
 

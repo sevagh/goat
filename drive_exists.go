@@ -2,6 +2,8 @@ package main
 
 import (
 	"time"
+
+	"github.com/sevagh/goat/execute"
 )
 
 const statAttempts = 10
@@ -21,7 +23,7 @@ func DoesDriveExistWithTimeout(driveName string) bool {
 
 //DoesDriveExist does a single stat call to check if a drive exists
 func DoesDriveExist(driveName string) bool {
-	if _, err := ExecuteCommand("stat", []string{driveName}); err != nil {
+	if _, err := execute.ExecuteCommand("stat", []string{driveName}); err != nil {
 		return false
 	}
 	return true

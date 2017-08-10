@@ -3,6 +3,8 @@ package main
 import (
 	log "github.com/sirupsen/logrus"
 	"os"
+
+	"github.com/sevagh/goat/fsutil"
 )
 
 //PrepAndMountDrives prepares the filesystem, RAIDs (if necessary) and mounts a given list of EbsVol (can be size 1 for non-RAID)
@@ -26,16 +28,16 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 
 		driveLogger.Info("Checking for existing filesystem")
 
-		if err := CheckFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
+		if err := fsutil.CheckFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
 			driveLogger.Fatalf("Checking for existing filesystem: %v", err)
 		}
-		if err := CreateFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
+		if err := fsutil.CreateFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
 			driveLogger.Fatalf("Error when creating filesystem: %v", err)
 		}
 	}
 
 	driveLogger.Info("Checking if something already mounted at %s", mountPath)
-	if isMounted, err := IsMountpointAlreadyMounted(mountPath); err != nil {
+	if isMounted, err := fsutil.IsMountpointAlreadyMounted(mountPath); err != nil {
 		driveLogger.Fatalf("Error when checking mount point for existing mounts: %v", err)
 	} else {
 		if isMounted {
@@ -50,12 +52,12 @@ func PrepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 	}
 
 	driveLogger.Info("Appending fstab entry")
-	if err := AppendToFstab(PREFIX+"-"+volName, desiredFs, mountPath, dryRun); err != nil {
+	if err := fsutil.AppendToFstab(PREFIX+"-"+volName, desiredFs, mountPath, dryRun); err != nil {
 		driveLogger.Fatalf("Couldn't append to fstab: %v", err)
 	}
 
 	driveLogger.Info("Now mounting")
-	if err := Mount(mountPath, dryRun); err != nil {
+	if err := fsutil.Mount(mountPath, dryRun); err != nil {
 		driveLogger.Fatalf("Couldn't mount: %v", err)
 	}
 

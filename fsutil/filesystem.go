@@ -1,8 +1,10 @@
-package main
+package fsutil
 
 import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/sevagh/goat/execute"
 )
 
 //CheckFilesystem checks for a filesystem on a given drive using blkid. It returns ok if there is no filesystem or the filesystem is the correct type. Error if there's a different filesystem
@@ -21,7 +23,7 @@ func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bo
 		return nil
 	}
 
-	fsOut, err := ExecuteCommand(cmd, args)
+	fsOut, err := execute.ExecuteCommand(cmd, args)
 	if err != nil {
 		if fsOut.Status == 2 {
 			//go ahead and create filesystem
@@ -43,7 +45,7 @@ func CreateFilesystem(driveName string, desiredFs string, label string, dryRun b
 	args := []string{
 		driveName,
 		"-L",
-		PREFIX + "-" + label,
+		"GOAT-" + label,
 	}
 
 	if dryRun {
@@ -51,7 +53,7 @@ func CreateFilesystem(driveName string, desiredFs string, label string, dryRun b
 		return nil
 	}
 
-	if _, err := ExecuteCommand(cmd, args); err != nil {
+	if _, err := execute.ExecuteCommand(cmd, args); err != nil {
 		return err
 	}
 	return nil
