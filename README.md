@@ -1,31 +1,40 @@
-[![Build Status](https://api.travis-ci.org/sevagh/goat.svg?branch=master)](https://travis-ci.org/sevagh/goat) [![ReportCard](http://goreportcard.com/badge/sevagh/goat)](http://goreportcard.com/report/sevagh/goat) [![GitHub tag](https://img.shields.io/github/tag/sevagh/goat.svg)](https://github.com/sevagh/goat/releases) [![GitPitch](https://gitpitch.com/assets/badge.svg)](https://gitpitch.com/sevagh/goat/gitpitch?grs=github&t=white)
+[![Build Status](https://api.travis-ci.org/sevagh/goat.svg?branch=master)](https://travis-ci.org/sevagh/goat) [![ReportCard](http://goreportcard.com/badge/sevagh/goat)](http://goreportcard.com/report/sevagh/goat) [![GitHub tag](https://img.shields.io/github/tag/sevagh/goat.svg)](https://github.com/sevagh/goat/releases)
 
 *VERY EARLY ALPHA - USE AT YOUR OWN RISK*
 
 # goat :goat:
-### Attach & mount EBS volumes and RAID arrays from inside EC2 instances
+
+### Attach & mount AWS resources to running EC2 instances
 
 `goat` is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
 
 By setting your tags correctly, `goat` can discover, attach, RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
 
+### Motivation
+
+The Terraform resource `aws_volume_attachment` isn't handled well when destroying a stack. See [here](https://github.com/hashicorp/terraform/issues/9000) for some discussion on the matter. We initially wrote instance-specific user-data shell scripts with hardcoded values (e.g. `mkfs.ext4 /dev/xvdb`, `mount /dev/xvdb /var/kafka_data`). With `goat` we can avoid needing to pass parameters or hardcoding values. All the required information comes from the EC2 instance and EBS volume tags.
+
+### Subcommands
+
+`goat` for now only supports the subcommand `goat disk` for EBS volumes. `goat network` (ENI, EIP) is coming in the future.
+
 ### RPM-based install
 
-Goat is systemd-based (you can download the binary and run it yourself for alternative cases) and has been developed for CentOS.
-
-Install the rpm from the releases page, which enables it in systemd automatically:
+Goat is systemd-based and has been developed for CentOS. Install the rpm from the releases page:
 
 ```
 $ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.3.0/goat-0.3.0-1.fc25.x86_64.rpm
-$ sudo systemctl enable goat
-$ sudo systemctl start goat
+$ sudo systemctl enable goat@disk
+$ sudo systemctl start goat@disk
 $ ...
-$ journalctl -u goat
+$ journalctl -u goat@disk
 ```
 
-### Behavior
+### Goat disk
 
-`goat` should behave correctly with no parameters. It is configured entirely with tags (explained [below](#tags)). It logs to `stderr` by default.
+#### Behavior
+
+`goat disk` should behave correctly with no parameters. It is configured entirely with tags (explained [below](#tags)). It logs to `stderr` by default.
 
 It takes some options:
 
@@ -78,11 +87,7 @@ ARRAY /dev/md127 level=raid0 num-devices=3 metadata=1.2 name="ip-172-31-25-105:'
 
 To avoid this, define a good/persistent hostname for EC2 instance, that you will then re-apply to any instance taking over this instance's disks.
 
-### Run phase
-
-In production I run `goat` at the EC2 user-data phase (executed from a bash script). Further exploration is needed to perhaps embed it properly into `systemd` or `cloud-init`.
-
-### Tags
+#### Tags
 
 These are the tags you need:
 
@@ -96,9 +101,9 @@ These are the tags you need:
 | GOAT-IN:MountPath    | Linux path to mount vol |         | *Yes*  | `/var/kafka_data`                                                |
 | GOAT-IN:FsType       | Linux filesystem type   |         | *Yes*  | `ext4`, `vfat`                                                   |
 
-### Examples
+#### Examples
 
-[Link to the example Terraform HCL scripts](https://github.com/sevagh/goat/tree/example). Also, the [Gitpitch presentation](https://gitpitch.com/sevagh/goat/gitpitch#) has a partial demonstration.
+[Link to the example Terraform HCL scripts](./.tf-example).
 
 Here's an example to clarify better.
 
@@ -152,7 +157,7 @@ Additionally, we want 1 extra disk (single disks, no RAID) per node, for logs:
     * GOAT-IN:MountPath: /vertica/log
     * GOAT-IN:FsType: ext4
 
-Run `goat` from the EC2 instance (ideally at the user-data phase) to automatically mount the associated EBS volumes with the above properties:
+Result:
 
 ```
 [dbadmin@ip-172-31-46-84 ~]$ ls /dev/disk/by-label/
@@ -172,11 +177,3 @@ LABEL=GOAT-vdata /vertica/data ext4 defaults 0 1
 /dev/xvdc        20G   45M   19G   1% /vertica/log
 /dev/md0      222G   61M  210G   1% /vertica/data
 ```
-
-### Motivation
-
-The Terraform resource `aws_volume_attachment` isn't handled well when destroying a stack. See [here](https://github.com/hashicorp/terraform/issues/9000) for some discussion on the matter.
-
-We initially wrote instance-specific user-data shell scripts with hardcoded values (e.g. `mkfs.ext4 /dev/xvdb`, `mount /dev/xvdb /var/kafka_data`).
-
-With `goat` we can avoid needing to pass parameters or hardcoding values. All the required information comes from the EC2 instance and EBS volume tags.

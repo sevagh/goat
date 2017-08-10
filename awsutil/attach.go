@@ -1,8 +1,10 @@
-package main
+package awsutil
 
 import (
 	"github.com/aws/aws-sdk-go/service/ec2"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/sevagh/goat/driveutil"
 )
 
 //AttachEbsVolumes attaches the given map of {'VolumeName':[]EbsVol} with the EC2 client in the provided ec2Instance
@@ -18,7 +20,7 @@ func AttachEbsVolumes(ec2Instance EC2Instance, volumes map[string][]EbsVol, dryR
 			volLogger := log.WithFields(log.Fields{"vol_id": volume.EbsVolID, "vol_name": volume.VolumeName})
 			if volume.AttachedName == "" {
 				volLogger.Info("Volume is unattached, picking drive name")
-				if deviceName, err = RandDriveNamePicker(); err != nil {
+				if deviceName, err = driveutil.RandDriveNamePicker(); err != nil {
 					volLogger.Fatal("Couldn't find an unused drive name")
 				}
 				attachVolIn := &ec2.AttachVolumeInput{
@@ -35,8 +37,8 @@ func AttachEbsVolumes(ec2Instance EC2Instance, volumes map[string][]EbsVol, dryR
 				volLogger.Info(volAttachments)
 				volume.AttachedName = deviceName
 
-				if !dryRun && !DoesDriveExistWithTimeout(deviceName) {
-					volLogger.Fatalf("Drive %s doesn't exist after attaching - checked with stat %d times", deviceName, statAttempts)
+				if !dryRun && !driveutil.DoesDriveExistWithTimeout(deviceName, 10) {
+					volLogger.Fatalf("Drive %s doesn't exist after attaching - checked with stat 10 times", deviceName)
 				}
 				localVolumes[key] = append(localVolumes[key], volume)
 			}
