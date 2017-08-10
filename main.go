@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"github.com/docopt/docopt-go"
 	log "github.com/sirupsen/logrus"
 	"os"
-	"strings"
 
 	"github.com/sevagh/goat/awsutil"
+	"github.com/sevagh/goat/commands"
 )
 
 var VERSION string
@@ -17,7 +16,8 @@ func main() {
 	usage := `goat - EC2/EBS utility
 
 Usage:
-  goat [--log-level=<log-level>] [--dry] [--debug]
+  goat disk [--log-level=<log-level>] [--dry] [--debug]
+  goat network [--log-level=<log-level>] [--dry] [--debug]
   goat -h | --help
   goat --version
 
@@ -42,37 +42,16 @@ Options:
 	dryRun := arguments["--dry"].(bool)
 	debug := arguments["--debug"].(bool)
 
-	log.Printf("%s", drawASCIIBanner("WELCOME TO GOAT", debug))
-
-	log.Printf("%s", drawASCIIBanner("1: COLLECTING EC2 INFO", debug))
+	log.Printf("%s", commands.DrawASCIIBanner("WELCOME TO GOAT", debug))
+	log.Printf("%s", commands.DrawASCIIBanner("1: COLLECTING EC2 INFO", debug))
 	ec2Instance := awsutil.GetEC2InstanceData()
 
-	log.Printf("%s", drawASCIIBanner("2: COLLECTING EBS INFO", debug))
-	ebsVolumes := awsutil.MapEbsVolumes(&ec2Instance)
+	cmd := arguments["<command>"].(string)
 
-	log.Printf("%s", drawASCIIBanner("3: ATTACHING EBS VOLS", debug))
-	ebsVolumes = awsutil.AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
-
-	log.Printf("%s", drawASCIIBanner("4: MOUNTING ATTACHED VOLS", debug))
-
-	if len(ebsVolumes) == 0 {
-		log.Warn("Empty vols, nothing to do")
-		os.Exit(0)
+	switch cmd {
+	case "disk":
+		commands.GoatDisk(ec2Instance, dryRun, debug)
+	case "network":
+		log.Fatalf("Network feature hasn't been implemented in Goat yet")
 	}
-
-	for volName, vols := range ebsVolumes {
-		PrepAndMountDrives(volName, vols, dryRun)
-	}
-}
-
-func drawASCIIBanner(headLine string, debug bool) string {
-	if debug {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Press enter to continue: ")
-		reader.ReadString('\n')
-	}
-
-	return fmt.Sprintf("\n%[1]s\n# %[2]s #\n%[1]s\n",
-		strings.Repeat("#", len(headLine)+4),
-		headLine)
 }
