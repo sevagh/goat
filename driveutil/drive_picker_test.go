@@ -1,4 +1,4 @@
-package main
+package driveutil
 
 import (
 	"strings"

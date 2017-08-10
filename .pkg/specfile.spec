@@ -8,13 +8,13 @@ Summary: Attach and mount EBS volumes
 License: BSD 3-clause
 URL: https://github.com/sevagh/goat 
 Source0: %{pkgname}
-Source1: %{pkgname}.service
+Source1: %{pkgname}@.service
 
 Requires: systemd mdadm
 
 
 %description
-Automatically attach and mount EBS volumes to a running EC2 instance.
+Automatically attach AWS resources to a running EC2 instance.
 
 
 #%prep
@@ -38,14 +38,13 @@ Automatically attach and mount EBS volumes to a running EC2 instance.
 if [ $1 -eq 1 ]; then
         /bin/systemctl daemon-reload >/dev/null 2>&1 || :
 fi
-#/bin/systemctl enable goat.service >/dev/null 2>&1 || :
 
 
 %preun
 if [ $1 -eq 0 ] ; then
         # Package removal, not upgrade
-        /bin/systemctl disable goat.service >/dev/null 2>&1 || :
-        /bin/systemctl stop goat.service >/dev/null 2>&1 || :
+        /bin/systemctl disable goat@*.service >/dev/null 2>&1 || :
+        /bin/systemctl stop goat@*.service >/dev/null 2>&1 || :
 fi
 
 
@@ -54,5 +53,7 @@ fi
 
 
 %changelog
+* Thu Aug 10 2017 Sevag Hanssian <sevag.hanssian@gmail.com>
+- Goat subcommands
 * Tue Jul 11 2017 Sevag Hanssian <sevag.hanssian@gmail.com>
 - First RPM package for goat 

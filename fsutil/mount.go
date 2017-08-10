@@ -1,9 +1,11 @@
-package main
+package fsutil
 
 import (
 	log "github.com/sirupsen/logrus"
 	"path/filepath"
 	"strings"
+
+	"github.com/sevagh/goat/execute"
 )
 
 //Mount calls mount with no parameters. It relies on there being a correct fstab entry on the provided mountpoint. In the case of a dryRun it doesn't actually execute it, just logs what it would have executed
@@ -18,7 +20,7 @@ func Mount(mountPath string, dryRun bool) error {
 		return nil
 	}
 
-	if _, err := ExecuteCommand(cmd, args); err != nil {
+	if _, err := execute.ExecuteCommand(cmd, args); err != nil {
 		return err
 	}
 
@@ -27,9 +29,9 @@ func Mount(mountPath string, dryRun bool) error {
 
 //IsMountpointAlreadyMounted checks if a mountPoint appears in the output of the mount command. If yes, it returns false. This is to protect from multiple mounts.
 func IsMountpointAlreadyMounted(mountPoint string) (bool, error) {
-	var mountOut CommandOut
+	var mountOut execute.CommandOut
 	var err error
-	if mountOut, err = ExecuteCommand("mount", []string{}); err != nil {
+	if mountOut, err = execute.ExecuteCommand("mount", []string{}); err != nil {
 		return true, err
 	}
 	for _, line := range strings.Split(mountOut.Stdout, "\n") {
