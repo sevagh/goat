@@ -47,3 +47,24 @@ func AttachEbsVolumes(ec2Instance EC2Instance, volumes map[string][]EbsVol, dryR
 	}
 	return localVolumes
 }
+
+//AttachEnis attaches the given array of Eni Ids with the EC2 client in the provided ec2Instance
+func AttachEnis(ec2Instance EC2Instance, enis []string, dryRun bool) {
+	for eniIdx, eni := range enis {
+		eniLogger := log.WithFields(log.Fields{"eni_id": eni})
+
+		deviceIdx := int64(eniIdx + 1)
+		attachEniIn := &ec2.AttachNetworkInterfaceInput{
+			NetworkInterfaceId: &eni,
+			InstanceId:         &ec2Instance.InstanceID,
+			DryRun:             &dryRun,
+			DeviceIndex:        &deviceIdx,
+		}
+
+		eniLogger.Info("Executing AWS SDK attach command")
+		_, err := ec2Instance.EC2Client.AttachNetworkInterface(attachEniIn)
+		if err != nil {
+			eniLogger.Fatalf("Couldn't attach: %v", err)
+		}
+	}
+}

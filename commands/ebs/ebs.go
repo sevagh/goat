@@ -1,4 +1,4 @@
-package commands
+package ebs
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -10,15 +10,15 @@ import (
 	"github.com/sevagh/goat/raidutil"
 )
 
-//GoatDisk runs Goat for your EBS volumes - attach, mount, mkfs, etc.
-func GoatDisk(ec2Instance awsutil.EC2Instance, dryRun bool, debug bool) {
-	log.Printf("%s", DrawASCIIBanner("2: COLLECTING EBS INFO", debug))
+//GoatEbs runs Goat for your EBS volumes - attach, mount, mkfs, etc.
+func GoatEbs(ec2Instance awsutil.EC2Instance, dryRun bool, debug bool) {
+	log.Printf("2: COLLECTING EBS INFO")
 	ebsVolumes := awsutil.MapEbsVolumes(&ec2Instance)
 
-	log.Printf("%s", DrawASCIIBanner("3: ATTACHING EBS VOLS", debug))
+	log.Printf("3: ATTACHING EBS VOLS")
 	ebsVolumes = awsutil.AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
 
-	log.Printf("%s", DrawASCIIBanner("4: MOUNTING ATTACHED VOLS", debug))
+	log.Printf("4: MOUNTING ATTACHED VOLS")
 
 	if len(ebsVolumes) == 0 {
 		log.Warn("Empty vols, nothing to do")
@@ -35,6 +35,12 @@ func prepAndMountDrives(volName string, vols []awsutil.EbsVol, dryRun bool) {
 
 	mountPath := vols[0].MountPath
 	desiredFs := vols[0].FsType
+	raidLevel := vols[0].RaidLevel
+
+	if volName == "" {
+		driveLogger.Info("No volume name given, not performing further actions")
+		return
+	}
 
 	if driveutil.DoesDriveExist("/dev/disk/by-label/GOAT-" + volName) {
 		driveLogger.Info("Label already exists, jumping to mount phase")
@@ -44,12 +50,21 @@ func prepAndMountDrives(volName string, vols []awsutil.EbsVol, dryRun bool) {
 			driveLogger.Info("Single drive, no RAID")
 			driveName = vols[0].AttachedName
 		} else {
+			if raidLevel == -1 {
+				driveLogger.Info("Raid level not provided, not performing further actions")
+				return
+			}
 			driveLogger.Info("Creating RAID array")
 			driveNames := []string{}
 			for _, vol := range vols {
 				driveNames = append(driveNames, vol.AttachedName)
 			}
-			driveName = raidutil.CreateRaidArray(driveNames, volName, vols[0].RaidLevel, dryRun)
+			driveName = raidutil.CreateRaidArray(driveNames, volName, raidLevel, dryRun)
+		}
+
+		if desiredFs == "" {
+			driveLogger.Info("Desired filesystem not provided, not performing further actions")
+			return
 		}
 
 		driveLogger.Info("Checking for existing filesystem")
@@ -60,6 +75,11 @@ func prepAndMountDrives(volName string, vols []awsutil.EbsVol, dryRun bool) {
 		if err := fsutil.CreateFilesystem(driveName, desiredFs, volName, dryRun); err != nil {
 			driveLogger.Fatalf("Error when creating filesystem: %v", err)
 		}
+	}
+
+	if mountPath == "" {
+		driveLogger.Info("Mount point not provided, not performing further actions")
+		return
 	}
 
 	driveLogger.Info("Checking if something already mounted at %s", mountPath)
