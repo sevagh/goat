@@ -7,7 +7,8 @@ import (
 	"os"
 
 	"github.com/sevagh/goat/awsutil"
-	"github.com/sevagh/goat/commands"
+	"github.com/sevagh/goat/commands/ebs"
+	"github.com/sevagh/goat/commands/eni"
 )
 
 //Goat version substituted by the Makefile
@@ -43,16 +44,16 @@ Options:
 	dryRun := arguments["--dry"].(bool)
 	debug := arguments["--debug"].(bool)
 
-	log.Printf("%s", commands.DrawASCIIBanner("WELCOME TO GOAT", debug))
-	log.Printf("%s", commands.DrawASCIIBanner("1: COLLECTING EC2 INFO", debug))
+	log.Printf("WELCOME TO GOAT")
+	log.Printf("1: COLLECTING EC2 INFO")
 	ec2Instance := awsutil.GetEC2InstanceData()
 
 	cmd := arguments["<command>"].(string)
 
 	switch cmd {
-	case "disk":
-		commands.GoatDisk(ec2Instance, dryRun, debug)
-	case "network":
-		log.Fatalf("Network feature hasn't been implemented in Goat yet")
+	case "ebs":
+		ebs.GoatEbs(ec2Instance, dryRun, debug)
+	case "eni":
+		eni.GoatEni(ec2Instance, dryRun, debug)
 	}
 }
