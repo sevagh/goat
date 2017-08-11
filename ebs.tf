@@ -1,5 +1,5 @@
 resource "aws_ebs_volume" "data_disk" {
-  count = "${var.servers * 3}"
+  count = "${var.servers * 2}"
 
   availability_zone = "us-east-1a"
   size              = "100"
@@ -8,9 +8,9 @@ resource "aws_ebs_volume" "data_disk" {
   tags {
     Name = "${var.prefix}-data-disk-${count.index}"
     "GOAT-IN:Prefix" = "${var.prefix}"
-    "GOAT-IN:NodeId" = "${count.index / 3}" 
+    "GOAT-IN:NodeId" = "${count.index / 2}" 
     "GOAT-IN:VolumeName" = "data"
-    "GOAT-IN:VolumeSize" = "3"
+    "GOAT-IN:VolumeSize" = "2"
     "GOAT-IN:MountPath" = "/krkn_data"
     "GOAT-IN:RaidLevel" = "0"
     "GOAT-IN:FsType" = "ext4"

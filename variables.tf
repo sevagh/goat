@@ -1,5 +1,5 @@
 variable "servers" {
-  default = "3"
+  default = "2"
 }
 
 variable "prefix" {
