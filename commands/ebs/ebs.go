@@ -1,4 +1,4 @@
-package commands
+package ebs
 
 import (
 	log "github.com/sirupsen/logrus"
@@ -10,15 +10,15 @@ import (
 	"github.com/sevagh/goat/raidutil"
 )
 
-//GoatDisk runs Goat for your EBS volumes - attach, mount, mkfs, etc.
-func GoatDisk(ec2Instance awsutil.EC2Instance, dryRun bool, debug bool) {
-	log.Printf("%s", DrawASCIIBanner("2: COLLECTING EBS INFO", debug))
+//GoatEbs runs Goat for your EBS volumes - attach, mount, mkfs, etc.
+func GoatEbs(ec2Instance awsutil.EC2Instance, dryRun bool, debug bool) {
+	log.Printf("2: COLLECTING EBS INFO")
 	ebsVolumes := awsutil.MapEbsVolumes(&ec2Instance)
 
-	log.Printf("%s", DrawASCIIBanner("3: ATTACHING EBS VOLS", debug))
+	log.Printf("3: ATTACHING EBS VOLS")
 	ebsVolumes = awsutil.AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
 
-	log.Printf("%s", DrawASCIIBanner("4: MOUNTING ATTACHED VOLS", debug))
+	log.Printf("4: MOUNTING ATTACHED VOLS")
 
 	if len(ebsVolumes) == 0 {
 		log.Warn("Empty vols, nothing to do")

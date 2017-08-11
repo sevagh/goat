@@ -24,11 +24,11 @@ type EbsVol struct {
 func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 	drivesToMount := map[string][]EbsVol{}
 
-	log.Info("Searching for EBS volumes with previously established EC2 client")
+	log.Info("Searching for EBS volumes")
 
 	volumes, err := findEbsVolumes(ec2Instance)
 	if err != nil {
-		log.Fatal("Error when searching for EBS volumes")
+		log.Fatalf("Error when searching for EBS volumes: %v", err)
 	}
 
 	log.Info("Classifying EBS volumes based on tags")
