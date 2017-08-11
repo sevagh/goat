@@ -10,6 +10,26 @@ It takes some options:
 * `--log-level=<level>` - logrus log levels (i.e. debug, info, warn, error, fatal, panic)
 * `--debug` - an interactive debug mode which prompts to continue after every phase so you can explore the state between phases
 
+#### Tags
+
+These are the tags you need:
+
+| Tag Name             | Description             | EC2     | EBS    | Required | Tag Value (examples)                                             |
+| -------------------- | ----------------------- | ------- | -----  | -------- | ---------------------------------------------------------------- |
+| GOAT-IN:Prefix       | Logical stack name      | *Yes*   | *Yes*  | *YES*    | `my_app_v1.3.4`                                                  |
+| GOAT-IN:NodeId       | EC2 id within stack     | *Yes*   | *Yes*  | *YES*    | `0`, `1`, `2` for 3-node kafka                                   |
+| GOAT-IN:VolumeName   | Distinct volume name    |         | *Yes*  | no       | `data`, `log` - RAID disks must use the same VolumeName          |
+| GOAT-IN:VolumeSize   | # of disks in vol group |         | *Yes*  | no       | 2 for 2-disk RAID, 1 for single disk/no RAID                     |
+| GOAT-IN:RaidLevel    | level of RAID (0 or 1)  |         | *Yes*  | no       | 0 or 1 for RAID, ignored if VolumeSize == 1                      |
+| GOAT-IN:MountPath    | Linux path to mount vol |         | *Yes*  | no       | `/var/kafka_data`                                                |
+| GOAT-IN:FsType       | Linux filesystem type   |         | *Yes*  | no       | `ext4`, `vfat`                                                   |
+
+#### Missing tags
+
+If a non-required tag is missing, that step will be skipped. E.g. without RaidLevel or VolumeSize, `mdadm` won't be run. Without a filesystem, `mkfs` won't be run. Without a mount path, `mount` won't be run. Without a volume name, nothing will be run.
+
+*The barest case will simply attach the EBS volumes and perform no further actions*
+
 #### Fresh run
 
 The event flow is roughly the following:
@@ -54,17 +74,3 @@ ARRAY /dev/md127 level=raid0 num-devices=3 metadata=1.2 name="ip-172-31-25-105:'
 ```
 
 To avoid this, define a good/persistent hostname for EC2 instance, that you will then re-apply to any instance taking over this instance's disks.
-
-#### Tags
-
-These are the tags you need:
-
-| Tag Name             | Description             | EC2     | EBS    | Tag Value (examples)                                             |
-| -------------------- | ----------------------- | ------- | -----  | ---------------------------------------------------------------- |
-| GOAT-IN:Prefix       | Logical stack name      | *Yes*   | *Yes*  | `my_app_v1.3.4`                                                  |
-| GOAT-IN:NodeId       | EC2 id within stack     | *Yes*   | *Yes*  | `0`, `1`, `2` for 3-node kafka                                   |
-| GOAT-IN:VolumeName   | Distinct volume name    |         | *Yes*  | `data`, `log` - RAID disks must use the same VolumeName          |
-| GOAT-IN:VolumeSize   | # of disks in vol group |         | *Yes*  | 2 for 2-disk RAID, 1 for single disk/no RAID                     |
-| GOAT-IN:RaidLevel    | level of RAID (0 or 1)  |         | *Yes*  | 0 or 1 for RAID, ignored if VolumeSize == 1                      |
-| GOAT-IN:MountPath    | Linux path to mount vol |         | *Yes*  | `/var/kafka_data`                                                |
-| GOAT-IN:FsType       | Linux filesystem type   |         | *Yes*  | `ext4`, `vfat`                                                   |
