@@ -103,7 +103,7 @@ These are the tags you need:
 
 #### Examples
 
-[Link to the example Terraform HCL scripts](./.tf-example).
+[Link to the example Terraform HCL scripts](https://github.com/sevagh/goat-example).
 
 Here's an example to clarify better.
 
