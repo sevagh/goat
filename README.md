@@ -30,7 +30,7 @@ Further reading:
 Goat is systemd-based and has been developed for CentOS. Install the rpm from the releases page:
 
 ```
-$ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.3.0/goat-0.3.0-1.fc25.x86_64.rpm
+$ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.4.0/goat-0.4.0-1.fc25.x86_64.rpm
 $ sudo systemctl enable goat@ebs
 $ sudo systemctl start goat@ebs
 $ ...
