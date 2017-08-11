@@ -26,12 +26,12 @@ Automatically attach AWS resources to a running EC2 instance.
 %{__mkdir} -p %{buildroot}/%{_bindir}
 %{__mkdir} -p %{buildroot}/%{_unitdir}
 %{__install} -m0775 %{SOURCE0} %{buildroot}/%{_bindir}/%{pkgname}
-%{__install} -m0777 %{SOURCE1} %{buildroot}/%{_unitdir}/%{pkgname}.service
+%{__install} -m0777 %{SOURCE1} %{buildroot}/%{_unitdir}/%{pkgname}@.service
 
 
 %files
 %{_bindir}/%{pkgname}
-%{_unitdir}/%{pkgname}.service
+%{_unitdir}/%{pkgname}@.service
 
 
 %post
