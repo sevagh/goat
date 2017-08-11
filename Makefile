@@ -16,7 +16,7 @@ test: build
 	@go test -v ./...
 
 lint:
-	@gofmt -w .
+	@gofmt -s -w .
 
 package:
 	@GOAT_VERSION=$(VERSION) $(MAKE) -C ./.pkg/

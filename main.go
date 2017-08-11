@@ -10,6 +10,7 @@ import (
 	"github.com/sevagh/goat/commands"
 )
 
+//Goat version substituted by the Makefile
 var VERSION string
 
 func main() {

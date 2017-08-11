@@ -61,19 +61,19 @@ func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 	params := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String("tag:GOAT-IN:Prefix"),
 				Values: []*string{
 					aws.String(ec2Instance.Prefix),
 				},
 			},
-			&ec2.Filter{
+			{
 				Name: aws.String("tag:GOAT-IN:NodeId"),
 				Values: []*string{
 					aws.String(ec2Instance.NodeID),
 				},
 			},
-			&ec2.Filter{
+			{
 				Name: aws.String("availability-zone"),
 				Values: []*string{
 					aws.String(ec2Instance.Az),

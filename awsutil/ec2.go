@@ -92,7 +92,7 @@ func populateRegionInfo(svc *ec2metadata.EC2Metadata) (ec2Metadata, error) {
 func getInstanceTags(ec2Instance *EC2Instance) error {
 	params := &ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
-			&ec2.Filter{
+			{
 				Name: aws.String("instance-id"),
 				Values: []*string{
 					aws.String(ec2Instance.InstanceID),
