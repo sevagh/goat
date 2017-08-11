@@ -1,9 +1,7 @@
 resource "aws_network_interface" "goat_eni" {
   count = "${var.servers}"
 
-  availability_zone = "us-east-1a"
-  size              = "100"
-  type              = "standard"
+  subnet_id = "${aws_subnet.goat_subnet.id}"
 
   tags {
     Name = "${var.prefix}-network-interface-${count.index}"
