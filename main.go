@@ -18,8 +18,8 @@ func main() {
 	usage := `goat - EC2/EBS utility
 
 Usage:
-  goat disk [--log-level=<log-level>] [--dry] [--debug]
-  goat network [--log-level=<log-level>] [--dry] [--debug]
+  goat ebs [--log-level=<log-level>] [--dry] [--debug]
+  goat eni [--log-level=<log-level>] [--dry] [--debug]
   goat -h | --help
   goat --version
 
