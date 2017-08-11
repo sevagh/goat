@@ -4,9 +4,9 @@ resource "aws_network_interface" "goat_eni" {
   subnet_id = "${aws_subnet.goat_subnet.id}"
 
   tags {
-    Name = "${var.prefix}-network-interface-${count.index}"
+    Name             = "${var.prefix}-network-interface-${count.index}"
     "GOAT-IN:Prefix" = "${var.prefix}"
-    "GOAT-IN:NodeId" = "${count.index}" 
+    "GOAT-IN:NodeId" = "${count.index}"
   }
 }
 
