@@ -44,13 +44,15 @@ func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 		mountPath := volumes[0].MountPath
 		fsType := volumes[0].FsType
 		raidLevel := volumes[0].RaidLevel
-		if len(volumes) != volSize {
-			volGroupLogger.Fatalf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
-		}
-		for _, vol := range volumes[1:] {
-			volLogger := log.WithFields(log.Fields{"vol_id": vol.EbsVolID, "vol_name": vol.VolumeName})
-			if volSize != vol.VolumeSize || mountPath != vol.MountPath || fsType != vol.FsType || raidLevel != vol.RaidLevel {
-				volLogger.Fatal("Mismatched tags among disks of same volume")
+		if volSize != -1 {
+			if len(volumes) != volSize {
+				volGroupLogger.Fatalf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
+			}
+			for _, vol := range volumes[1:] {
+				volLogger := log.WithFields(log.Fields{"vol_id": vol.EbsVolID, "vol_name": vol.VolumeName})
+				if volSize != vol.VolumeSize || mountPath != vol.MountPath || fsType != vol.FsType || raidLevel != vol.RaidLevel {
+					volLogger.Fatal("Mismatched tags among disks of same volume")
+				}
 			}
 		}
 	}
@@ -91,7 +93,12 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 
 	for _, volume := range result.Volumes {
 		ebsVolume := EbsVol{
-			EbsVolID: *volume.VolumeId,
+			EbsVolID:   *volume.VolumeId,
+			VolumeName: "",
+			RaidLevel:  -1,
+			VolumeSize: -1,
+			MountPath:  "",
+			FsType:     "",
 		}
 		if len(volume.Attachments) > 0 {
 			for _, attachment := range volume.Attachments {
@@ -103,38 +110,24 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 		} else {
 			ebsVolume.AttachedName = ""
 		}
-		tagCtr := 0
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
 			case "GOAT-IN:VolumeName":
 				ebsVolume.VolumeName = *tag.Value
-				tagCtr++
 			case "GOAT-IN:RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse RaidLevel tag as int: %v", err)
 				}
-				tagCtr++
 			case "GOAT-IN:VolumeSize":
 				if ebsVolume.VolumeSize, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse VolumeSize tag as int: %v", err)
 				}
-				tagCtr++
 			case "GOAT-IN:MountPath":
 				ebsVolume.MountPath = *tag.Value
-				tagCtr++
 			case "GOAT-IN:FsType":
 				ebsVolume.FsType = *tag.Value
-				tagCtr++
-			case "GOAT-IN:NodeId": //do nothing
-				tagCtr++
-			case "GOAT-IN:Prefix": //do nothing
-				tagCtr++
 			default:
 			}
-		}
-
-		if tagCtr != 7 {
-			return volumes, fmt.Errorf("Missing required KRK-IN tags VolumeName, RaidLevel, MountPath, VolumeSize, NodeId, Prefix, FsType")
 		}
 		volumes = append(volumes, ebsVolume)
 	}
