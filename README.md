@@ -4,7 +4,7 @@
 
 # goat :goat:
 
-### Attach AWS resources to running EC2 instances
+### Attach EBS volumes and ENIs to running EC2 instances
 
 `goat` is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
 
@@ -18,9 +18,9 @@ The Terraform resource `aws_volume_attachment` isn't handled well when destroyin
 
 ### Subcommands
 
-`goat` for now the subcommands `goat ebs` for EBS volumes and `goat eni` for ENIs.
+`goat` for now supports the subcommands `goat ebs` for EBS volumes and `goat eni` for ENIs.
 
-Further reading:
+Docs:
 
 * [ebs](./commands/ebs/README.md)
 * [eni](./commands/eni/README.md)
