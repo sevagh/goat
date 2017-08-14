@@ -6,7 +6,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 
-	"github.com/sevagh/goat/awsutil"
 	"github.com/sevagh/goat/commands/ebs"
 	"github.com/sevagh/goat/commands/eni"
 )
@@ -44,16 +43,11 @@ Options:
 	dryRun := arguments["--dry"].(bool)
 	debug := arguments["--debug"].(bool)
 
-	log.Printf("WELCOME TO GOAT")
-	log.Printf("1: COLLECTING EC2 INFO")
-	ec2Instance := awsutil.GetEC2InstanceData()
-
-	cmd := arguments["<command>"].(string)
-
-	switch cmd {
-	case "ebs":
-		ebs.GoatEbs(ec2Instance, dryRun, debug)
-	case "eni":
-		eni.GoatEni(ec2Instance, dryRun, debug)
+	if arguments["ebs"].(bool) {
+		log.Printf("Running goat for EBS")
+		ebs.GoatEbs(dryRun, debug)
+	} else if arguments["eni"].(bool) {
+		log.Printf("Running goat for ENI")
+		eni.GoatEni(dryRun, debug)
 	}
 }
