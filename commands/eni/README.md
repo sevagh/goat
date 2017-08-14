@@ -18,6 +18,14 @@ The event flow is roughly the following:
 * Use metadata to establish an EC2 client and scan ENIs
 * Attach the ENIs it needs based on their tags
 
+#### DeviceIndex
+
+ENI attachments take a parameter called [DeviceIndex](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-ec2-network-interface-attachment.html). Goat isn't smart, and always starts from DeviceIndex `1`.
+
+This means that your EC2 instance should have no attached ENIs.
+
+If it does, they should be the ones that `goat` was going to attach anyway, not external ENIs that have no `goat` tags.
+
 #### Tags
 
 These are the tags you need:
