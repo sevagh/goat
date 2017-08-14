@@ -11,7 +11,11 @@ import (
 )
 
 //GoatEbs runs Goat for your EBS volumes - attach, mount, mkfs, etc.
-func GoatEbs(ec2Instance awsutil.EC2Instance, dryRun bool, debug bool) {
+func GoatEbs(dryRun bool, debug bool) {
+	log.Printf("WELCOME TO GOAT")
+	log.Printf("1: COLLECTING EC2 INFO")
+	ec2Instance := awsutil.GetEC2InstanceData()
+
 	log.Printf("2: COLLECTING EBS INFO")
 	ebsVolumes := awsutil.MapEbsVolumes(&ec2Instance)
 
