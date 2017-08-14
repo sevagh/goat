@@ -9,7 +9,7 @@ ConditionPathExists=/usr/bin/goat
 Type=oneshot
 User=root
 Group=root
-ExecStart=/usr/bin/goat %i --log-level=info
+ExecStart=/usr/bin/goat "%i" --log-level=info
 SyslogIdentifier=goat
 
 [Install]
