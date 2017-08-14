@@ -42,13 +42,17 @@ func FindEnis(ec2Instance *EC2Instance) []string {
 	}
 
 	for _, eni := range result.NetworkInterfaces {
-		attachedID := *eni.Attachment.InstanceId
+		attachedID := ""
+		if eni.Attachment != nil {
+			attachedID = *eni.Attachment.InstanceId
+		}
 		if attachedID != "" {
 			if attachedID != ec2Instance.InstanceID {
 				log.Fatalf("Eni %s attached to different instance-id: %s", *eni.NetworkInterfaceId, attachedID)
+			} else {
+				log.Infof("Eni %s already attached to this instance, skipping", *eni.NetworkInterfaceId)
+				continue
 			}
-		} else {
-			continue
 		}
 		enis = append(enis, *eni.NetworkInterfaceId)
 	}
