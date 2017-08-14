@@ -14,6 +14,8 @@ resource "aws_instance" "instance" {
   subnet_id              = "${aws_subnet.goat_subnet.id}"
   vpc_security_group_ids = ["${aws_security_group.goat_sg.id}"]
 
+  depends_on = ["aws_network_interface.goat_eni", "aws_ebs_volume.log_disk", "aws_ebs_volume.data_disk"]
+
   tags {
     Name             = "${var.prefix}-${count.index}"
     "GOAT-IN:Prefix" = "${var.prefix}"
