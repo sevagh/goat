@@ -1,4 +1,4 @@
-[![Build Status](https://api.travis-ci.org/sevagh/goat.svg?branch=master)](https://travis-ci.org/sevagh/goat) [![ReportCard](http://goreportcard.com/badge/sevagh/goat)](http://goreportcard.com/report/sevagh/goat) [![GitHub tag](https://img.shields.io/github/tag/sevagh/goat.svg)](https://github.com/sevagh/goat/releases)
+[![ReportCard](http://goreportcard.com/badge/sevagh/goat)](http://goreportcard.com/report/sevagh/goat) [![GitHub tag](https://img.shields.io/github/tag/sevagh/goat.svg)](https://github.com/sevagh/goat/releases)
 
 *VERY EARLY ALPHA - USE AT YOUR OWN RISK*
 
