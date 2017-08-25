@@ -16,7 +16,7 @@ Furthermore, for EBS volumes, it can perform additional actions such as RAID (wi
 
 It's necessary for the instance to have an IAM Role with _at least_ access to the EBS and ENI resources that it will be attaching - see [here](https://github.com/sevagh/goat-example/blob/master/iam_role.tf). Your roles can be even more permissive (i.e. full EC2 access) but that comes with its own risks.
 
-Unfortunately, resource-level permissions is [currently not supported](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/ec2-api-permissions.html#ec2-api-unsupported-resource-permissions) for attaching network interfaces. This means that to use `goat@eni`, your instances must have full permissions for __all__ ENIs.
+Unfortunately, resource-level permissions are [currently not supported](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/ec2-api-permissions.html#ec2-api-unsupported-resource-permissions) for attaching network interfaces. This means that to use `goat@eni`, your instances must have full permissions for __all__ ENIs.
 
 ### Motivation
 
