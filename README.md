@@ -6,11 +6,15 @@
 
 ### Attach EBS volumes and ENIs to running EC2 instances
 
-`goat` is a Go application which runs from inside the EC2 instance (it's necessary for the instance to have an IAM Role with full EC2 access).
+`goat` is a Go application which runs from inside the EC2 instance.
 
 By setting your tags correctly, `goat` can discover and attach EBS volumes and ENIs.
 
 Furthermore, for EBS volumes, it can perform additional actions such as RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
+
+### Permission model
+
+It's necessary for the instance to have an IAM Role with _at least_ access to the EBS and ENI resources that it will be attaching - see [here](https://github.com/sevagh/goat-example/blob/master/iam_role.tf). Your roles can be even more permissive (i.e. full EC2 access) but that comes with its own risks.
 
 ### Motivation
 
