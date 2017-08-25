@@ -16,6 +16,8 @@ Furthermore, for EBS volumes, it can perform additional actions such as RAID (wi
 
 It's necessary for the instance to have an IAM Role with _at least_ access to the EBS and ENI resources that it will be attaching - see [here](https://github.com/sevagh/goat-example/blob/master/iam_role.tf). Your roles can be even more permissive (i.e. full EC2 access) but that comes with its own risks.
 
+Unfortunately, resource-level permissions is [currently not supported](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/ec2-api-permissions.html#ec2-api-unsupported-resource-permissions) for attaching network interfaces. This means that to use `goat@eni`, your instances must have full permissions for __all__ ENIs.
+
 ### Motivation
 
 The Terraform resource `aws_volume_attachment` isn't handled well when destroying a stack. See [here](https://github.com/hashicorp/terraform/issues/9000) for some discussion on the matter. We initially wrote instance-specific user-data shell scripts with hardcoded values (e.g. `mkfs.ext4 /dev/xvdb`, `mount /dev/xvdb /var/kafka_data`). With `goat` we can avoid needing to pass parameters or hardcoding values. All the required information comes from the EC2 instance and EBS volume tags.
