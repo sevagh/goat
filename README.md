@@ -12,6 +12,42 @@ $ export TF_VAR_aws_secret_key=xxxx
 $ export TF_VAR_keypair_name=mykeypair
 ```
 
+### Permission model
+
+Instead of fully open EC2 access, we can actually have tag-based permissions for EBS volumes:
+
+```json
+"Effect": "Allow",
+"Action": [
+  "ec2:*"
+],
+"Resource": "*",
+"Condition":
+    {"StringEquals": {
+        "ec2:ResourceTag/GOAT-IN:Prefix": ["${var.prefix}"]
+    }
+}
+```
+
+Links:
+
+* https://aws.amazon.com/premiumsupport/knowledge-center/iam-ec2-resource-tags/
+* https://docs.aws.amazon.com/AWSEC2/latest/APIReference/ec2-api-permissions.html
+
+Due to [current limitations](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/ec2-api-permissions.html#ec2-api-unsupported-resource-permissions), unfortunately, we cannot have the same tag-based permissions for the `AttachNetworkInterface` action.
+
+The result is that to use `goat@eni`, necessarily your EC2 instance must have the power to attach _any_ network interface:
+
+```json
+{
+  "Effect": "Allow",
+  "Action": [
+    "ec2:AttachNetworkInterface"
+  ],
+  "Resource": "*"
+}
+```
+
 ### Results for this repo
 
 #### EBS

@@ -30,13 +30,32 @@ resource "aws_iam_role_policy" "iam_role_policy" {
   policy = <<EOF
 {
   "Version": "2012-10-17",
-  "Statement": [{
+  "Statement": [
+  {
     "Effect": "Allow",
     "Action": [
       "ec2:*"
     ],
+    "Resource": "*",
+    "Condition":
+        {"StringEquals": {
+            "ec2:ResourceTag/GOAT-IN:Prefix": ["${var.prefix}"]
+        }
+    }
+  },
+  {
+    "Effect" : "Allow",
+    "Action" : "ec2:Describe*",
+    "Resource" : "*"
+  },
+  {
+    "Effect": "Allow",
+    "Action": [
+      "ec2:AttachNetworkInterface"
+    ],
     "Resource": "*"
-  }]
+  }
+  ]
 }
 EOF
 }
