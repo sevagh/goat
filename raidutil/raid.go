@@ -40,7 +40,7 @@ func CreateRaidArray(driveNames []string, volName string, raidLevel int, dryRun 
 	if dryRun {
 		return raidDriveName
 	}
-	if _, err := execute.ExecuteCommand(cmd, args); err != nil {
+	if _, err := execute.Command(cmd, args); err != nil {
 		raidLogger.Fatalf("Error when executing mdadm command: %v", err)
 	}
 
@@ -61,7 +61,7 @@ func PersistMdadm() error {
 
 	var out execute.CommandOut
 	var err error
-	if out, err = execute.ExecuteCommand(cmd, args); err != nil {
+	if out, err = execute.Command(cmd, args); err != nil {
 		log.Fatalf("Error when executing mdadm command: %v", err)
 	}
 

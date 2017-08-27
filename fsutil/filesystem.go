@@ -23,7 +23,7 @@ func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bo
 		return nil
 	}
 
-	fsOut, err := execute.ExecuteCommand(cmd, args)
+	fsOut, err := execute.Command(cmd, args)
 	if err != nil {
 		if fsOut.Status == 2 {
 			//go ahead and create filesystem
@@ -53,7 +53,7 @@ func CreateFilesystem(driveName string, desiredFs string, label string, dryRun b
 		return nil
 	}
 
-	if _, err := execute.ExecuteCommand(cmd, args); err != nil {
+	if _, err := execute.Command(cmd, args); err != nil {
 		return err
 	}
 	return nil

@@ -17,19 +17,19 @@ func GoatEbs(dryRun bool, debug bool) {
 	ec2Instance := awsutil.GetEC2InstanceData()
 
 	log.Printf("2: COLLECTING EBS INFO")
-	ebsVolumes := awsutil.MapEbsVolumes(&ec2Instance)
+	ec2Instance.FindEbsVolumes()
 
 	log.Printf("3: ATTACHING EBS VOLS")
-	ebsVolumes = awsutil.AttachEbsVolumes(ec2Instance, ebsVolumes, dryRun)
+	ec2Instance.AttachEbsVolumes(dryRun)
 
 	log.Printf("4: MOUNTING ATTACHED VOLS")
 
-	if len(ebsVolumes) == 0 {
+	if len(ec2Instance.Vols) == 0 {
 		log.Warn("Empty vols, nothing to do")
 		os.Exit(0)
 	}
 
-	for volName, vols := range ebsVolumes {
+	for volName, vols := range ec2Instance.Vols {
 		prepAndMountDrives(volName, vols, dryRun)
 	}
 }
