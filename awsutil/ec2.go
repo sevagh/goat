@@ -19,11 +19,9 @@ type EC2Instance struct {
 	Prefix     string
 	NodeID     string
 	Az         string
-}
-
-type ec2Metadata struct {
-	region string
-	az     string
+	Region     string
+	Vols       map[string][]EbsVol
+	Enis       []string
 }
 
 //GetEC2InstanceData returns a populated EC2Instance struct with the current EC2 instances' metadata
@@ -50,23 +48,21 @@ func GetEC2InstanceData() EC2Instance {
 
 	ec2Instance.InstanceID = result
 
-	meta, err := populateRegionInfo(svc)
-	if err != nil {
+	if err := ec2Instance.populateRegionInfo(svc); err != nil {
 		log.Fatalf("Couldn't access InstanceIdentityDocument: %v", err)
 	}
 
-	ec2Instance.Az = meta.az
-	sess.Config.Region = &meta.region
+	sess.Config.Region = &ec2Instance.Region
 
 	log.WithFields(log.Fields{"instance_id": result}).Info("Retrieved metadata successfully")
 
-	ec2Logger := log.WithFields(log.Fields{"instance_id": result, "region": meta.region, "az": meta.az})
+	ec2Logger := log.WithFields(log.Fields{"instance_id": result, "region": ec2Instance.Region, "az": ec2Instance.Az})
 	ec2Logger.Info("Using metadata to initialize EC2 SDK client")
 
 	ec2Svc := ec2.New(sess)
 	ec2Instance.EC2Client = ec2Svc
 
-	err = getInstanceTags(&ec2Instance)
+	err = ec2Instance.getInstanceTags()
 	if err != nil {
 		ec2Logger.Fatalf("Couldn't get tags: %v", err)
 	}
@@ -78,30 +74,29 @@ func GetEC2InstanceData() EC2Instance {
 	return ec2Instance
 }
 
-func populateRegionInfo(svc *ec2metadata.EC2Metadata) (ec2Metadata, error) {
-	ret := ec2Metadata{}
+func (e *EC2Instance) populateRegionInfo(svc *ec2metadata.EC2Metadata) error {
 	id, err := svc.GetInstanceIdentityDocument()
 	if err != nil {
-		return ret, err
+		return err
 	}
-	ret.az = id.AvailabilityZone
-	ret.region = id.Region
-	return ret, nil
+	e.Az = id.AvailabilityZone
+	e.Region = id.Region
+	return nil
 }
 
-func getInstanceTags(ec2Instance *EC2Instance) error {
+func (e *EC2Instance) getInstanceTags() error {
 	params := &ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			{
 				Name: aws.String("instance-id"),
 				Values: []*string{
-					aws.String(ec2Instance.InstanceID),
+					aws.String(e.InstanceID),
 				},
 			},
 		},
 	}
 
-	result, err := ec2Instance.EC2Client.DescribeInstances(params)
+	result, err := e.EC2Client.DescribeInstances(params)
 	if err != nil {
 		return err
 	}
@@ -110,9 +105,9 @@ func getInstanceTags(ec2Instance *EC2Instance) error {
 		for _, instance := range reservation.Instances {
 			for _, tag := range instance.Tags {
 				if *tag.Key == "GOAT-IN:NodeId" {
-					ec2Instance.NodeID = *tag.Value
+					e.NodeID = *tag.Value
 				} else if *tag.Key == "GOAT-IN:Prefix" {
-					ec2Instance.Prefix = *tag.Value
+					e.Prefix = *tag.Value
 				}
 			}
 		}

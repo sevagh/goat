@@ -20,13 +20,13 @@ type EbsVol struct {
 	FsType       string
 }
 
-//MapEbsVolumes discovers and creates a {'VolumeName':[]EbsVol} map for all the required EBS volumes given an EC2Instance struct
-func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
+//FindEbsVolumes discovers and creates a {'VolumeName':[]EbsVol} map for all the required EBS volumes given an EC2Instance struct
+func (e *EC2Instance) FindEbsVolumes() {
 	drivesToMount := map[string][]EbsVol{}
 
 	log.Info("Searching for EBS volumes")
 
-	volumes, err := findEbsVolumes(ec2Instance)
+	volumes, err := e.findEbsVolumes()
 	if err != nil {
 		log.Fatalf("Error when searching for EBS volumes: %v", err)
 	}
@@ -57,28 +57,28 @@ func MapEbsVolumes(ec2Instance *EC2Instance) map[string][]EbsVol {
 		}
 	}
 
-	return drivesToMount
+	e.Vols = drivesToMount
 }
 
-func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
+func (e *EC2Instance) findEbsVolumes() ([]EbsVol, error) {
 	params := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			{
 				Name: aws.String("tag:GOAT-IN:Prefix"),
 				Values: []*string{
-					aws.String(ec2Instance.Prefix),
+					aws.String(e.Prefix),
 				},
 			},
 			{
 				Name: aws.String("tag:GOAT-IN:NodeId"),
 				Values: []*string{
-					aws.String(ec2Instance.NodeID),
+					aws.String(e.NodeID),
 				},
 			},
 			{
 				Name: aws.String("availability-zone"),
 				Values: []*string{
-					aws.String(ec2Instance.Az),
+					aws.String(e.Az),
 				},
 			},
 		},
@@ -86,7 +86,7 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 
 	volumes := []EbsVol{}
 
-	result, err := ec2Instance.EC2Client.DescribeVolumes(params)
+	result, err := e.EC2Client.DescribeVolumes(params)
 	if err != nil {
 		return volumes, err
 	}
@@ -102,7 +102,7 @@ func findEbsVolumes(ec2Instance *EC2Instance) ([]EbsVol, error) {
 		}
 		if len(volume.Attachments) > 0 {
 			for _, attachment := range volume.Attachments {
-				if *attachment.InstanceId != ec2Instance.InstanceID {
+				if *attachment.InstanceId != e.InstanceID {
 					return volumes, fmt.Errorf("Volume %s attached to different instance-id: %s", *volume.VolumeId, *attachment.InstanceId)
 				}
 				ebsVolume.AttachedName = *attachment.Device

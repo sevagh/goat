@@ -8,13 +8,13 @@ import (
 )
 
 //AttachEbsVolumes attaches the given map of {'VolumeName':[]EbsVol} with the EC2 client in the provided ec2Instance
-func AttachEbsVolumes(ec2Instance EC2Instance, volumes map[string][]EbsVol, dryRun bool) map[string][]EbsVol {
+func (e *EC2Instance) AttachEbsVolumes(dryRun bool) map[string][]EbsVol {
 	var deviceName string
 	var err error
 
 	localVolumes := map[string][]EbsVol{}
 
-	for key, volumes := range volumes {
+	for key, volumes := range e.Vols {
 		localVolumes[key] = []EbsVol{}
 		for _, volume := range volumes {
 			volLogger := log.WithFields(log.Fields{"vol_id": volume.EbsVolID, "vol_name": volume.VolumeName})
@@ -25,12 +25,12 @@ func AttachEbsVolumes(ec2Instance EC2Instance, volumes map[string][]EbsVol, dryR
 				}
 				attachVolIn := &ec2.AttachVolumeInput{
 					Device:     &deviceName,
-					InstanceId: &ec2Instance.InstanceID,
+					InstanceId: &e.InstanceID,
 					VolumeId:   &volume.EbsVolID,
 					DryRun:     &dryRun,
 				}
 				volLogger.Info("Executing AWS SDK attach command")
-				volAttachments, err := ec2Instance.EC2Client.AttachVolume(attachVolIn)
+				volAttachments, err := e.EC2Client.AttachVolume(attachVolIn)
 				if err != nil {
 					volLogger.Fatalf("Couldn't attach: %v", err)
 				}
@@ -49,20 +49,20 @@ func AttachEbsVolumes(ec2Instance EC2Instance, volumes map[string][]EbsVol, dryR
 }
 
 //AttachEnis attaches the given array of Eni Ids with the EC2 client in the provided ec2Instance
-func AttachEnis(ec2Instance EC2Instance, enis []string, dryRun bool) {
-	for eniIdx, eni := range enis {
+func (e *EC2Instance) AttachEnis(dryRun bool) {
+	for eniIdx, eni := range e.Enis {
 		eniLogger := log.WithFields(log.Fields{"eni_id": eni})
 
 		deviceIdx := int64(eniIdx + 1)
 		attachEniIn := &ec2.AttachNetworkInterfaceInput{
 			NetworkInterfaceId: &eni,
-			InstanceId:         &ec2Instance.InstanceID,
+			InstanceId:         &e.InstanceID,
 			DryRun:             &dryRun,
 			DeviceIndex:        &deviceIdx,
 		}
 
 		eniLogger.Info("Executing AWS SDK attach command")
-		_, err := ec2Instance.EC2Client.AttachNetworkInterface(attachEniIn)
+		_, err := e.EC2Client.AttachNetworkInterface(attachEniIn)
 		if err != nil {
 			eniLogger.Fatalf("Couldn't attach: %v", err)
 		}

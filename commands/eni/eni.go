@@ -14,14 +14,14 @@ func GoatEni(dryRun bool, debug bool) {
 	ec2Instance := awsutil.GetEC2InstanceData()
 
 	log.Printf("2: COLLECTING ENI INFO")
-	enis := awsutil.FindEnis(&ec2Instance)
+	ec2Instance.FindEnis()
 
 	log.Printf("3: ATTACHING ENIS")
 
-	if len(enis) == 0 {
+	if len(ec2Instance.Enis) == 0 {
 		log.Warn("Empty enis, nothing to do")
 		os.Exit(0)
 	}
 
-	awsutil.AttachEnis(ec2Instance, enis, dryRun)
+	ec2Instance.AttachEnis(dryRun)
 }
