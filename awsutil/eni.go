@@ -8,7 +8,7 @@ import (
 )
 
 //FindEnis returns a list of all ENIs that should be attached to this EC2 instance
-func FindEnis(ec2Instance *EC2Instance) []string {
+func (e *EC2Instance) FindEnis() {
 	log.Info("Searching for ENIs")
 
 	params := &ec2.DescribeNetworkInterfacesInput{
@@ -16,19 +16,19 @@ func FindEnis(ec2Instance *EC2Instance) []string {
 			{
 				Name: aws.String("tag:GOAT-IN:Prefix"),
 				Values: []*string{
-					aws.String(ec2Instance.Prefix),
+					aws.String(e.Prefix),
 				},
 			},
 			{
 				Name: aws.String("tag:GOAT-IN:NodeId"),
 				Values: []*string{
-					aws.String(ec2Instance.NodeID),
+					aws.String(e.NodeID),
 				},
 			},
 			{
 				Name: aws.String("availability-zone"),
 				Values: []*string{
-					aws.String(ec2Instance.Az),
+					aws.String(e.Az),
 				},
 			},
 		},
@@ -36,7 +36,7 @@ func FindEnis(ec2Instance *EC2Instance) []string {
 
 	enis := []string{}
 
-	result, err := ec2Instance.EC2Client.DescribeNetworkInterfaces(params)
+	result, err := e.EC2Client.DescribeNetworkInterfaces(params)
 	if err != nil {
 		log.Fatalf("Error when searching for ENIs: %v", err)
 	}
@@ -47,7 +47,7 @@ func FindEnis(ec2Instance *EC2Instance) []string {
 			attachedID = *eni.Attachment.InstanceId
 		}
 		if attachedID != "" {
-			if attachedID != ec2Instance.InstanceID {
+			if attachedID != e.InstanceID {
 				log.Fatalf("Eni %s attached to different instance-id: %s", *eni.NetworkInterfaceId, attachedID)
 			} else {
 				log.Infof("Eni %s already attached to this instance, skipping", *eni.NetworkInterfaceId)
@@ -57,5 +57,5 @@ func FindEnis(ec2Instance *EC2Instance) []string {
 		enis = append(enis, *eni.NetworkInterfaceId)
 	}
 
-	return enis
+	e.Enis = enis
 }
