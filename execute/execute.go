@@ -14,8 +14,8 @@ type CommandOut struct {
 	Status int
 }
 
-//ExecuteCommand executes a given command + args and returns a CommandOut struct with an error if the command fails
-func ExecuteCommand(commandString string, args []string) (CommandOut, error) {
+//Command executes a given command + args and returns a CommandOut struct with an error if the command fails
+func Command(commandString string, args []string) (CommandOut, error) {
 	out := CommandOut{}
 	cmd := exec.Command(commandString, args...)
 
