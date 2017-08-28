@@ -11,7 +11,7 @@ deps:
 	@dep ensure
 
 test: build
-	@go fmt . 
+	@gofmt -s -w ./...
 	@go vet .
 	@go test -v ./...
 
