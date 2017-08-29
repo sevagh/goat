@@ -4,15 +4,15 @@ data "template_file" "bootstrap" {
 }
 
 resource "aws_instance" "instance" {
-  count                  = "${var.servers}"
-  availability_zone      = "us-east-1a"
-  ami                    = "ami-6d1c2007"
-  instance_type          = "t2.micro"
-  key_name               = "${var.keypair_name}"
-  user_data              = "${element(data.template_file.bootstrap.*.rendered, count.index)}"
-  iam_instance_profile   = "${aws_iam_instance_profile.iam_profile.id}"
-  subnet_id              = "${aws_subnet.goat_subnet.id}"
-  vpc_security_group_ids = ["${aws_security_group.goat_sg.id}"]
+  count                       = "${var.servers}"
+  availability_zone           = "us-east-1a"
+  ami                         = "ami-6d1c2007"
+  instance_type               = "t2.micro"
+  key_name                    = "${var.keypair_name}"
+  user_data                   = "${element(data.template_file.bootstrap.*.rendered, count.index)}"
+  iam_instance_profile        = "${aws_iam_instance_profile.iam_profile.id}"
+  subnet_id                   = "${aws_subnet.goat_subnet.id}"
+  associate_public_ip_address = "false"
 
   depends_on = ["aws_network_interface.goat_eni", "aws_ebs_volume.log_disk", "aws_ebs_volume.data_disk"]
 
