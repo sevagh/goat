@@ -14,7 +14,7 @@ Furthermore, for EBS volumes, it can perform additional actions such as RAID (wi
 
 ### Permission model
 
-It's necessary for the instance to have an IAM Role with _at least_ access to the EBS and ENI resources that it will be attaching - see [here](https://github.com/sevagh/goat-example/blob/master/iam_role.tf). Your roles can be even more permissive (i.e. full EC2 access) but that comes with its own risks.
+It's necessary for the instance to have an IAM Role with _at least_ access to the EBS and ENI resources that it will be attaching - see [here](./hcl-example/iam_role.tf). Your roles can be even more permissive (i.e. full EC2 access) but that comes with its own risks.
 
 Unfortunately, resource-level permissions are [currently not supported](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/ec2-api-permissions.html#ec2-api-unsupported-resource-permissions) for attaching network interfaces. This means that to use `goat@eni`, your instances must have full permissions for __all__ ENIs.
 
@@ -49,7 +49,7 @@ Goat by itself is sufficient for the EBS feature, but needs help for setting up 
 
 Refer to [this](./commands/eni#setting-up-the-eni---ec2-net-utils) document. It refers to a [port of ec2-net-utils](https://github.com/sevagh/ec2-utils/releases) from the Amazon Linux AMI to CentOS/systemd.
 
-A fully working chunk of `ec2 user-data` with `goat` looks like [this](https://github.com/sevagh/goat-example/blob/master/bootstrap.tpl#L8):
+A fully working chunk of `ec2 user-data` with `goat` looks like [this](./hcl-example/blob/master/bootstrap.tpl#L8):
 
 ```
 yum install -y wget mdadm
@@ -65,4 +65,4 @@ systemctl start goat@eni
 
 ### Examples
 
-[Link to the example Terraform HCL scripts](https://github.com/sevagh/goat-example).
+[Link to the example Terraform HCL scripts](./hcl-example).
