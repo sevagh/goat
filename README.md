@@ -47,14 +47,14 @@ $ journalctl -u goat@ebs
 
 Goat by itself is sufficient for the EBS feature, but needs help for setting up an ENI.
 
-Refer to [this](./commands/eni#setting-up-the-eni---ec2-net-utils) document. It refers to a [port of ec2-net-utils](https://github.com/sevagh/ec2-utils/releases) from the Amazon Linux AMI to CentOS/systemd.
+Refer to [this](./commands/eni#setting-up-the-eni---ec2-net-utils) document. It refers to a [port of ec2-net-utils](./ec2-utils) from the Amazon Linux AMI to CentOS/systemd.
 
 A fully working chunk of `ec2 user-data` with `goat` looks like [this](./hcl-example/blob/master/bootstrap.tpl#L8):
 
 ```
 yum install -y wget mdadm
 yum install -y https://github.com/sevagh/goat/releases/download/0.4.0/goat-0.4.0-1.fc25.x86_64.rpm
-yum install -y https://github.com/sevagh/ec2-utils/releases/download/v0.5.3/ec2-net-utils-0.5-2.fc25.noarch.rpm
+yum install -y https://github.com/sevagh/goat/releases/download/ec2-utils-v0.5.3/ec2-net-utils-0.5-2.fc25.noarch.rpm
 systemctl enable elastic-network-interfaces
 systemctl start elastic-network-interfaces
 systemctl enable goat@ebs
