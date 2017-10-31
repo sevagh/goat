@@ -1,0 +1,13 @@
+# This task finds and configures elastic network interfaces
+# left in an unconfigured state.
+[Unit]
+Description=Elastic Network Interfaces
+After=network-online.target syslog.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/sbin/ec2ifscan
+
+[Install]
+WantedBy=multi-user.target

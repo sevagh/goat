@@ -1,0 +1,22 @@
+[Unit]
+Description=Bring up %i if configured by ec2net.hotplug
+
+# BindsTo marks this service as stopped when the device disappears, and also
+# kills children in the control group such as dhclient (though, the ifdown
+# run by udev would take care of that as well).
+BindsTo=sys-subsystem-net-devices-%i.device
+
+# Don't run when network.service is still starting, avoids trying to bring up
+# interfaces that network.service is already bringing up.
+After=network.service
+
+# Don't run if network.service has already configured the interface.
+ConditionPathExists=!/var/run/dhclient-%i.pid
+
+# Don't run if elastic-network-interfaces hasn't written the config yet.
+# There will be another udev add event after it's configured.
+ConditionPathExists=/etc/sysconfig/network-scripts/ifcfg-%i
+
+[Service]
+ExecStart=/sbin/ifup %i
+RemainAfterExit=true

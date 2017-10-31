@@ -1,0 +1,2 @@
+#!/bin/sh
+exec /sbin/modprobe acpiphp >/dev/null 2>&1
