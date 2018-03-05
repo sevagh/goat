@@ -28,15 +28,15 @@ The Terraform resource `aws_volume_attachment` isn't handled well when destroyin
 
 Docs:
 
-* [ebs](./commands/ebs/README.md)
-* [eni](./commands/eni/README.md)
+* [ebs](./pkg/commands/ebs/README.md)
+* [eni](./pkg/commands/eni/README.md)
 
 ### RPM-based install
 
 Goat is systemd-based and has been developed for CentOS. Install the rpm from the releases page:
 
 ```
-$ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.4.0/goat-0.4.0-1.fc25.x86_64.rpm
+$ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.4.1/goat-0.4.1-1.fc25.x86_64.rpm
 $ sudo systemctl enable goat@ebs
 $ sudo systemctl start goat@ebs
 $ ...
