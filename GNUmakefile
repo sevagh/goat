@@ -1,4 +1,4 @@
-VERSION:=0.4.0
+VERSION:=0.4.1
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
 GOAT_NAME=$(notdir $(shell pwd))
 
