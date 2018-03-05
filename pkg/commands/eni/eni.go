@@ -4,7 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 
-	"github.com/sevagh/goat/awsutil"
+	"github.com/sevagh/goat/pkg/awsutil"
 )
 
 //GoatEni runs Goat for your ENIs - attach

@@ -4,10 +4,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 
-	"github.com/sevagh/goat/awsutil"
-	"github.com/sevagh/goat/driveutil"
-	"github.com/sevagh/goat/fsutil"
-	"github.com/sevagh/goat/raidutil"
+	"github.com/sevagh/goat/pkg/awsutil"
+	"github.com/sevagh/goat/pkg/driveutil"
+	"github.com/sevagh/goat/pkg/fsutil"
+	"github.com/sevagh/goat/pkg/raidutil"
 )
 
 //GoatEbs runs Goat for your EBS volumes - attach, mount, mkfs, etc.
