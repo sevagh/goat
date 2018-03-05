@@ -14,25 +14,32 @@ all: build_static
 builddir:
 	@mkdir -p $(DIST_DIR) $(BIN_DIR)
 
-build:
+build: builddir deps
 	@cd cmd/goat && go build $(DYNAMIC_FLAGS) -o ../../$(BIN_DIR)/$(GOAT_NAME)
 
-build_static: builddir
+build_static: builddir deps
 	@cd cmd/goat && go build $(STATIC_FLAGS) -o ../../$(BIN_DIR)/$(GOAT_NAME)
 
-release: builddir
+release: builddir deps
 	@cd cmd/goat && go build $(RELEASE_FLAGS) -o ../../$(BIN_DIR)/$(GOAT_NAME)
 
 deps:
-	@go get -u github.com/golang/dep
+	@go get -u github.com/golang/dep/cmd/dep
 	@dep ensure
 
-test: build lint
-	@go vet .
-	@go test -v ./...
+test:
+	@go vet ./pkg/...
+	@go vet ./cmd/goat/...
+	@go test -v ./pkg/...
+	@go test -v ./cmd/goat/...
 
-lint:
+lint: lintsetup
 	@gofmt -s -w $(GOAT_FILES)
+	@gometalinter.v2 --enable-all $(GOAT_FILES) --exclude=_test.go
+
+lintsetup:
+	@go get -u gopkg.in/alecthomas/gometalinter.v2
+	@gometalinter.v2 --install 2>&1 >/dev/null
 
 clean:
 	-rm -rf build
