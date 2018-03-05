@@ -6,8 +6,8 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 
-	"github.com/sevagh/goat/commands/ebs"
-	"github.com/sevagh/goat/commands/eni"
+	"github.com/sevagh/goat/pkg/commands/ebs"
+	"github.com/sevagh/goat/pkg/commands/eni"
 )
 
 //Goat version substituted by the Makefile

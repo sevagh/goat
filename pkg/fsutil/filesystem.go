@@ -4,7 +4,7 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 
-	"github.com/sevagh/goat/execute"
+	"github.com/sevagh/goat/pkg/execute"
 )
 
 //CheckFilesystem checks for a filesystem on a given drive using blkid. It returns ok if there is no filesystem or the filesystem is the correct type. Error if there's a different filesystem

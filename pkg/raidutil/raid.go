@@ -5,8 +5,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/sevagh/goat/driveutil"
-	"github.com/sevagh/goat/execute"
+	"github.com/sevagh/goat/pkg/driveutil"
+	"github.com/sevagh/goat/pkg/execute"
 )
 
 //CreateRaidArray runs the appropriate mdadm command for the given list of EbsVol that should be raided together. It takes dryRun as a boolean, where it tells you which mdadm it would have run

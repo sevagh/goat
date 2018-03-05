@@ -3,7 +3,7 @@ package driveutil
 import (
 	"time"
 
-	"github.com/sevagh/goat/execute"
+	"github.com/sevagh/goat/pkg/execute"
 )
 
 //DoesDriveExistWithTimeout makes 10 attempts, 2 second sleep between each, to stat a drive to check for its existence

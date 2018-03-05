@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/sevagh/goat/execute"
+	"github.com/sevagh/goat/pkg/execute"
 )
 
 //Mount calls mount with no parameters. It relies on there being a correct fstab entry on the provided mountpoint. In the case of a dryRun it doesn't actually execute it, just logs what it would have executed
