@@ -1,2 +1,3 @@
-dist/
-goat
+bin/
+rpm-package/ebs/goat-ebs
+rpm-package/eni/goat-eni
