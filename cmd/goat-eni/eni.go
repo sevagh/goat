@@ -1,4 +1,4 @@
-package eni
+package main
 
 import (
 	log "github.com/sirupsen/logrus"

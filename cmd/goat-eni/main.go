@@ -5,20 +5,16 @@ import (
 	"github.com/docopt/docopt-go"
 	log "github.com/sirupsen/logrus"
 	"os"
-
-	"github.com/sevagh/goat/pkg/commands/ebs"
-	"github.com/sevagh/goat/pkg/commands/eni"
 )
 
 //Goat version substituted by the Makefile
 var VERSION string
 
 func main() {
-	usage := `goat - EC2/EBS utility
+	usage := `goat - ENI attach utility
 
 Usage:
-  goat ebs [--log-level=<log-level>] [--dry] [--debug]
-  goat eni [--log-level=<log-level>] [--dry] [--debug]
+  goat [--log-level=<log-level>] [--dry] [--debug]
   goat -h | --help
   goat --version
 
@@ -43,11 +39,6 @@ Options:
 	dryRun := arguments["--dry"].(bool)
 	debug := arguments["--debug"].(bool)
 
-	if arguments["ebs"].(bool) {
-		log.Printf("Running goat for EBS")
-		ebs.GoatEbs(dryRun, debug)
-	} else if arguments["eni"].(bool) {
-		log.Printf("Running goat for ENI")
-		eni.GoatEni(dryRun, debug)
-	}
+        log.Printf("Running goat for ENI")
+        GoatEni(dryRun, debug)
 }
