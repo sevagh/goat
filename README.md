@@ -10,7 +10,7 @@ By setting your tags correctly, `goat` can discover and attach EBS volumes and E
 
 Furthermore, for EBS volumes, it can perform additional actions such as RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
 
-The `goat` package consists on the subcommands [goat-ebs](./cmd/goat-ebs/README.md) and [goat-eni](./cmd/goat-eni/README.md).
+The `goat` package consists of the subcommands [goat-ebs](./cmd/goat-ebs/README.md) and [goat-eni](./cmd/goat-eni/README.md).
 
 ### Permission model
 
