@@ -10,11 +10,11 @@ By setting your tags correctly, `goat` can discover and attach EBS volumes and E
 
 Furthermore, for EBS volumes, it can perform additional actions such as RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
 
-The `goat` package consists of the subcommands [goat-ebs](./cmd/goat-ebs/README.md) and [goat-eni](./cmd/goat-eni/README.md).
+The `goat` package consists of the subcommands [goat ebs](./docs/EBS.md) and [goat eni](./docs/ENI.md).
 
 ### Permission model
 
-It's necessary for the instance to have an IAM Role with _at least_ access to the EBS and ENI resources that it will be attaching - see [here](./hcl-example/iam_role.tf). Your roles can be even more permissive (i.e. full EC2 access) but that comes with its own risks.
+It's necessary for the instance to have an IAM Role with _at least_ access to the EBS and ENI resources that it will be attaching - see [here](./docs/hcl-example/iam_role.tf). Your roles can be even more permissive (i.e. full EC2 access) but that comes with its own risks.
 
 Unfortunately, resource-level permissions are [currently not supported](https://docs.aws.amazon.com/AWSEC2/latest/APIReference/ec2-api-permissions.html#ec2-api-unsupported-resource-permissions) for attaching network interfaces. This means that to use `goat@eni`, your instances must have full permissions for __all__ ENIs.
 
@@ -47,4 +47,4 @@ $ sudo systemctl start goat-eni
 
 ### Examples
 
-[Link to the example Terraform HCL scripts](./hcl-example).
+[Link to the example Terraform HCL scripts](./docs/hcl-example).

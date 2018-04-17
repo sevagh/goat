@@ -1,23 +1,17 @@
-package fsutil
+package filesystem
 
 import (
-	log "github.com/sirupsen/logrus"
 	"path/filepath"
 	"strings"
 
-	"github.com/sevagh/goat/pkg/execute"
+	"github.com/sevagh/goat/execute"
 )
 
-//Mount calls mount with no parameters. It relies on there being a correct fstab entry on the provided mountpoint. In the case of a dryRun it doesn't actually execute it, just logs what it would have executed
-func Mount(mountPath string, dryRun bool) error {
+//Mount calls mount with no parameters. It relies on there being a correct fstab entry on the provided mountpoint.
+func Mount(mountPath string) error {
 	cmd := "mount"
 	args := []string{
 		mountPath,
-	}
-
-	if dryRun {
-		log.WithFields(log.Fields{"mount_path": mountPath}).Infof("MOUNT: Would have executed: %s %s", cmd, args)
-		return nil
 	}
 
 	if _, err := execute.Command(cmd, args); err != nil {

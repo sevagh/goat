@@ -1,33 +1,14 @@
-VERSION:=0.5.0
+VERSION:=0.6.0
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
-GOAT_CMDS=$(shell find cmd/ -maxdepth 1 -mindepth 1 -type d)
 
-STATIC_ENV:=CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-STATIC_FLAGS:=-a -tags netgo -ldflags '-extldflags "-static" -X main.VERSION=$(VERSION)'
-RELEASE_FLAGS:=-a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)'
-
-all: build_static
+all: build
 
 build: deps
-	@$(foreach cmd,$(GOAT_CMDS),\
-		cd $(cmd) &&\
-		$(STATIC_ENV) go build $(STATIC_FLAGS) \
-			-o ../../bin/$(notdir $(cmd)) &&\
-		cd - 2>&1 >/dev/null;)
-
-release: deps
-	@$(foreach cmd,$(GOAT_CMDS),\
-		cd $(cmd) &&\
-		$(STATIC_ENV) go build $(RELEASE_FLAGS) \
-			-o ../../bin/$(notdir $(cmd)) &&\
-		cd - 2>&1 >/dev/null;)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o  bin/goat
 
 test:
-	@$(foreach cmd,$(GOAT_CMDS),\
-		go vet ./$(cmd) &&\
-		go test -v ./$(cmd);)
-	@go vet ./pkg/...
-	@go test -v ./pkg/...
+	@go vet ./...
+	@go test -v ./...
 
 deps:
 	@command -v dep 2>&1 >/dev/null || go get -u github.com/golang/dep/cmd/dep
@@ -40,11 +21,13 @@ lint:
 lintsetup:
 	@go get -u gopkg.in/alecthomas/gometalinter.v2
 	@gometalinter.v2 --install 2>&1 >/dev/null
+	@go install ./...
 
 clean:
 	-rm -rf bin
 
-package: release
-	@GOAT_VERSION=$(VERSION) $(MAKE) -C ./rpm-package/
+rpm: build
+	@cp bin/goat rpm-package/
+	GOAT_VERSION=$(VERSION) $(MAKE) -C ./rpm-package/
 
 .PHONY: clean test
