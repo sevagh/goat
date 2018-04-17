@@ -21,6 +21,7 @@ lint:
 lintsetup:
 	@go get -u gopkg.in/alecthomas/gometalinter.v2
 	@gometalinter.v2 --install 2>&1 >/dev/null
+	@go install ./...
 
 clean:
 	-rm -rf bin
