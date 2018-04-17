@@ -6,9 +6,7 @@
 
 `goat` is a Go application which runs from inside the EC2 instance.
 
-By setting your tags correctly, `goat` can discover and attach EBS volumes and ENIs.
-
-Furthermore, for EBS volumes, it can perform additional actions such as RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
+By setting your tags correctly, `goat` can discover and attach EBS volumes and ENIs. Furthermore, for EBS volumes, it can perform additional actions such as RAID (with mdadm), mkfs, and mount EBS volumes to the EC2 instance where it's running.
 
 The `goat` package consists of the subcommands [goat ebs](./docs/EBS.md) and [goat eni](./docs/ENI.md).
 
@@ -23,27 +21,16 @@ Unfortunately, resource-level permissions are [currently not supported](https://
 Goat is systemd-based and has been developed for CentOS. Install the rpm from the releases page:
 
 ```
-$ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.4.1/goat-ebs-0.4.2-1.fc25.x86_64.rpm
-$ sudo systemctl enable goat-ebs
-$ sudo systemctl start goat-ebs
+$ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.6.0/goat-0.6.0-1.fc27.x86_64.rpm
+$ sudo systemctl enable goat@ebs
+$ sudo systemctl start goat@ebs
 ```
 
 ### Additional dependencies for ENI
 
 Goat by itself is sufficient for the EBS feature, but needs help for setting up an ENI.
 
-Refer to [this](./commands/eni#setting-up-the-eni---ec2-net-utils) document. It refers to a [port of ec2-net-utils](https://github.com/sevagh/ec2-utils/releases) from the Amazon Linux AMI to CentOS/systemd.
-
-A fully working chunk of `ec2 user-data` with `goat` looks like [this](./hcl-example/blob/master/bootstrap.tpl#L8):
-
-```
-$ sudo yum install -y https://github.com/sevagh/goat/releases/download/0.4.0/goat-eni-0.4.2-1.fc25.x86_64.rpm
-$ sudo yum install -y https://github.com/sevagh/ec2-utils/releases/download/v0.5.3/ec2-net-utils-0.5-2.fc25.noarch.rpm
-$ sudo systemctl enable elastic-network-interfaces
-$ sudo systemctl start elastic-network-interfaces
-$ sudo systemctl enable goat-eni
-$ sudo systemctl start goat-eni
-```
+Refer to [this](./docs/ENI.md#setting-up-the-eni---ec2-net-utils) document. It refers to my fork of a [port of ec2-net-utils](https://github.com/sevagh/ec2-utils/releases) from the Amazon Linux AMI to CentOS/systemd.
 
 ### Examples
 
