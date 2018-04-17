@@ -1,4 +1,4 @@
-VERSION:=0.5.0
+VERSION:=0.6.0
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
 
 STATIC_ENV:=CGO_ENABLED=0 GOOS=linux GOARCH=amd64
