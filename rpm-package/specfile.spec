@@ -1,14 +1,14 @@
-%define pkgname goat-eni
+%define pkgname goat
 
 Name: %{pkgname}
 Version: %{_version}
 Release: 1%{?dist}
-Summary: Attach AWS elastic network interfaces
+Summary: Attach and mount EBS and ENI
 
 License: BSD 3-clause
 URL: https://github.com/sevagh/goat 
 Source0: %{pkgname}
-Source1: %{pkgname}.service
+Source1: %{pkgname}@.service
 
 Requires: systemd mdadm
 
@@ -26,12 +26,12 @@ Automatically attach AWS resources to a running EC2 instance.
 %{__mkdir} -p %{buildroot}/%{_bindir}
 %{__mkdir} -p %{buildroot}/%{_unitdir}
 %{__install} -m0775 %{SOURCE0} %{buildroot}/%{_bindir}/%{pkgname}
-%{__install} -m0777 %{SOURCE1} %{buildroot}/%{_unitdir}/%{pkgname}.service
+%{__install} -m0777 %{SOURCE1} %{buildroot}/%{_unitdir}/%{pkgname}@.service
 
 
 %files
 %{_bindir}/%{pkgname}
-%{_unitdir}/%{pkgname}.service
+%{_unitdir}/%{pkgname}@.service
 
 
 %post
@@ -43,8 +43,8 @@ fi
 %preun
 if [ $1 -eq 0 ] ; then
         # Package removal, not upgrade
-        /bin/systemctl disable %{pkgname}.service >/dev/null 2>&1 || :
-        /bin/systemctl stop %{pkgname}.service >/dev/null 2>&1 || :
+        /bin/systemctl disable %{pkgname}@*.service >/dev/null 2>&1 || :
+        /bin/systemctl stop %{pkgname}@*.service >/dev/null 2>&1 || :
 fi
 
 
@@ -53,6 +53,8 @@ fi
 
 
 %changelog
+* Tue Apr 17 2018 Sevag Hanssian <sevag.hanssian@gmail.com>
+- Recombine commands
 * Tue Mar 06 2018 Sevag Hanssian <sevag.hanssian@gmail.com>
 - Split subcommands into two binaries
 * Thu Aug 10 2017 Sevag Hanssian <sevag.hanssian@gmail.com>

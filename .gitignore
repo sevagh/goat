@@ -1,3 +1,2 @@
 bin/
-rpm-package/ebs/goat-ebs
-rpm-package/eni/goat-eni
+rpm-package/goat

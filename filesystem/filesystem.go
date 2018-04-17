@@ -1,14 +1,13 @@
-package fsutil
+package filesystem
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
 
-	"github.com/sevagh/goat/pkg/execute"
+	"github.com/sevagh/goat/execute"
 )
 
 //CheckFilesystem checks for a filesystem on a given drive using blkid. It returns ok if there is no filesystem or the filesystem is the correct type. Error if there's a different filesystem
-func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bool) error {
+func CheckFilesystem(driveName string, desiredFs string, label string) error {
 	cmd := "blkid"
 	args := []string{
 		"-o",
@@ -16,11 +15,6 @@ func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bo
 		"-s",
 		"TYPE",
 		driveName,
-	}
-
-	if dryRun {
-		log.WithFields(log.Fields{"drive_name": driveName, "fs": desiredFs, "label": label}).Infof("FILESYSTEM: would have executed %s %s", cmd, args)
-		return nil
 	}
 
 	fsOut, err := execute.Command(cmd, args)
@@ -39,18 +33,13 @@ func CheckFilesystem(driveName string, desiredFs string, label string, dryRun bo
 	}
 }
 
-//CreateFilesystem executes mkfs.<desired_filesystem> on the requested drive. It can do a dryRun where it logs its command without running it
-func CreateFilesystem(driveName string, desiredFs string, label string, dryRun bool) error {
+//CreateFilesystem executes mkfs.<desired_filesystem> on the requested drive.
+func CreateFilesystem(driveName string, desiredFs string, label string) error {
 	cmd := "mkfs." + desiredFs
 	args := []string{
 		driveName,
 		"-L",
 		"GOAT-" + label,
-	}
-
-	if dryRun {
-		log.WithFields(log.Fields{"drive_name": driveName, "fs": desiredFs, "label": label}).Infof("FILESYSTEM: would have executed %s %s", cmd, args)
-		return nil
 	}
 
 	if _, err := execute.Command(cmd, args); err != nil {
