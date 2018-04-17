@@ -1,21 +1,14 @@
 VERSION:=0.6.0
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
 
-STATIC_ENV:=CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-STATIC_FLAGS:=-a -tags netgo -ldflags '-extldflags "-static" -X main.VERSION=$(VERSION)'
-RELEASE_FLAGS:=
-
 all: build
 
 build: deps
 	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o  bin/goat
 
 test:
-	@$(foreach cmd,$(GOAT_CMDS),\
-		go vet ./$(cmd) &&\
-		go test -v ./$(cmd);)
-	@go vet ./pkg/...
-	@go test -v ./pkg/...
+	@go vet ./...
+	@go test -v ./...
 
 deps:
 	@command -v dep 2>&1 >/dev/null || go get -u github.com/golang/dep/cmd/dep

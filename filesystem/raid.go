@@ -1,9 +1,9 @@
 package filesystem
 
 import (
+	"fmt"
 	"os"
 	"strconv"
-        "fmt"
 
 	"github.com/sevagh/goat/execute"
 )
@@ -52,7 +52,7 @@ func PersistMdadm() error {
 	var out execute.CommandOut
 	var err error
 	if out, err = execute.Command(cmd, args); err != nil {
-                return fmt.Errorf("Error when executing mdadm command: %v", err)
+		return fmt.Errorf("Error when executing mdadm command: %v", err)
 	}
 
 	f, err := os.OpenFile("/etc/mdadm.conf", os.O_WRONLY|os.O_CREATE, 0600)

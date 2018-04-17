@@ -52,7 +52,7 @@ func prepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 		driveLogger.Info("Label already exists, jumping to mount phase")
 	} else {
 		var driveName string
-                var err error
+		var err error
 		if len(vols) == 1 {
 			driveLogger.Info("Single drive, no RAID")
 			driveName = vols[0].AttachedName
@@ -66,9 +66,9 @@ func prepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 			for _, vol := range vols {
 				driveNames = append(driveNames, vol.AttachedName)
 			}
-                        if driveName, err = filesystem.CreateRaidArray(driveNames, volName, raidLevel); err != nil {
-                                driveLogger.Fatalf("Error when creating reaid array: %v", err)
-                        }
+			if driveName, err = filesystem.CreateRaidArray(driveNames, volName, raidLevel); err != nil {
+				driveLogger.Fatalf("Error when creating reaid array: %v", err)
+			}
 		}
 
 		if desiredFs == "" {

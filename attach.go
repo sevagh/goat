@@ -1,9 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	log "github.com/sirupsen/logrus"
-        "fmt"
 
 	"github.com/sevagh/goat/filesystem"
 )
