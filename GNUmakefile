@@ -1,26 +1,14 @@
 VERSION:=0.5.0
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
-GOAT_CMDS=$(shell find cmd/ -maxdepth 1 -mindepth 1 -type d)
 
 STATIC_ENV:=CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 STATIC_FLAGS:=-a -tags netgo -ldflags '-extldflags "-static" -X main.VERSION=$(VERSION)'
-RELEASE_FLAGS:=-a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)'
+RELEASE_FLAGS:=
 
-all: build_static
+all: build
 
 build: deps
-	@$(foreach cmd,$(GOAT_CMDS),\
-		cd $(cmd) &&\
-		$(STATIC_ENV) go build $(STATIC_FLAGS) \
-			-o ../../bin/$(notdir $(cmd)) &&\
-		cd - 2>&1 >/dev/null;)
-
-release: deps
-	@$(foreach cmd,$(GOAT_CMDS),\
-		cd $(cmd) &&\
-		$(STATIC_ENV) go build $(RELEASE_FLAGS) \
-			-o ../../bin/$(notdir $(cmd)) &&\
-		cd - 2>&1 >/dev/null;)
+	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o  bin/goat
 
 test:
 	@$(foreach cmd,$(GOAT_CMDS),\
@@ -44,7 +32,8 @@ lintsetup:
 clean:
 	-rm -rf bin
 
-package: release
-	@GOAT_VERSION=$(VERSION) $(MAKE) -C ./rpm-package/
+rpm: build
+	@cp bin/goat rpm-package/
+	GOAT_VERSION=$(VERSION) $(MAKE) -C ./rpm-package/
 
 .PHONY: clean test

@@ -11,10 +11,11 @@ import (
 var VERSION string
 
 func main() {
-	usage := `goat - ENI attach utility
+	usage := `goat - EC2/EBS attach utility
 
 Usage:
-  goat [--log-level=<log-level>] [--dry] [--debug]
+  goat ebs [--log-level=<log-level>] [--dry] [--debug]
+  goat eni [--log-level=<log-level>] [--dry] [--debug]
   goat -h | --help
   goat --version
 
@@ -39,6 +40,11 @@ Options:
 	dryRun := arguments["--dry"].(bool)
 	debug := arguments["--debug"].(bool)
 
-        log.Printf("Running goat for ENI")
-        GoatEni(dryRun, debug)
+	if arguments["ebs"].(bool) {
+		log.Printf("Running goat for EBS")
+		GoatEbs(dryRun, debug)
+	} else if arguments["eni"].(bool) {
+		log.Printf("Running goat for ENI")
+		GoatEni(dryRun, debug)
+	}
 }
