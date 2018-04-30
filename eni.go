@@ -9,7 +9,7 @@ import (
 )
 
 //GoatEni runs Goat for your ENIs - attach
-func GoatEni(dryRun bool, debug bool) {
+func GoatEni(debug bool) {
 	log.Printf("WELCOME TO GOAT")
 	log.Printf("1: COLLECTING EC2 INFO")
 	ec2Instance := GetEC2InstanceData()
@@ -24,7 +24,7 @@ func GoatEni(dryRun bool, debug bool) {
 		os.Exit(0)
 	}
 
-	ec2Instance.AttachEnis(dryRun)
+	ec2Instance.AttachEnis()
 }
 
 //FindEnis returns a list of all ENIs that should be attached to this EC2 instance
