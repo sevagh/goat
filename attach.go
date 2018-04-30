@@ -9,7 +9,7 @@ import (
 )
 
 //AttachEbsVolumes attaches the given map of {'VolumeName':[]EbsVol} with the EC2 client in the provided ec2Instance
-func (e *EC2Instance) AttachEbsVolumes(dryRun bool) map[string][]EbsVol {
+func (e *EC2Instance) AttachEbsVolumes() map[string][]EbsVol {
 	var deviceName string
 	var err error
 
@@ -28,7 +28,6 @@ func (e *EC2Instance) AttachEbsVolumes(dryRun bool) map[string][]EbsVol {
 					Device:     &deviceName,
 					InstanceId: &e.InstanceID,
 					VolumeId:   &volume.EbsVolID,
-					DryRun:     &dryRun,
 				}
 				volLogger.Info("Executing AWS SDK attach command")
 				volAttachments, err := e.EC2Client.AttachVolume(attachVolIn)
@@ -38,7 +37,7 @@ func (e *EC2Instance) AttachEbsVolumes(dryRun bool) map[string][]EbsVol {
 				volLogger.Info(volAttachments)
 				volume.AttachedName = deviceName
 
-				if !dryRun && !filesystem.DoesDriveExistWithTimeout(deviceName, 10) {
+				if !filesystem.DoesDriveExistWithTimeout(deviceName, 10) {
 					volLogger.Fatalf("Drive %s doesn't exist after attaching - checked with stat 10 times", deviceName)
 				}
 				localVolumes[key] = append(localVolumes[key], volume)
@@ -50,7 +49,7 @@ func (e *EC2Instance) AttachEbsVolumes(dryRun bool) map[string][]EbsVol {
 }
 
 //AttachEnis attaches the given array of Eni Ids with the EC2 client in the provided ec2Instance
-func (e *EC2Instance) AttachEnis(dryRun bool) {
+func (e *EC2Instance) AttachEnis() {
 	for eniIdx, eni := range e.Enis {
 		eniLogger := log.WithFields(log.Fields{"eni_id": eni})
 
@@ -58,7 +57,6 @@ func (e *EC2Instance) AttachEnis(dryRun bool) {
 		attachEniIn := &ec2.AttachNetworkInterfaceInput{
 			NetworkInterfaceId: &eni,
 			InstanceId:         &e.InstanceID,
-			DryRun:             &dryRun,
 			DeviceIndex:        &deviceIdx,
 		}
 

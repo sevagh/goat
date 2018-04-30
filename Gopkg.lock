@@ -35,12 +35,6 @@
   revision = "8a0e4eacaec13849a4177fa293f5e908760056a9"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/docopt/docopt-go"
-  packages = ["."]
-  revision = "ee0de3bc6815ee19d4a46c7eb90f829db0e014b1"
-
-[[projects]]
   name = "github.com/go-ini/ini"
   packages = ["."]
   revision = "32e4c1e6bc4e7d0d8451aa6b75200d19e37a536a"
@@ -75,6 +69,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "89cf7c032f3941ee52979d1553c19d0aaddd3c4390cd06453352a4713f20542d"
+  inputs-digest = "975b40561178aceb85457e078db55b5e48ab3b721e09305f57ad53bc45d650dd"
   solver-name = "gps-cdcl"
   solver-version = 1

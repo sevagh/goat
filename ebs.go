@@ -13,7 +13,7 @@ import (
 )
 
 //GoatEbs runs Goat for your EBS volumes - attach, mount, mkfs, etc.
-func GoatEbs(dryRun bool, debug bool) {
+func GoatEbs(debug bool) {
 	log.Printf("WELCOME TO GOAT")
 	log.Printf("1: COLLECTING EC2 INFO")
 	ec2Instance := GetEC2InstanceData()
@@ -22,7 +22,7 @@ func GoatEbs(dryRun bool, debug bool) {
 	ec2Instance.FindEbsVolumes()
 
 	log.Printf("3: ATTACHING EBS VOLS")
-	ec2Instance.AttachEbsVolumes(dryRun)
+	ec2Instance.AttachEbsVolumes()
 
 	log.Printf("4: MOUNTING ATTACHED VOLS")
 
@@ -32,11 +32,11 @@ func GoatEbs(dryRun bool, debug bool) {
 	}
 
 	for volName, vols := range ec2Instance.Vols {
-		prepAndMountDrives(volName, vols, dryRun)
+		prepAndMountDrives(volName, vols)
 	}
 }
 
-func prepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
+func prepAndMountDrives(volName string, vols []EbsVol) {
 	driveLogger := log.WithFields(log.Fields{"vol_name": volName, "vols": vols})
 
 	mountPath := vols[0].MountPath
@@ -100,10 +100,8 @@ func prepAndMountDrives(volName string, vols []EbsVol, dryRun bool) {
 		}
 	}
 
-	if !dryRun {
-		if err := os.MkdirAll(mountPath, 0777); err != nil {
-			driveLogger.Fatalf("Couldn't mkdir: %v", err)
-		}
+	if err := os.MkdirAll(mountPath, 0777); err != nil {
+		driveLogger.Fatalf("Couldn't mkdir: %v", err)
 	}
 
 	driveLogger.Info("Appending fstab entry")

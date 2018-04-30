@@ -1,4 +1,4 @@
-VERSION:=0.6.0
+VERSION:=0.7.0
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
 
 all: build
@@ -14,8 +14,10 @@ deps:
 	@command -v dep 2>&1 >/dev/null || go get -u github.com/golang/dep/cmd/dep
 	@dep ensure
 
-lint:
+fmt:
 	@gofmt -s -w $(GOAT_FILES)
+
+lint:
 	-gometalinter.v2 --enable-all $(GOAT_FILES) --exclude=_test.go
 
 lintsetup:
