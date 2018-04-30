@@ -6,9 +6,8 @@
 
 It takes some options:
 
-* `--dry` - dry run, don't execute any commands
-* `--log-level=<level>` - logrus log levels (i.e. debug, info, warn, error, fatal, panic)
-* `--debug` - an interactive debug mode which prompts to continue after every phase so you can explore the state between phases
+* `-logLevel=<level>` - logrus log levels (i.e. debug, info, warn, error, fatal, panic)
+* `-debug` - an interactive debug mode which prompts to continue after every phase so you can explore the state between phases
 
 #### Tags
 
