@@ -14,7 +14,7 @@ func Mount(mountPath string) error {
 		mountPath,
 	}
 
-	if _, err := execute.Command(cmd, args); err != nil {
+	if _, err := execute.Command(cmd, args, ""); err != nil {
 		return err
 	}
 
@@ -25,7 +25,7 @@ func Mount(mountPath string) error {
 func IsMountpointAlreadyMounted(mountPoint string) (bool, error) {
 	var mountOut execute.CommandOut
 	var err error
-	if mountOut, err = execute.Command("mount", []string{}); err != nil {
+	if mountOut, err = execute.Command("mount", []string{}, ""); err != nil {
 		return true, err
 	}
 	for _, line := range strings.Split(mountOut.Stdout, "\n") {
