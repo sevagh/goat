@@ -17,7 +17,7 @@ func CheckFilesystem(driveName string, desiredFs string, label string) error {
 		driveName,
 	}
 
-	fsOut, err := execute.Command(cmd, args)
+	fsOut, err := execute.Command(cmd, args, "")
 	if err != nil {
 		if fsOut.Status == 2 {
 			//go ahead and create filesystem
@@ -42,7 +42,7 @@ func CreateFilesystem(driveName string, desiredFs string, label string) error {
 		"GOAT-" + label,
 	}
 
-	if _, err := execute.Command(cmd, args); err != nil {
+	if _, err := execute.Command(cmd, args, ""); err != nil {
 		return err
 	}
 	return nil

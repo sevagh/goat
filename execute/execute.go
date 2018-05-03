@@ -15,9 +15,21 @@ type CommandOut struct {
 }
 
 //Command executes a given command + args and returns a CommandOut struct with an error if the command fails
-func Command(commandString string, args []string) (CommandOut, error) {
+func Command(command string, args []string, dir string) (CommandOut, error) {
 	out := CommandOut{}
-	cmd := exec.Command(commandString, args...)
+	cmd := exec.Cmd{}
+
+	path, err := exec.LookPath(command)
+	if err != nil {
+		return out, err
+	}
+
+	cmd.Path = path
+	cmd.Args = append([]string{path}, args...)
+
+	if dir != "" {
+		cmd.Dir = dir
+	}
 
 	var cmdOut bytes.Buffer
 	var cmdErr bytes.Buffer

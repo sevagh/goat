@@ -5,7 +5,7 @@ import (
 )
 
 func TestCommandReturnCodeSuccess(t *testing.T) {
-	if out, err := Command("true", []string{}); err != nil {
+	if out, err := Command("true", []string{}, ""); err != nil {
 		t.Fatalf("Errored: %v", err)
 	} else {
 		if !(out.Status == 0) {
@@ -15,7 +15,7 @@ func TestCommandReturnCodeSuccess(t *testing.T) {
 }
 
 func TestCommandReturnCodeFailure(t *testing.T) {
-	if out, err := Command("false", []string{}); err == nil {
+	if out, err := Command("false", []string{}, ""); err == nil {
 		t.Fatalf("Expected an error")
 	} else {
 		if !(out.Status == 1) {
@@ -25,7 +25,7 @@ func TestCommandReturnCodeFailure(t *testing.T) {
 }
 
 func TestCommandStdout(t *testing.T) {
-	if out, err := Command("bash", []string{"-c", "echo hello"}); err != nil {
+	if out, err := Command("bash", []string{"-c", "echo hello"}, ""); err != nil {
 		t.Fatalf("Error: %v", err)
 	} else {
 		if !(out.Stderr == "") {
@@ -38,7 +38,7 @@ func TestCommandStdout(t *testing.T) {
 }
 
 func TestCommandStderr(t *testing.T) {
-	if out, err := Command("bash", []string{"-c", "echo hello 1>&2"}); err != nil {
+	if out, err := Command("bash", []string{"-c", "echo hello 1>&2"}, ""); err != nil {
 		t.Fatalf("Error: %v", err)
 	} else {
 		if !(out.Stdout == "") {
@@ -51,7 +51,7 @@ func TestCommandStderr(t *testing.T) {
 }
 
 func TestCommandFailedToStart(t *testing.T) {
-	if out, err := Command("i_shouldnt_exist", []string{}); err == nil {
+	if out, err := Command("i_shouldnt_exist", []string{}, ""); err == nil {
 		t.Fatal("Expected error")
 	} else {
 		if !(out.Status == 0) {

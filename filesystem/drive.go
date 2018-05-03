@@ -21,7 +21,7 @@ func DoesDriveExistWithTimeout(driveName string, maxAttempts int) bool {
 
 //DoesDriveExist does a single stat call to check if a drive exists
 func DoesDriveExist(driveName string) bool {
-	if _, err := execute.Command("stat", []string{driveName}); err != nil {
+	if _, err := execute.Command("stat", []string{driveName}, ""); err != nil {
 		return false
 	}
 	return true
