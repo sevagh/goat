@@ -21,12 +21,6 @@ The event flow is roughly the following:
 
 There's a project to port [ec2-net-utils](https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html#ec2-net-utils), a tool available on Amazon Linux AMIs, to CentOS/systemd, [here](https://github.com/etuttle/ec2-utils).
 
-I [forked](https://github.com/sevagh/ec2-utils) it and created a release. This tool is highly recommended to perform the actual setup of your ENI:
-
-```
-sudo yum install -y https://github.com/sevagh/ec2-utils/releases/download/v0.5.3/ec2-net-utils-0.5-2.fc25.noarch.rpm
-sudo systemctl enable elastic-network-interfaces
-```
 
 #### DeviceIndex
 

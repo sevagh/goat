@@ -28,9 +28,7 @@ $ sudo systemctl start goat@ebs
 
 ### Additional dependencies for ENI
 
-Goat by itself is sufficient for the EBS feature, but needs help for setting up an ENI.
-
-Refer to [this](./docs/ENI.md#setting-up-the-eni---ec2-net-utils) document. It refers to my fork of a [port of ec2-net-utils](https://github.com/sevagh/ec2-utils/releases) from the Amazon Linux AMI to CentOS/systemd.
+Goat by itself is sufficient for the EBS feature, but needs help for setting up an ENI. Refer to [this](./docs/ENI.md#setting-up-the-eni---ec2-net-utils) document.
 
 ### Examples
 
