@@ -9,13 +9,13 @@ import (
 )
 
 //GoatEni runs Goat for your ENIs - attach
-func GoatEni(debug bool) {
+func GoatEni(debug bool, tagPrefix string) {
 	log.Printf("WELCOME TO GOAT")
 	log.Printf("1: COLLECTING EC2 INFO")
-	ec2Instance := GetEC2InstanceData()
+	ec2Instance := GetEC2InstanceData(tagPrefix)
 
 	log.Printf("2: COLLECTING ENI INFO")
-	ec2Instance.FindEnis()
+	ec2Instance.FindEnis(tagPrefix)
 
 	log.Printf("3: ATTACHING ENIS")
 
@@ -28,19 +28,19 @@ func GoatEni(debug bool) {
 }
 
 //FindEnis returns a list of all ENIs that should be attached to this EC2 instance
-func (e *EC2Instance) FindEnis() {
+func (e *EC2Instance) FindEnis(tagPrefix string) {
 	log.Info("Searching for ENIs")
 
 	params := &ec2.DescribeNetworkInterfacesInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String("tag:GOAT-IN:Prefix"),
+				Name: aws.String("tag:"+tagPrefix+":Prefix"),
 				Values: []*string{
 					aws.String(e.Prefix),
 				},
 			},
 			{
-				Name: aws.String("tag:GOAT-IN:NodeId"),
+				Name: aws.String("tag:"+tagPrefix+":NodeId"),
 				Values: []*string{
 					aws.String(e.NodeID),
 				},
