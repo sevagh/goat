@@ -71,7 +71,7 @@ func (e *EC2Instance) AttachEnis() {
 func randDriveNamePicker() (string, error) {
 	ctr := 0
 	deviceName := "/dev/xvd"
-	runes := []rune("bcdefghijklmnopqrstuvwxyz")
+	runes := []rune("fghijklmnopqrstuvwxyz")
 	for {
 		if ctr >= len(runes) {
 			return "", fmt.Errorf("Ran out of drive names")
