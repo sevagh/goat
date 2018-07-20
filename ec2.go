@@ -25,7 +25,7 @@ type EC2Instance struct {
 }
 
 //GetEC2InstanceData returns a populated EC2Instance struct with the current EC2 instances' metadata
-func GetEC2InstanceData() EC2Instance {
+func GetEC2InstanceData(tagPrefix string) EC2Instance {
 	var ec2Instance EC2Instance
 	sess := session.New()
 
@@ -62,13 +62,13 @@ func GetEC2InstanceData() EC2Instance {
 	ec2Svc := ec2.New(sess)
 	ec2Instance.EC2Client = ec2Svc
 
-	err = ec2Instance.getInstanceTags()
+	err = ec2Instance.getInstanceTags(tagPrefix)
 	if err != nil {
 		ec2Logger.Fatalf("Couldn't get tags: %v", err)
 	}
 
 	if ec2Instance.NodeID == "" || ec2Instance.Prefix == "" {
-		ec2Logger.Fatal("This instance is missing required GOAT-IN tags NodeId, Prefix")
+		ec2Logger.Fatalf("This instance is missing required '%s' tags NodeId, Prefix", tagPrefix)
 	}
 
 	return ec2Instance
@@ -84,7 +84,7 @@ func (e *EC2Instance) populateRegionInfo(svc *ec2metadata.EC2Metadata) error {
 	return nil
 }
 
-func (e *EC2Instance) getInstanceTags() error {
+func (e *EC2Instance) getInstanceTags(tagPrefix string) error {
 	params := &ec2.DescribeInstancesInput{
 		Filters: []*ec2.Filter{
 			{
@@ -104,9 +104,9 @@ func (e *EC2Instance) getInstanceTags() error {
 	for _, reservation := range result.Reservations {
 		for _, instance := range reservation.Instances {
 			for _, tag := range instance.Tags {
-				if *tag.Key == "GOAT-IN:NodeId" {
+				if *tag.Key == tagPrefix+":NodeId" {
 					e.NodeID = *tag.Value
-				} else if *tag.Key == "GOAT-IN:Prefix" {
+				} else if *tag.Key == tagPrefix+":Prefix" {
 					e.Prefix = *tag.Value
 				}
 			}
