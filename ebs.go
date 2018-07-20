@@ -13,13 +13,13 @@ import (
 )
 
 //GoatEbs runs Goat for your EBS volumes - attach, mount, mkfs, etc.
-func GoatEbs(debug bool) {
+func GoatEbs(debug bool, tagPrefix string) {
 	log.Printf("WELCOME TO GOAT")
 	log.Printf("1: COLLECTING EC2 INFO")
-	ec2Instance := GetEC2InstanceData()
+	ec2Instance := GetEC2InstanceData(tagPrefix)
 
 	log.Printf("2: COLLECTING EBS INFO")
-	ec2Instance.FindEbsVolumes()
+	ec2Instance.FindEbsVolumes(tagPrefix)
 
 	log.Printf("3: ATTACHING EBS VOLS")
 	ec2Instance.AttachEbsVolumes()
@@ -132,12 +132,12 @@ type EbsVol struct {
 }
 
 //FindEbsVolumes discovers and creates a {'VolumeName':[]EbsVol} map for all the required EBS volumes given an EC2Instance struct
-func (e *EC2Instance) FindEbsVolumes() {
+func (e *EC2Instance) FindEbsVolumes(tagPrefix string) {
 	drivesToMount := map[string][]EbsVol{}
 
 	log.Info("Searching for EBS volumes")
 
-	volumes, err := e.findEbsVolumes()
+	volumes, err := e.findEbsVolumes(tagPrefix)
 	if err != nil {
 		log.Fatalf("Error when searching for EBS volumes: %v", err)
 	}
@@ -171,17 +171,17 @@ func (e *EC2Instance) FindEbsVolumes() {
 	e.Vols = drivesToMount
 }
 
-func (e *EC2Instance) findEbsVolumes() ([]EbsVol, error) {
+func (e *EC2Instance) findEbsVolumes(tagPrefix string) ([]EbsVol, error) {
 	params := &ec2.DescribeVolumesInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String("tag:GOAT-IN:Prefix"),
+				Name: aws.String("tag:"+tagPrefix+":Prefix"),
 				Values: []*string{
 					aws.String(e.Prefix),
 				},
 			},
 			{
-				Name: aws.String("tag:GOAT-IN:NodeId"),
+				Name: aws.String("tag:"+tagPrefix+":NodeId"),
 				Values: []*string{
 					aws.String(e.NodeID),
 				},
@@ -223,19 +223,19 @@ func (e *EC2Instance) findEbsVolumes() ([]EbsVol, error) {
 		}
 		for _, tag := range volume.Tags {
 			switch *tag.Key {
-			case "GOAT-IN:VolumeName":
+			case tagPrefix+":VolumeName":
 				ebsVolume.VolumeName = *tag.Value
-			case "GOAT-IN:RaidLevel":
+			case tagPrefix+":RaidLevel":
 				if ebsVolume.RaidLevel, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse RaidLevel tag as int: %v", err)
 				}
-			case "GOAT-IN:VolumeSize":
+			case tagPrefix+":VolumeSize":
 				if ebsVolume.VolumeSize, err = strconv.Atoi(*tag.Value); err != nil {
 					return volumes, fmt.Errorf("Couldn't parse VolumeSize tag as int: %v", err)
 				}
-			case "GOAT-IN:MountPath":
+			case tagPrefix+":MountPath":
 				ebsVolume.MountPath = *tag.Value
-			case "GOAT-IN:FsType":
+			case tagPrefix+":FsType":
 				ebsVolume.FsType = *tag.Value
 			default:
 			}
