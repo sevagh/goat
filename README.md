@@ -30,6 +30,10 @@ $ sudo systemctl start goat@ebs
 
 Goat by itself is sufficient for the EBS feature, but needs help for setting up an ENI. Refer to [this](./docs/ENI.md#setting-up-the-eni---ec2-net-utils) document.
 
+### Hack
+
+If you have docker locally, you can use the following command in order to quickly get a development env ready: `make dev-env`.
+
 ### Examples
 
 [Link to the example Terraform HCL scripts](./docs/hcl-example).
