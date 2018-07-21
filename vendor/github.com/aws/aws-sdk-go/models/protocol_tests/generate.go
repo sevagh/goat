@@ -270,7 +270,7 @@ func (i *testCase) TestCase(idx int) string {
 		case "rest-xml":
 			i.InputTest.Body = util.SortXML(bytes.NewReader([]byte(i.InputTest.Body)))
 		case "json", "rest-json":
-			i.InputTest.Body = strings.Replace(i.InputTest.Body, " ", "", -1)
+			i.InputTest.Body = i.InputTest.Body
 		}
 
 		jsonValues := buildJSONValues(i.Given.InputRef.Shape)
@@ -394,6 +394,7 @@ func generateTestSuite(filename string) string {
 		suite.API.NoConstServiceNames = true // don't generate service names
 		suite.API.Setup()
 		suite.API.Metadata.EndpointPrefix = suite.API.PackageName()
+		suite.API.Metadata.EndpointsID = suite.API.Metadata.EndpointPrefix
 
 		// Sort in order for deterministic test generation
 		names := make([]string, 0, len(suite.API.Shapes))
@@ -481,7 +482,7 @@ func GenerateAssertions(out interface{}, shape *api.Shape, prefix string) string
 		case "timestamp":
 			return fmtAssertEqual(
 				fmt.Sprintf("time.Unix(%#v, 0).UTC().String()", out),
-				fmt.Sprintf("%s.String()", prefix),
+				fmt.Sprintf("%s.UTC().String()", prefix),
 			)
 		case "blob":
 			return fmtAssertEqual(
