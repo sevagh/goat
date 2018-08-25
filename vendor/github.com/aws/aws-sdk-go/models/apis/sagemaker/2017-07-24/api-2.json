@@ -2,7 +2,7 @@
   "version":"2.0",
   "metadata":{
     "apiVersion":"2017-07-24",
-    "endpointPrefix":"sagemaker",
+    "endpointPrefix":"api.sagemaker",
     "jsonVersion":"1.1",
     "protocol":"json",
     "serviceAbbreviation":"SageMaker",
@@ -1050,7 +1050,8 @@
         "CreationTime":{"shape":"Timestamp"},
         "TrainingStartTime":{"shape":"Timestamp"},
         "TrainingEndTime":{"shape":"Timestamp"},
-        "LastModifiedTime":{"shape":"Timestamp"}
+        "LastModifiedTime":{"shape":"Timestamp"},
+        "SecondaryStatusTransitions":{"shape":"SecondaryStatusTransitions"}
       }
     },
     "DescribeTransformJobRequest":{
@@ -1110,6 +1111,7 @@
         "Disabled"
       ]
     },
+    "DisassociateNotebookInstanceLifecycleConfig":{"type":"boolean"},
     "EndpointArn":{
       "type":"string",
       "max":2048,
@@ -2139,7 +2141,10 @@
       "type":"string",
       "enum":[
         "Starting",
+        "LaunchingMLInstances",
+        "PreparingTrainingStack",
         "Downloading",
+        "DownloadingTrainingImage",
         "Training",
         "Uploading",
         "Stopping",
@@ -2148,6 +2153,23 @@
         "Completed",
         "Failed"
       ]
+    },
+    "SecondaryStatusTransition":{
+      "type":"structure",
+      "required":[
+        "Status",
+        "StartTime"
+      ],
+      "members":{
+        "Status":{"shape":"SecondaryStatus"},
+        "StartTime":{"shape":"Timestamp"},
+        "EndTime":{"shape":"Timestamp"},
+        "StatusMessage":{"shape":"StatusMessage"}
+      }
+    },
+    "SecondaryStatusTransitions":{
+      "type":"list",
+      "member":{"shape":"SecondaryStatusTransition"}
     },
     "SecurityGroupId":{
       "type":"string",
@@ -2193,6 +2215,7 @@
         "NotebookInstanceName":{"shape":"NotebookInstanceName"}
       }
     },
+    "StatusMessage":{"type":"string"},
     "StopHyperParameterTuningJobRequest":{
       "type":"structure",
       "required":["HyperParameterTuningJobName"],
@@ -2568,7 +2591,9 @@
       "members":{
         "NotebookInstanceName":{"shape":"NotebookInstanceName"},
         "InstanceType":{"shape":"InstanceType"},
-        "RoleArn":{"shape":"RoleArn"}
+        "RoleArn":{"shape":"RoleArn"},
+        "LifecycleConfigName":{"shape":"NotebookInstanceLifecycleConfigName"},
+        "DisassociateLifecycleConfig":{"shape":"DisassociateNotebookInstanceLifecycleConfig"}
       }
     },
     "UpdateNotebookInstanceLifecycleConfigInput":{

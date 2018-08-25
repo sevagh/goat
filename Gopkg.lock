@@ -3,7 +3,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:41a9edc69bb031c46a66b77ce86764c47e978310af11aaf57977c44815826701"
+  digest = "1:174e893894d5d9a24b89e863df45838c2a9f39e9d4e0467b6e211744c40644ac"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -37,18 +37,18 @@
     "service/sts",
   ]
   pruneopts = ""
-  revision = "bb991cd9350cbec2b1dd32552b136317f7e4cdc8"
+  revision = "488d634b5a699b9118ac2befb5135922b4a77210"
 
 [[projects]]
-  digest = "1:d19c78214e03e297e9e30d2eb11892f731358b2951f2a5c7374658a156373e4c"
+  digest = "1:cd5bab9c9e23ffa6858eaa79dc827fd84bc24bc00b0cfb0b14036e393da2b1fa"
   name = "github.com/go-ini/ini"
   packages = ["."]
   pruneopts = ""
-  revision = "358ee7663966325963d4e8b2e1fbd570c5195153"
-  version = "v1.38.1"
+  revision = "5cf292cae48347c2490ac1a58fe36735fb78df7e"
+  version = "v1.38.2"
 
 [[projects]]
-  digest = "1:4f767a115bc8e08576f6d38ab73c376fc1b1cd3bb5041171c9e8668cc7739b52"
+  digest = "1:6f49eae0c1e5dab1dafafee34b207aeb7a42303105960944828c2079b92fc88e"
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
   pruneopts = ""
@@ -56,30 +56,30 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:071da5667b38737d0eecf5d6695143bb7a54bc5b9a42de9c6dbdf014c651d839"
+  digest = "1:c3f7fa9201a7dfd36968c279457b387fd542eb5e0097353f468225d75f93280e"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = ""
-  revision = "92052687f8ec598ff0da626d2909478cfd1e3a3c"
+  revision = "fc587f31c804fe6853cd90f0d8d90af588eca5bd"
 
 [[projects]]
   branch = "master"
-  digest = "1:21100b2e8b6922303dd109da81b3134ed0eff05cb3402881eabde9cce8f4e5e6"
+  digest = "1:793a79198b755828dec284c6f1325e24e09186f1b7ba818b65c7c35104ed86eb"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = ""
-  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
+  revision = "614d502a4dac94afa3a6ce146bd1736da82514c6"
 
 [[projects]]
   branch = "master"
-  digest = "1:a8944db88149e7ecbea4b760c625b9ccf455fceae21387bc8890c3589d28b623"
+  digest = "1:7a5f7a1206de6b90f67cb465e489eac3298e95afa7262813b542df4fab38952f"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = ""
-  revision = "ac767d655b305d4e9612f5f6e33120b9176c4ad4"
+  revision = "4910a1d54f876d7b22162a85f4d066d3ee649450"
 
 [solve-meta]
   analyzer-name = "dep"

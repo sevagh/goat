@@ -542,6 +542,8 @@ func ExampleRDS_CreateDBInstance_shared00() {
 				fmt.Println(rds.ErrCodeKMSKeyNotAccessibleFault, aerr.Error())
 			case rds.ErrCodeDomainNotFoundFault:
 				fmt.Println(rds.ErrCodeDomainNotFoundFault, aerr.Error())
+			case rds.ErrCodeBackupPolicyNotFoundFault:
+				fmt.Println(rds.ErrCodeBackupPolicyNotFoundFault, aerr.Error())
 			default:
 				fmt.Println(aerr.Error())
 			}
@@ -1277,7 +1279,7 @@ func ExampleRDS_DescribeDBClusterParameters_shared00() {
 	svc := rds.New(session.New())
 	input := &rds.DescribeDBClusterParametersInput{
 		DBClusterParameterGroupName: aws.String("mydbclusterparametergroup"),
-		Source:                      aws.String("system"),
+		Source: aws.String("system"),
 	}
 
 	result, err := svc.DescribeDBClusterParameters(input)
@@ -2306,6 +2308,8 @@ func ExampleRDS_ModifyDBInstance_shared00() {
 				fmt.Println(rds.ErrCodeCertificateNotFoundFault, aerr.Error())
 			case rds.ErrCodeDomainNotFoundFault:
 				fmt.Println(rds.ErrCodeDomainNotFoundFault, aerr.Error())
+			case rds.ErrCodeBackupPolicyNotFoundFault:
+				fmt.Println(rds.ErrCodeBackupPolicyNotFoundFault, aerr.Error())
 			default:
 				fmt.Println(aerr.Error())
 			}
@@ -2935,6 +2939,8 @@ func ExampleRDS_RestoreDBInstanceFromDBSnapshot_shared00() {
 				fmt.Println(rds.ErrCodeDomainNotFoundFault, aerr.Error())
 			case rds.ErrCodeDBParameterGroupNotFoundFault:
 				fmt.Println(rds.ErrCodeDBParameterGroupNotFoundFault, aerr.Error())
+			case rds.ErrCodeBackupPolicyNotFoundFault:
+				fmt.Println(rds.ErrCodeBackupPolicyNotFoundFault, aerr.Error())
 			default:
 				fmt.Println(aerr.Error())
 			}
@@ -3005,6 +3011,8 @@ func ExampleRDS_RestoreDBInstanceToPointInTime_shared00() {
 				fmt.Println(rds.ErrCodeDomainNotFoundFault, aerr.Error())
 			case rds.ErrCodeDBParameterGroupNotFoundFault:
 				fmt.Println(rds.ErrCodeDBParameterGroupNotFoundFault, aerr.Error())
+			case rds.ErrCodeBackupPolicyNotFoundFault:
+				fmt.Println(rds.ErrCodeBackupPolicyNotFoundFault, aerr.Error())
 			default:
 				fmt.Println(aerr.Error())
 			}

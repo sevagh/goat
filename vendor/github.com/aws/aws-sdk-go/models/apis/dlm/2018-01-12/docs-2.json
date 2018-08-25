@@ -1,6 +1,6 @@
 {
   "version": "2.0",
-  "service": "<fullname>Amazon Data Lifecyle Manager</fullname> <p>With Amazon Data Lifecyle Manager, you can manage the lifecycle of your AWS resources. You create lifecycle policies, which are used to automate operations on the specified resources.</p> <p>Data Lifecycle Manager supports Amazon EBS volumes and snapshots. For information about using Data Lifecycle Manager with Amazon EBS, see <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html\">Amazon Data Lifecyle Manager for Amazon EBS Snapshots</a>.</p>",
+  "service": "<fullname>Amazon Data Lifecycle Manager</fullname> <p>With Amazon Data Lifecycle Manager, you can manage the lifecycle of your AWS resources. You create lifecycle policies, which are used to automate operations on the specified resources.</p> <p>Amazon DLM supports Amazon EBS volumes and snapshots. For information about using Amazon DLM with Amazon EBS, see <a href=\"http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/snapshot-lifecycle.html\">Automating the Amazon EBS Snapshot Lifecycle</a> in the <i>Amazon EC2 User Guide</i>.</p>",
   "operations": {
     "CreateLifecyclePolicy": "<p>Creates a policy to manage the lifecycle of the specified AWS resources. You can create up to 100 lifecycle policies.</p>",
     "DeleteLifecyclePolicy": "<p>Deletes the specified lifecycle policy and halts the automated operations that the policy specified.</p>",
@@ -165,7 +165,7 @@
     "PolicyDetails": {
       "base": "<p>Specifies the configuration of a lifecycle policy.</p>",
       "refs": {
-        "CreateLifecyclePolicyRequest$PolicyDetails": "<p>The configuration of the lifecycle policy.</p> <p>Target tags cannot be re-used across lifecycle policies.</p>",
+        "CreateLifecyclePolicyRequest$PolicyDetails": "<p>The configuration details of the lifecycle policy.</p> <p>Target tags cannot be re-used across lifecycle policies.</p>",
         "LifecyclePolicy$PolicyDetails": "<p>The configuration of the lifecycle policy</p>",
         "UpdateLifecyclePolicyRequest$PolicyDetails": "<p>The configuration of the lifecycle policy.</p> <p>Target tags cannot be re-used across policies.</p>"
       }
@@ -222,7 +222,7 @@
     "ScheduleList": {
       "base": null,
       "refs": {
-        "PolicyDetails$Schedules": "<p>The schedule.</p>"
+        "PolicyDetails$Schedules": "<p>The schedule of policy-defined actions.</p>"
       }
     },
     "ScheduleName": {
@@ -264,25 +264,25 @@
     "TagsToAddFilterList": {
       "base": null,
       "refs": {
-        "GetLifecyclePoliciesRequest$TagsToAdd": "<p>The tags to add to the resources.</p> <p>Tags are strings in the format <code>key:value</code>.</p> <p>These tags are added in addition to the AWS-added lifecycle tags.</p>"
+        "GetLifecyclePoliciesRequest$TagsToAdd": "<p>The tags to add to objects created by the policy.</p> <p>Tags are strings in the format <code>key=value</code>.</p> <p>These user-defined tags are added in addition to the AWS-added lifecycle tags.</p>"
       }
     },
     "TagsToAddList": {
       "base": null,
       "refs": {
-        "Schedule$TagsToAdd": "<p>The tags to add to policy-created resources. These tags are added in addition to the default lifecycle tags.</p>"
+        "Schedule$TagsToAdd": "<p>The tags to apply to policy-created resources. These user-defined tags are in addition to the AWS-added lifecycle tags.</p>"
       }
     },
     "TargetTagList": {
       "base": null,
       "refs": {
-        "PolicyDetails$TargetTags": "<p>The target tags.</p>"
+        "PolicyDetails$TargetTags": "<p>The single tag that identifies targeted resources for this policy.</p>"
       }
     },
     "TargetTagsFilterList": {
       "base": null,
       "refs": {
-        "GetLifecyclePoliciesRequest$TargetTags": "<p>The target tags.</p> <p>Tags are strings in the format <code>key:value</code>.</p>"
+        "GetLifecyclePoliciesRequest$TargetTags": "<p>The target tag for a policy.</p> <p>Tags are strings in the format <code>key=value</code>.</p>"
       }
     },
     "Time": {
