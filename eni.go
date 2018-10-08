@@ -34,13 +34,13 @@ func (e *EC2Instance) FindEnis(tagPrefix string) {
 	params := &ec2.DescribeNetworkInterfacesInput{
 		Filters: []*ec2.Filter{
 			{
-				Name: aws.String("tag:"+tagPrefix+":Prefix"),
+				Name: aws.String("tag:" + tagPrefix + ":Prefix"),
 				Values: []*string{
 					aws.String(e.Prefix),
 				},
 			},
 			{
-				Name: aws.String("tag:"+tagPrefix+":NodeId"),
+				Name: aws.String("tag:" + tagPrefix + ":NodeId"),
 				Values: []*string{
 					aws.String(e.NodeID),
 				},
