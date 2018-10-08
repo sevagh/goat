@@ -5,11 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestFormatting(t *testing.T) {
@@ -175,6 +177,29 @@ func TestDisableTimestampWithColoredOutput(t *testing.T) {
 	b, _ := tf.Format(WithField("test", "test"))
 	if strings.Contains(string(b), "[0000]") {
 		t.Error("timestamp not expected when DisableTimestamp is true")
+	}
+}
+
+func TestNewlineBehavior(t *testing.T) {
+	tf := &TextFormatter{ForceColors: true}
+
+	// Ensure a single new line is removed as per stdlib log
+	e := NewEntry(StandardLogger())
+	e.Message = "test message\n"
+	b, _ := tf.Format(e)
+	if bytes.Contains(b, []byte("test message\n")) {
+		t.Error("first newline at end of Entry.Message resulted in unexpected 2 newlines in output. Expected newline to be removed.")
+	}
+
+	// Ensure a double new line is reduced to a single new line
+	e = NewEntry(StandardLogger())
+	e.Message = "test message\n\n"
+	b, _ = tf.Format(e)
+	if bytes.Contains(b, []byte("test message\n\n")) {
+		t.Error("Double newline at end of Entry.Message resulted in unexpected 2 newlines in output. Expected single newline")
+	}
+	if !bytes.Contains(b, []byte("test message\n")) {
+		t.Error("Double newline at end of Entry.Message did not result in a single newline after formatting")
 	}
 }
 
@@ -423,5 +448,33 @@ func TestTextFormatterIsColored(t *testing.T) {
 	}
 }
 
-// TODO add tests for sorting etc., this requires a parser for the text
-// formatter output.
+func TestCustomSorting(t *testing.T) {
+	formatter := &TextFormatter{
+		DisableColors: true,
+		SortingFunc: func(keys []string) {
+			sort.Slice(keys, func(i, j int) bool {
+				if keys[j] == "prefix" {
+					return false
+				}
+				if keys[i] == "prefix" {
+					return true
+				}
+				return strings.Compare(keys[i], keys[j]) == -1
+			})
+		},
+	}
+
+	entry := &Entry{
+		Message: "Testing custom sort function",
+		Time:    time.Now(),
+		Level:   InfoLevel,
+		Data: Fields{
+			"test":      "testvalue",
+			"prefix":    "the application prefix",
+			"blablabla": "blablabla",
+		},
+	}
+	b, err := formatter.Format(entry)
+	require.NoError(t, err)
+	require.True(t, strings.HasPrefix(string(b), "prefix="), "format output is %q", string(b))
+}
