@@ -114,9 +114,11 @@ func prepAndMountDrives(volName string, vols []EbsVol) {
 		driveLogger.Fatalf("Couldn't mount: %v", err)
 	}
 
-	driveLogger.Info("Now persisting mdadm conf")
-	if err := filesystem.PersistMdadm(); err != nil {
-		driveLogger.Fatalf("Couldn't persist mdadm conf: %v", err)
+	if len(vols) > 1 {
+		driveLogger.Info("Now persisting mdadm conf")
+		if err := filesystem.PersistMdadm(); err != nil {
+			driveLogger.Fatalf("Couldn't persist mdadm conf: %v", err)
+		}
 	}
 }
 
