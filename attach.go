@@ -9,7 +9,7 @@ import (
 )
 
 //AttachEbsVolumes attaches the given map of {'VolumeName':[]EbsVol} with the EC2 client in the provided ec2Instance
-func (e *EC2Instance) AttachEbsVolumes() map[string][]EbsVol {
+func (e *EC2Instance) AttachEbsVolumes() {
 	var deviceName string
 	var err error
 
@@ -45,7 +45,7 @@ func (e *EC2Instance) AttachEbsVolumes() map[string][]EbsVol {
 
 		}
 	}
-	return localVolumes
+	e.Vols = localVolumes
 }
 
 //AttachEnis attaches the given array of Eni Ids with the EC2 client in the provided ec2Instance
