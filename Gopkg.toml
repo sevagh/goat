@@ -5,3 +5,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/sirupsen/logrus"
+
+[[constraint]]
+  name = "github.com/mvisonneau/go-ebsnvme"
+  version = "0.1.0"
