@@ -1,5 +1,5 @@
 NAME:=goat
-VERSION:=0.8.0
+VERSION:=0.9.0
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
 
 all: build
