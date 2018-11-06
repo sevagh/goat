@@ -63,6 +63,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:ddaa9cb9044da5acde71439da578a11393b443248cf7ca8a88dbb8aef80668c9"
+  name = "github.com/mvisonneau/go-ebsnvme"
+  packages = ["pkg/ebsnvme"]
+  pruneopts = ""
+  revision = "712c1897902b6de1e94be54d0261430064247fe0"
+  version = "0.1.0"
+
+[[projects]]
   branch = "master"
   digest = "1:c0959eb8fc519d62edc717e2997032859688c0e1ddd9d4463512ead83576d247"
   name = "github.com/sirupsen/logrus"
@@ -99,6 +107,7 @@
     "github.com/aws/aws-sdk-go/aws/ec2metadata",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/ec2",
+    "github.com/mvisonneau/go-ebsnvme/pkg/ebsnvme",
     "github.com/sirupsen/logrus",
   ]
   solver-name = "gps-cdcl"

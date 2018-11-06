@@ -9,7 +9,7 @@ import (
 )
 
 //AttachEbsVolumes attaches the given map of {'VolumeName':[]EbsVol} with the EC2 client in the provided ec2Instance
-func (e *EC2Instance) AttachEbsVolumes() map[string][]EbsVol {
+func (e *EC2Instance) AttachEbsVolumes() {
 	var deviceName string
 	var err error
 
@@ -35,17 +35,17 @@ func (e *EC2Instance) AttachEbsVolumes() map[string][]EbsVol {
 					volLogger.Fatalf("Couldn't attach: %v", err)
 				}
 				volLogger.Info(volAttachments)
-				volume.AttachedName = deviceName
 
 				if !filesystem.DoesDriveExistWithTimeout(deviceName, 10) {
 					volLogger.Fatalf("Drive %s doesn't exist after attaching - checked with stat 10 times", deviceName)
 				}
+
+				volume.AttachedName = deviceName
 				localVolumes[key] = append(localVolumes[key], volume)
 			}
-
 		}
 	}
-	return localVolumes
+	e.Vols = localVolumes
 }
 
 //AttachEnis attaches the given array of Eni Ids with the EC2 client in the provided ec2Instance

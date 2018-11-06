@@ -55,7 +55,11 @@ func prepAndMountDrives(volName string, vols []EbsVol) {
 		var err error
 		if len(vols) == 1 {
 			driveLogger.Info("Single drive, no RAID")
-			driveName = vols[0].AttachedName
+			driveName, err = filesystem.GetActualBlockDeviceName(vols[0].AttachedName)
+			if err != nil {
+				driveLogger.Fatalf("Block device is not available %s : %v", vols[0].AttachedName, err)
+			}
+			driveLogger.Infof("Using %s as local block device", driveName)
 		} else {
 			if raidLevel == -1 {
 				driveLogger.Info("Raid level not provided, not performing further actions")
@@ -64,7 +68,12 @@ func prepAndMountDrives(volName string, vols []EbsVol) {
 			driveLogger.Info("Creating RAID array")
 			driveNames := []string{}
 			for _, vol := range vols {
-				driveNames = append(driveNames, vol.AttachedName)
+				driveName, err = filesystem.GetActualBlockDeviceName(vol.AttachedName)
+				if err != nil {
+					driveLogger.Fatalf("Block device is not available %s : %v", vol.AttachedName, err)
+				}
+				driveLogger.Infof("Using %s as local block device", driveName)
+				driveNames = append(driveNames, driveName)
 			}
 			if driveName, err = filesystem.CreateRaidArray(driveNames, volName, raidLevel); err != nil {
 				driveLogger.Fatalf("Error when creating reaid array: %v", err)
