@@ -3,13 +3,13 @@ Description=GOAT: EC2-%i attach utility
 Documentation=https://github.com/sevagh/goat
 Requires=network.target remote-fs.target
 After=network.target remote-fs.target
-ConditionPathExists=/usr/bin/goat
+ConditionPathExists=/usr/sbin/goat
 
 [Service]
 Type=oneshot
 User=root
 Group=root
-ExecStart=/usr/bin/goat "%i"
+ExecStart=/usr/sbin/goat "%i"
 SyslogIdentifier=goat
 
 [Install]

@@ -44,6 +44,15 @@ OPTIONS
         Display version and exit
 ```
 
+### Environment variables
+
+You can use the environment variables:
+
+* `GOAT_LOG_LEVEL`
+* `GOAT_TAG_PREFIX`
+
+Set these the same as `-logLevel` and `-tagPrefix` -  the environment variables take precedence.
+
 ### Additional dependencies for ENI
 
 Goat by itself is sufficient for the EBS feature, but needs help for setting up an ENI. Refer to [this](./docs/ENI.md#setting-up-the-eni---ec2-net-utils) document.

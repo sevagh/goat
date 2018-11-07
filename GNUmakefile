@@ -3,12 +3,13 @@ VERSION:=1.0.0
 OS:=linux
 ARCH:=amd64
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
+BINPATH=usr/sbin
 
 all: build
 
 build: deps
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o usr/bin/$(NAME)
-	strip usr/bin/$(NAME)
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o $(BINPATH)/$(NAME)
+	strip $(BINPATH)/$(NAME)
 
 test:
 	@go vet ./...
@@ -27,7 +28,7 @@ lint:
 package_all: pkgclean build deb rpm zip
 
 zip:
-	@zip pkg/$(NAME)_$(VERSION)_$(OS)_$(ARCH).zip -j usr/bin/$(NAME)
+	@zip pkg/$(NAME)_$(VERSION)_$(OS)_$(ARCH).zip -j $(BINPATH)/$(NAME)
 
 deb:
 	@mkdir -p pkg
@@ -35,7 +36,7 @@ deb:
 		-p pkg/$(NAME)_VERSION_ARCH.deb \
 		-d "mdadm" \
 		--deb-systemd ./goat@.service \
-		usr/bin
+		$(BINPATH)
 
 rpm:
 	@mkdir -p pkg
@@ -43,7 +44,7 @@ rpm:
 		-p pkg/$(NAME)_VERSION_ARCH.rpm \
 		-d "mdadm" \
 		--rpm-systemd ./goat@.service \
-		usr/bin
+		$(BINPATH)
 
 pkgclean:
 	@rm -rf pkg

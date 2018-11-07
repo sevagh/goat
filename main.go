@@ -16,6 +16,9 @@ func main() {
 	debugPtr := flag.Bool("debug", false, "Interactive debug prompts")
 	tagPrefixPtr := flag.String("tagPrefix", "GOAT-IN", "Prefix for GOAT related tags")
 
+	tagPrefixEnv := os.Getenv("GOAT_TAG_PREFIX")
+	logLevelEnv := os.Getenv("GOAT_LOG_LEVEL")
+
 	flag.Usage = func() {
 		fmt.Fprintf(os.Stderr, "Usage: goat [OPTIONS] ebs|eni\n\nOPTIONS\n")
 		flag.PrintDefaults()
@@ -24,7 +27,7 @@ func main() {
 	flag.Parse()
 
 	if *versionPtr {
-		fmt.Printf("goat %s", VERSION)
+		fmt.Println("goat ", VERSION)
 		os.Exit(0)
 	}
 
@@ -35,8 +38,22 @@ func main() {
 
 	command := flag.Args()[0]
 
+	logLevel := ""
+	if logLevelEnv != "" {
+		logLevel = logLevelEnv // env var takes precedence
+	} else {
+		logLevel = *logLevelPtr
+	}
+
+	tagPrefix := ""
+	if tagPrefixEnv != "" {
+		tagPrefix = tagPrefixEnv
+	} else {
+		tagPrefix = *tagPrefixPtr
+	}
+
 	log.SetOutput(os.Stderr)
-	if level, err := log.ParseLevel(*logLevelPtr); err != nil {
+	if level, err := log.ParseLevel(logLevel); err != nil {
 		log.Fatalf("%v", err)
 	} else {
 		log.SetLevel(level)
@@ -46,9 +63,9 @@ func main() {
 
 	log.Printf("Running goat for %s", command)
 	if command == "ebs" {
-		GoatEbs(*debugPtr, *tagPrefixPtr)
+		GoatEbs(*debugPtr, tagPrefix)
 	} else if command == "eni" {
-		GoatEni(*debugPtr, *tagPrefixPtr)
+		GoatEni(*debugPtr, tagPrefix)
 	} else {
 		log.Fatalf("Unrecognized command: %s", command)
 	}
