@@ -1,5 +1,5 @@
 NAME:=goat
-VERSION:=0.9.0
+VERSION:=1.0.0
 OS:=linux
 ARCH:=amd64
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
