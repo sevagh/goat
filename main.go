@@ -16,6 +16,11 @@ func main() {
 	debugPtr := flag.Bool("debug", false, "Interactive debug prompts")
 	tagPrefixPtr := flag.String("tagPrefix", "GOAT-IN", "Prefix for GOAT related tags")
 
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "Usage: goat [OPTIONS] ebs|eni\n\nOPTIONS\n")
+		flag.PrintDefaults()
+	}
+
 	flag.Parse()
 
 	if *versionPtr {
@@ -24,8 +29,10 @@ func main() {
 	}
 
 	if flag.NArg() != 1 {
-		log.Fatalf("Usage: goat [OPTIONS] ebs|eni")
+		flag.Usage()
+		os.Exit(1)
 	}
+
 	command := flag.Args()[0]
 
 	log.SetOutput(os.Stderr)
