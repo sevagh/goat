@@ -1,12 +1,15 @@
 NAME:=goat
-VERSION:=0.9.0
+VERSION:=1.0.0
+OS:=linux
+ARCH:=amd64
 GOAT_FILES?=$$(find . -name '*.go' | grep -v vendor)
+BINPATH=usr/sbin
 
 all: build
 
 build: deps
-	CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o bin/$(NAME)
-	strip bin/$(NAME)
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o $(BINPATH)/$(NAME)
+	strip $(BINPATH)/$(NAME)
 
 test:
 	@go vet ./...
@@ -22,17 +25,34 @@ fmt:
 lint:
 	-gometalinter.v2 --enable-all $(GOAT_FILES) --exclude=_test.go
 
+package_all: pkgclean build deb rpm zip
+
+zip:
+	@zip pkg/$(NAME)_$(VERSION)_$(OS)_$(ARCH).zip -j $(BINPATH)/$(NAME)
+
+deb:
+	@mkdir -p pkg
+	fpm -s dir -t deb -n $(NAME) -v $(VERSION) -C . \
+		-p pkg/$(NAME)_VERSION_ARCH.deb \
+		-d "mdadm" \
+		--deb-systemd ./goat@.service \
+		$(BINPATH)
+
+rpm:
+	@mkdir -p pkg
+	fpm -s dir -t rpm -n $(NAME) -v $(VERSION) -C . \
+		-p pkg/$(NAME)_VERSION_ARCH.rpm \
+		-d "mdadm" \
+		--rpm-systemd ./goat@.service \
+		$(BINPATH)
+
+pkgclean:
+	@rm -rf pkg
+
 lintsetup:
 	@go get -u gopkg.in/alecthomas/gometalinter.v2
 	@gometalinter.v2 --install 2>&1 >/dev/null
 	@go install ./...
-
-clean:
-	-rm -rf bin
-
-rpm: build
-	@cp bin/goat rpm-package/
-	GOAT_VERSION=$(VERSION) $(MAKE) -C ./rpm-package/
 
 dev-env: ## Build a local development environment using Docker
 	@docker run -it --rm \
