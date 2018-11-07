@@ -27,7 +27,7 @@ lint:
 package_all: pkgclean build deb rpm zip
 
 zip:
-	@zip pkg/$(NAME)_$(VERSION)_$(OS)_$(ARCH) -j usr/bin/$(NAME)
+	@zip pkg/$(NAME)_$(VERSION)_$(OS)_$(ARCH).zip -j usr/bin/$(NAME)
 
 deb:
 	@mkdir -p pkg
