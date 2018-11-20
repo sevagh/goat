@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/sevagh/goat/execute"
 )
 
 //CreateRaidArray runs the appropriate mdadm command for the given list of EbsVol that should be raided together.
@@ -32,7 +30,7 @@ func CreateRaidArray(driveNames []string, volName string, raidLevel int) (string
 
 	args = append(args, driveNames...)
 
-	if _, err := execute.Command(cmd, args, ""); err != nil {
+	if _, err := Command(cmd, args, ""); err != nil {
 		return "", fmt.Errorf("Error when executing mdadm command: %v", err)
 	}
 
@@ -49,9 +47,9 @@ func PersistMdadm() error {
 		"--scan",
 	}
 
-	var out execute.CommandOut
+	var out CommandOut
 	var err error
-	if out, err = execute.Command(cmd, args, ""); err != nil {
+	if out, err = Command(cmd, args, ""); err != nil {
 		return fmt.Errorf("Error when executing mdadm command: %v", err)
 	}
 
