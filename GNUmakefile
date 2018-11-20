@@ -7,17 +7,13 @@ BINPATH=usr/sbin
 
 all: build
 
-build: deps
+build:
 	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o $(BINPATH)/$(NAME)
 	strip $(BINPATH)/$(NAME)
 
 test:
 	@go vet ./...
 	@go test -v ./...
-
-deps:
-	@command -v dep 2>&1 >/dev/null || go get -u github.com/golang/dep/cmd/dep
-	@dep ensure -v
 
 fmt:
 	@gofmt -s -w $(GOAT_FILES)
@@ -59,7 +55,7 @@ dev-env: ## Build a local development environment using Docker
 		-v $(shell pwd):/go/src/github.com/sevagh/$(NAME) \
 		-w /go/src/github.com/sevagh/$(NAME) \
 		golang:1.10 \
-		/bin/bash -c 'make deps; make install; bash'
+		/bin/bash -c 'make install; bash'
 
 install: ## Build and install locally the binary (dev purpose)
 	go install .
