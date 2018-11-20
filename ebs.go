@@ -5,6 +5,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"os"
 	"strconv"
+	"syscall"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -101,7 +102,7 @@ func prepAndMountDrives(volName string, vols []EbsVol) {
 	}
 
 	driveLogger.Info("Checking if something already mounted at %s", mountPath)
-	if isMounted, err := filesystem.IsMountpointAlreadyMounted(mountPath); err != nil {
+	if isMounted, err := filesystem.IsMounted(mountPath); err != nil {
 		driveLogger.Fatalf("Error when checking mount point for existing mounts: %v", err)
 	} else {
 		if isMounted {
@@ -119,7 +120,7 @@ func prepAndMountDrives(volName string, vols []EbsVol) {
 	}
 
 	driveLogger.Info("Now mounting")
-	if err := filesystem.Mount(mountPath); err != nil {
+	if err := syscall.Mount("", mountPath, "", 0, ""); err != nil {
 		driveLogger.Fatalf("Couldn't mount: %v", err)
 	}
 
