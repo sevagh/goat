@@ -167,6 +167,10 @@ func (e *EC2Instance) FindEbsVolumes(tagPrefix string) {
 		mountPath := volumes[0].MountPath
 		fsType := volumes[0].FsType
 		raidLevel := volumes[0].RaidLevel
+		if len(volumes) == 0 {
+			volGroupLogger.Error("No volumes")
+			delete(drivesToMount, volName)
+		}
 		if volSize != -1 {
 			if len(volumes) != volSize {
 				volGroupLogger.Fatalf("Found %d volumes, expected %d from VolumeSize tag", len(volumes), volSize)
