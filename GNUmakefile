@@ -11,11 +11,11 @@ all: build
 
 docker-build:
 	mkdir -p $(PKGDIR)
-	docker build --no-cache -t "goat-builder" -f Dockerfile.build .
+	docker build -q -t "goat-builder" -f Dockerfile.build .
 	docker run -v $(PKGDIR):/goat-pkg goat-builder
 
 build:
-	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o $(BINPATH)/$(NAME)
+	CGO_ENABLED=0 GOOS=$(OS) GOARCH=$(ARCH) go build -mod=vendor -a -tags netgo -ldflags '-w -extldflags "-static" -X main.VERSION=$(VERSION)' -o $(BINPATH)/$(NAME)
 	strip $(BINPATH)/$(NAME)
 	echo $(VERSION) > $(BINPATH)/version-file
 
@@ -36,9 +36,9 @@ fmt:
 
 dev-env: ## Build a local development environment using Docker
 	@docker run -it --rm \
-		-v $(shell pwd):/go/src/github.com/sevagh/$(NAME) \
-		-w /go/src/github.com/sevagh/$(NAME) \
-		golang:1.11 \
+		-v $(shell pwd):/$(NAME) \
+		-w /$(NAME) \
+		golang:1.12 \
 		/bin/bash -c 'make install; bash'
 
 install: ## Build and install locally the binary (dev purpose)

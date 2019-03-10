@@ -1,13 +1,10 @@
-FROM golang:1.11-stretch as build
-
-ENV REPO sevagh/goat
-ENV GO111MODULE=on
+FROM golang:1.12-stretch as build
 
 RUN apt-get update -y &&\
 	apt-get install -y zip 
 
-COPY . /go/src/github.com/$REPO
-WORKDIR /go/src/github.com/$REPO
+COPY . /goat
+WORKDIR /goat
 
 RUN make build zip tarball
 
@@ -18,8 +15,8 @@ RUN dnf update -y &&\
 
 COPY ./rpm /goat-rpm-pkg/
 
-COPY --from=build /go/src/github.com/sevagh/goat/bin/goat /goat-rpm-pkg/goat
-COPY --from=build /go/src/github.com/sevagh/goat/bin/version-file /goat-rpm-pkg/version-file
+COPY --from=build /goat/bin/goat /goat-rpm-pkg/goat
+COPY --from=build /goat/bin/version-file /goat-rpm-pkg/version-file
 
 WORKDIR goat-rpm-pkg
 
@@ -31,7 +28,7 @@ RUN alien ./*.rpm
 
 FROM alpine
 
-COPY --from=build /go/src/github.com/sevagh/goat/pkg /_goat-pkg
+COPY --from=build /goat/pkg /_goat-pkg
 COPY --from=rpmbuild /root/rpmbuild/RPMS/x86_64/* /_goat-pkg/
 
 CMD cp _goat-pkg/* goat-pkg/
