@@ -42,6 +42,8 @@ func (e *EC2Instance) AttachEbsVolumes() {
 
 				volume.AttachedName = deviceName
 				localVolumes[key] = append(localVolumes[key], volume)
+			} else {
+				localVolumes[key] = append(localVolumes[key], volume)
 			}
 		}
 	}
