@@ -232,7 +232,12 @@ func (e *EC2Instance) findEbsVolumes(tagPrefix string) ([]EbsVol, error) {
 				if *attachment.InstanceId != e.InstanceID {
 					return volumes, fmt.Errorf("Volume %s attached to different instance-id: %s", *volume.VolumeId, *attachment.InstanceId)
 				}
-				ebsVolume.AttachedName = *attachment.Device
+				attachedName := *attachment.Device
+				realAttachedName, err := filesystem.GetActualBlockDeviceName(attachedName)
+				if err != nil {
+					return volumes, fmt.Errorf("Couldn't get real device name of %s", attachedName)
+				}
+				ebsVolume.AttachedName = realAttachedName
 			}
 		} else {
 			ebsVolume.AttachedName = ""
