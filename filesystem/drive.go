@@ -35,7 +35,7 @@ func DoesDriveExist(driveName string) bool {
 	return true
 }
 
-// GetLocalBlockDeviceName returns the actual name of the block device seen
+// GetActualBlockDeviceName returns the actual name of the block device seen
 // within the instance (useful for nitros)
 func GetActualBlockDeviceName(name string) (string, error) {
 	for _, device := range listNvmeBlockDevices() {

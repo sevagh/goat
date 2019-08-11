@@ -39,12 +39,15 @@ func (e *EC2Instance) AttachEbsVolumes() {
 				if !filesystem.DoesDriveExistWithTimeout(deviceName, 10) {
 					volLogger.Fatalf("Drive %s doesn't exist after attaching - checked with stat 10 times", deviceName)
 				}
-
-				volume.AttachedName = deviceName
-				localVolumes[key] = append(localVolumes[key], volume)
 			} else {
-				localVolumes[key] = append(localVolumes[key], volume)
+				deviceName = volume.AttachedName
 			}
+			realDeviceName, err := filesystem.GetActualBlockDeviceName(deviceName)
+			if err != nil {
+				volLogger.Fatalf("Couldn't get real device name of %s", deviceName)
+			}
+			volume.AttachedName = realDeviceName
+			localVolumes[key] = append(localVolumes[key], volume)
 		}
 	}
 	e.Vols = localVolumes

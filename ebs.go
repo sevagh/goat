@@ -77,7 +77,7 @@ func prepAndMountDrives(volName string, vols []EbsVol) {
 				driveNames = append(driveNames, driveName)
 			}
 			if driveName, err = filesystem.CreateRaidArray(driveNames, volName, raidLevel); err != nil {
-				driveLogger.Fatalf("Error when creating reaid array: %v", err)
+				driveLogger.Fatalf("Error when creating RAID array: %v", err)
 			}
 		}
 
@@ -101,7 +101,7 @@ func prepAndMountDrives(volName string, vols []EbsVol) {
 		return
 	}
 
-	driveLogger.Info("Checking if something already mounted at %s", mountPath)
+	driveLogger.Infof("Checking if something already mounted at %s", mountPath)
 	if isMounted, err := filesystem.IsMounted(mountPath); err != nil {
 		driveLogger.Fatalf("Error when checking mount point for existing mounts: %v", err)
 	} else {
