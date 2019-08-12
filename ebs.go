@@ -4,8 +4,8 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"os"
+	"os/exec"
 	"strconv"
-	"syscall"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/ec2"
@@ -120,9 +120,10 @@ func prepAndMountDrives(volName string, vols []EbsVol) {
 	}
 
 	driveLogger.Info("Now mounting")
-	if err := syscall.Mount("", mountPath, "", 0, ""); err != nil {
-		driveLogger.Fatalf("Couldn't mount: %v", err)
-	}
+	cmd := exec.Command("mount", mountPath)
+        if err := cmd.Run(); err != nil {
+                driveLogger.Fatalf("Couldn't mount: %v", err)
+        }
 
 	if len(vols) > 1 {
 		driveLogger.Info("Now persisting mdadm conf")
