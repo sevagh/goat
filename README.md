@@ -1,5 +1,7 @@
 # goat
 
+**N.B.: the active maintenance fork of this project is available at [https://github.com/steamhaus/goat](https://github.com/steamhaus/goat)**
+
 ### Attach EBS volumes and ENIs to running EC2 instances
 
 `goat` is a Go program which runs from inside the EC2 instance.
