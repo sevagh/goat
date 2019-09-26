@@ -3,8 +3,8 @@ Description=GOAT: EC2-%i attach utility
 Documentation=https://github.com/sevagh/goat
 Requires=network.target
 After=network.target
+After=NetworkManager-wait-online.service
 Before=cloud-init.service
-Before=sshd.service
 ConditionPathExists=/usr/sbin/goat
 
 [Service]
