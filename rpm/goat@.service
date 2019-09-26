@@ -1,8 +1,10 @@
 [Unit]
 Description=GOAT: EC2-%i attach utility
 Documentation=https://github.com/sevagh/goat
-Requires=network.target remote-fs.target
-After=network.target remote-fs.target
+Requires=network.target
+After=network.target
+Before=cloud-init.service
+Before=sshd.service
 ConditionPathExists=/usr/sbin/goat
 
 [Service]
@@ -13,4 +15,4 @@ ExecStart=/usr/sbin/goat "%i"
 SyslogIdentifier=goat
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=cloud-init.target
