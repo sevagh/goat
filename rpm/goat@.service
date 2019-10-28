@@ -6,10 +6,11 @@ After=network.target remote-fs.target
 ConditionPathExists=/usr/sbin/goat
 
 [Service]
+EnvironmentFile=/etc/sysconfig/goat
 Type=oneshot
 User=root
 Group=root
-ExecStart=/usr/sbin/goat "%i"
+ExecStart=/usr/sbin/goat -tagPrefix ${TAG_PREFIX} -logLevel ${LOG_LEVEL} "%i"
 SyslogIdentifier=goat
 
 [Install]
