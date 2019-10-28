@@ -1,8 +1,10 @@
 [Unit]
 Description=GOAT: EC2-%i attach utility
 Documentation=https://github.com/sevagh/goat
-Requires=network.target remote-fs.target
-After=network.target remote-fs.target
+Requires=network.target
+After=network.target
+After=NetworkManager-wait-online.service
+Before=cloud-init.service
 ConditionPathExists=/usr/sbin/goat
 
 [Service]
@@ -14,4 +16,4 @@ ExecStart=/usr/sbin/goat -tagPrefix ${TAG_PREFIX} -logLevel ${LOG_LEVEL} "%i"
 SyslogIdentifier=goat
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=cloud-init.target
