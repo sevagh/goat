@@ -11,7 +11,7 @@ all: build
 
 docker-build:
 	mkdir -p $(PKGDIR)
-	docker build -q -t "goat-builder" -f Dockerfile.build .
+	docker build -t "goat-builder" -f Dockerfile.build .
 	docker run -v $(PKGDIR):/goat-pkg goat-builder
 
 build:

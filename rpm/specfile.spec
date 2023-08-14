@@ -4,6 +4,7 @@ Name: %{pkgname}
 Version: %{_version}
 Release: 1%{?dist}
 Summary: Attach and mount EBS and ENI
+BuildRequires: systemd-rpm-macros
 
 License: BSD 3-clause
 URL: https://github.com/sevagh/goat 

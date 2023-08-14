@@ -1,4 +1,4 @@
-FROM golang:1.12-stretch as build
+FROM golang:1.21-bullseye as build
 
 RUN apt-get update -y &&\
 	apt-get install -y zip 
@@ -11,7 +11,7 @@ RUN make build zip tarball
 FROM fedora as rpmbuild
 
 RUN dnf update -y &&\
-	dnf install -y make rpm-build alien
+	dnf install -y make rpm-build alien systemd-rpm-macros
 
 COPY ./rpm /goat-rpm-pkg/
 
