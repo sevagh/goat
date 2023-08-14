@@ -27,7 +27,9 @@ type EC2Instance struct {
 //GetEC2InstanceData returns a populated EC2Instance struct with the current EC2 instances' metadata
 func GetEC2InstanceData(tagPrefix string) EC2Instance {
 	var ec2Instance EC2Instance
-	sess := session.New()
+	sess := session.New(&aws.Config{
+    MaxRetries: aws.Int(5),
+})
 
 	creds := credentials.NewCredentials(
 		&ec2rolecreds.EC2RoleProvider{

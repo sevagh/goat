@@ -1,5 +1,5 @@
 NAME:=goat
-VERSION:=$(shell git describe --tags)
+VERSION:=$(shell git describe --tags|sed 's/^v//')
 OS:=linux
 ARCH:=amd64
 GOAT_FILES:=$$(find . -name '*.go' | grep -v vendor)
